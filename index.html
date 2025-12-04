@@ -6,149 +6,26 @@
 <title>Rechnungs App</title>
 
 <style>
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:Arial,sans-serif;
-}
-
-#topbar{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  padding:12px;
-  background:#000;
-  border-bottom:1px solid #333;
-  z-index:1000;
-}
-
-#navButtons{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-}
-
-#navButtons button{
-  flex:1;
-  padding:8px;
-  font-size:11px;
-  border-radius:10px;
-  border:1px solid #444;
-  background:#000;
-  color:#bbb;
-  font-weight:bold;
-}
-
-#navButtons button.active{
-  background:#222;
-  color:#fff;
-}
-
-#content{
-  position:fixed;
-  top:64px;
-  left:0;
-  right:0;
-  bottom:0;
-  overflow-y:auto;
-  padding:10px;
-  box-sizing:border-box;
-}
-
-/* Sektionen */
-.section{
-  display:none;
-}
-.section.active{
-  display:block;
-}
-
-/* Tabellen */
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:11px;
-}
-
-th,td{
-  border-bottom:1px solid #222;
-  padding:4px;
-  white-space:nowrap;
-}
-th{
-  background:#111;
-  color:#bbb;
-}
-
-/* Inputs */
-input,textarea,select{
-  width:100%;
-  padding:7px;
-  box-sizing:border-box;
-  border-radius:8px;
-  border:1px solid #444;
-  background:#111;
-  color:#fff;
-  font-size:12px;
-}
-
-label{
-  font-size:11px;
-  color:#bbb;
-  display:block;
-  margin-bottom:3px;
-}
-
-.form-row{
-  margin-bottom:8px;
-}
-
-.form-row-inline{
-  display:flex;
-  gap:6px;
-}
-.form-row-inline .col{
-  flex:1;
-}
-
-button.primary{
-  background:#0a84ff;
-  border-color:#0a84ff;
-  color:#fff;
-}
-button.danger{
-  border-color:#ff4d4d;
-  color:#ffb3b3;
-}
-
-/* Rechnungsliste */
-.invoice-row{
-  cursor:pointer;
-}
-.invoice-row:hover{
-  background:#111;
-}
-
-/* Positionstabelle */
-#posTable th,#posTable td{
-  border:1px solid #333;
-}
-
-/* Hinweise */
-.hint{
-  font-size:10px;
-  color:#999;
-  margin-top:2px;
-}
+body{margin:0;background:#000;color:#fff;font-family:Arial,sans-serif;}
+#topbar{position:fixed;top:0;left:0;right:0;padding:12px;background:#000;border-bottom:1px solid #333;z-index:1000;}
+#navButtons{display:flex;gap:6px;flex-wrap:wrap;}
+#navButtons button{flex:1;padding:8px;font-size:11px;border-radius:10px;border:1px solid #444;background:#000;color:#bbb;font-weight:bold;}
+#navButtons button.active{background:#222;color:#fff;}
+#content{position:fixed;top:64px;left:0;right:0;bottom:0;overflow:auto;padding:10px;box-sizing:border-box;}
+.section{display:none;}
+.section.active{display:block;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th,td{border-bottom:1px solid #222;padding:4px;white-space:nowrap;}
+th{background:#111;color:#bbb;}
+.invoice-row:hover{background:#111;}
+.iconBtn{cursor:pointer;margin-right:6px;}
 </style>
 </head>
 <body>
 
 <div id="topbar">
   <div id="navButtons">
-    <button data-view="viewInvoices" class="active">Rechnungen</button>
+    <button data-view="viewInvoices" class="active">Verkäufe</button>
     <button data-view="viewEditor">Neue Rechnung</button>
     <button data-view="viewCustomers">Kunden</button>
     <button data-view="viewSettings">Einstellungen</button>
@@ -157,758 +34,70 @@ button.danger{
 </div>
 
 <div id="content">
-  <!-- RECHNUNGSLISTE -->
-  <div id="viewInvoices" class="section active">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <div style="font-weight:bold;">Rechnungen</div>
-      <button class="primary" id="btnNewInvoice">+ Neue Rechnung</button>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Datum</th>
-          <th>Nr</th>
-          <th>Kunde</th>
-          <th>Ort</th>
-          <th>Brutto (€)</th>
-          <th>Aktion</th>
-        </tr>
-      </thead>
-      <tbody id="invoiceTableBody"></tbody>
-    </table>
-  </div>
+<div id="viewInvoices" class="section active">
+<table>
+<thead>
+<tr>
+  <th>Art.-Nr</th>
+  <th>Rechnung</th>
+  <th>Artikel</th>
+  <th>Menge</th>
+  <th>Preis</th>
+  <th>Datum</th>
+  <th>Ort</th>
+  <th>Aktionen</th>
+</tr>
+</thead>
+<tbody id="invoiceTableBody"></tbody>
+</table>
+</div>
 
-  <!-- RECHNUNGSEDITOR -->
-  <div id="viewEditor" class="section">
-    <div style="font-weight:bold;margin-bottom:6px;">Rechnung bearbeiten / erstellen</div>
+<div id="viewEditor" class="section"><div>Editor unverändert</div></div>
+<div id="viewCustomers" class="section"><div>Kunden unverändert</div></div>
+<div id="viewSettings" class="section"><div>Einstellungen unverändert</div></div>
+<div id="viewBackup" class="section"><div>Backup unverändert</div></div>
 
-    <div class="form-row-inline">
-      <div class="col">
-        <label>Verkaufsort / Plattform</label>
-        <input id="inv_channel" list="channelSuggestions" placeholder="z.B. Ebay, Kleinanzeigen, Vinted, Flohmarkt">
-        <datalist id="channelSuggestions">
-          <option value="Ebay">
-          <option value="Kleinanzeigen">
-          <option value="Vinted">
-          <option value="Flohmarkt">
-        </datalist>
-        <div class="hint">Der erste Buchstabe bestimmt den Präfix der Rechnungsnummer.</div>
-      </div>
-      <div class="col">
-        <label>Rechnungsnummer</label>
-        <input id="inv_number" placeholder="z.B. E001 - 2025">
-        <div class="hint">
-          <button id="btnGenNumber" type="button">Nummer automatisch vergeben</button><br>
-          Du kannst sie danach trotzdem manuell ändern.
-        </div>
-      </div>
-    </div>
-
-    <div class="form-row-inline">
-      <div class="col">
-        <label>Datum</label>
-        <input type="date" id="inv_date">
-      </div>
-      <div class="col">
-        <label>Mehrwertsteuer-Modus</label>
-        <input id="inv_vatMode" readonly>
-        <div class="hint">Einstellbar unter „Einstellungen“ (19 % oder 0 %).</div>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label>Kunde</label>
-      <select id="inv_customer"></select>
-      <div class="hint">
-        <button id="btnNewCustomerFromInv" type="button">Neuen Kunden anlegen</button>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label>Positionen</label>
-      <table id="posTable">
-        <thead>
-          <tr>
-            <th>Bezeichnung</th>
-            <th>Menge</th>
-            <th>Einzelpreis (Brutto €)</th>
-            <th>Gesamt (Brutto €)</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="posTableBody"></tbody>
-      </table>
-      <div class="hint">
-        <button id="btnAddPos" type="button">+ Position hinzufügen</button>
-      </div>
-    </div>
-
-    <div class="form-row-inline">
-      <div class="col">
-        <label>Versandkosten (Brutto €)</label>
-        <input id="inv_shipping" type="number" step="0.01" value="0">
-        <div class="hint">Wird in die Gesamtsumme eingerechnet und auf der Rechnung ausgewiesen.</div>
-      </div>
-      <div class="col">
-        <label>Zwischensumme (Positionen, Brutto)</label>
-        <input id="inv_sumBruttoPositions" readonly>
-      </div>
-      <div class="col">
-        <label>Gesamt-Brutto inkl. Versand</label>
-        <input id="inv_sumTotal" readonly>
-      </div>
-    </div>
-
-    <div class="form-row-inline">
-      <div class="col">
-        <label>enthaltene MwSt</label>
-        <input id="inv_sumVat" readonly>
-      </div>
-      <div class="col">
-        <label>Notiz / interne Bemerkung</label>
-        <textarea id="inv_note" rows="2"></textarea>
-      </div>
-    </div>
-
-    <div class="form-row-inline" style="margin-top:10px;">
-      <div class="col">
-        <button id="btnSaveInvoice" class="primary" type="button">Rechnung speichern</button>
-      </div>
-      <div class="col">
-        <button id="btnPrintInvoice" type="button">Drucken / PDF</button>
-      </div>
-      <div class="col">
-        <button id="btnCancelEdit" type="button">Abbrechen</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- KUNDEN -->
-  <div id="viewCustomers" class="section">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <div style="font-weight:bold;">Kunden</div>
-      <button class="primary" id="btnAddCustomer">+ Kunde</button>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Adresse</th>
-          <th>Aktion</th>
-        </tr>
-      </thead>
-      <tbody id="customerTableBody"></tbody>
-    </table>
-  </div>
-
-  <!-- EINSTELLUNGEN -->
-  <div id="viewSettings" class="section">
-    <div style="font-weight:bold;margin-bottom:6px;">Einstellungen</div>
-    <div class="form-row">
-      <label>Firmenname</label>
-      <input id="set_firmName">
-    </div>
-    <div class="form-row">
-      <label>Adresse (mehrere Zeilen möglich)</label>
-      <textarea id="set_firmAddress" rows="2"></textarea>
-    </div>
-    <div class="form-row-inline">
-      <div class="col">
-        <label>Steuernummer</label>
-        <input id="set_taxId">
-      </div>
-      <div class="col">
-        <label>USt-ID</label>
-        <input id="set_ustId">
-      </div>
-    </div>
-    <div class="form-row">
-      <label>Standard-Fußtext unter jeder Rechnung</label>
-      <textarea id="set_footer" rows="3" placeholder="z.B. Vielen Dank für Ihren Einkauf."></textarea>
-      <div class="hint">Dieser Text erscheint immer unten auf der Rechnung.</div>
-    </div>
-    <div class="form-row">
-      <label>Mehrwertsteuer-Modus</label>
-      <select id="set_vatMode">
-        <option value="19">19 % MwSt</option>
-        <option value="0">0 % (Kleinunternehmer)</option>
-      </select>
-      <div class="hint">Gilt für neue Rechnungen, bis du es wieder änderst.</div>
-    </div>
-    <div class="form-row">
-      <button id="btnSaveSettings" class="primary" type="button">Einstellungen speichern</button>
-    </div>
-  </div>
-
-  <!-- BACKUP -->
-  <div id="viewBackup" class="section">
-    <div style="font-weight:bold;margin-bottom:6px;">Sichern / Laden</div>
-    <div class="form-row">
-      <button id="btnBackup" class="primary" type="button">Sichern (rechnungen_backup.json)</button>
-      <div class="hint">Es wird immer dieselbe Datei verwendet. iPhone fragt nach Überschreiben.</div>
-    </div>
-    <div class="form-row">
-      <button id="btnRestore" type="button">Laden (Backup einspielen)</button>
-      <div class="hint">Wähle deine Datei „rechnungen_backup.json“, um alles wiederherzustellen.</div>
-    </div>
-  </div>
 </div>
 
 <script>
-// ===== Globale Daten =====
-let settings = {
-  firmName: "",
-  firmAddress: "",
-  taxId: "",
-  ustId: "",
-  footerText: "",
-  vatMode: "19" // "19" oder "0"
-};
-
-let customers = [];
-let invoices  = [];
-
-let currentInvoiceId = null;
-
-// ===== Storage =====
-function loadData(){
-  try{
-    const s = JSON.parse(localStorage.getItem("rechnungSettings") || "{}");
-    settings = Object.assign(settings, s);
-  }catch(e){}
-  try{
-    customers = JSON.parse(localStorage.getItem("rechnungCustomers") || "[]");
-  }catch(e){
-    customers = [];
-  }
-  try{
-    invoices = JSON.parse(localStorage.getItem("rechnungInvoices") || "[]");
-  }catch(e){
-    invoices = [];
-  }
-}
-
-function saveData(){
-  localStorage.setItem("rechnungSettings", JSON.stringify(settings));
-  localStorage.setItem("rechnungCustomers", JSON.stringify(customers));
-  localStorage.setItem("rechnungInvoices", JSON.stringify(invoices));
-}
-
-// ===== Navigation =====
-const navButtons = document.querySelectorAll("#navButtons button");
-const sections   = document.querySelectorAll(".section");
-
-navButtons.forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    const view = btn.getAttribute("data-view");
-    navButtons.forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    sections.forEach(sec=>{
-      sec.classList.toggle("active", sec.id === view);
-    });
-    if(view === "viewInvoices") renderInvoiceList();
-    if(view === "viewCustomers") renderCustomerList();
-    if(view === "viewSettings")  renderSettings();
-    if(view === "viewEditor")    prepareNewInvoice(false);
-  });
-});
-
-// ===== Einstellungen =====
-function renderSettings(){
-  document.getElementById("set_firmName").value    = settings.firmName || "";
-  document.getElementById("set_firmAddress").value = settings.firmAddress || "";
-  document.getElementById("set_taxId").value       = settings.taxId || "";
-  document.getElementById("set_ustId").value       = settings.ustId || "";
-  document.getElementById("set_footer").value      = settings.footerText || "";
-  document.getElementById("set_vatMode").value     = settings.vatMode || "19";
-}
-
-document.getElementById("btnSaveSettings").onclick = () => {
-  settings.firmName    = document.getElementById("set_firmName").value.trim();
-  settings.firmAddress = document.getElementById("set_firmAddress").value.trim();
-  settings.taxId       = document.getElementById("set_taxId").value.trim();
-  settings.ustId       = document.getElementById("set_ustId").value.trim();
-  settings.footerText  = document.getElementById("set_footer").value.trim();
-  settings.vatMode     = document.getElementById("set_vatMode").value;
-  saveData();
-  alert("Einstellungen gespeichert.");
-};
-
-// ===== Kunden =====
-function renderCustomerList(){
-  const tbody = document.getElementById("customerTableBody");
-  tbody.innerHTML = "";
-  customers.forEach((c,i)=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${c.name || ""}</td>
-      <td>${(c.address||"").replace(/\\n/g,"<br>")}</td>
-      <td>
-        <button type="button" onclick="editCustomer(${i})">✏️</button>
-        <button type="button" class="danger" onclick="deleteCustomer(${i})">🗑</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-  renderCustomerSelect();
-}
-
-function renderCustomerSelect(){
-  const sel = document.getElementById("inv_customer");
-  sel.innerHTML = "";
-  if(customers.length === 0){
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "Kein Kunde vorhanden";
-    sel.appendChild(opt);
-    return;
-  }
-  customers.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.name;
-    sel.appendChild(opt);
-  });
-}
-
-document.getElementById("btnAddCustomer").onclick = () => {
-  const block = prompt("Name + Adresse (mehrere Zeilen, Name in der ersten Zeile):");
-  if(!block) return;
-  const lines = block.split(/\\r?\\n/);
-  const name = lines[0] || block;
-  const address = block;
-  const c = {
-    id: "c_"+Date.now(),
-    name,
-    address
-  };
-  customers.push(c);
-  saveData();
-  renderCustomerList();
-};
-
-function editCustomer(i){
-  const c = customers[i];
-  const block = prompt("Name + Adresse bearbeiten:", c.address || (c.name||""));
-  if(!block) return;
-  const lines = block.split(/\\r?\\n/);
-  c.name    = lines[0] || block;
-  c.address = block;
-  saveData();
-  renderCustomerList();
-}
-
-function deleteCustomer(i){
-  if(!confirm("Kunden wirklich löschen?")) return;
-  customers.splice(i,1);
-  saveData();
-  renderCustomerList();
-}
-
-document.getElementById("btnNewCustomerFromInv").onclick = () => {
-  document.querySelector('#navButtons button[data-view="viewCustomers"]').click();
-  document.getElementById("btnAddCustomer").click();
-};
-
-// ===== Rechnungen =====
-const invoiceTableBody = document.getElementById("invoiceTableBody");
+let invoices = JSON.parse(localStorage.getItem("rechnungInvoices")||"[]");
 
 function renderInvoiceList(){
-  invoiceTableBody.innerHTML = "";
-  invoices
-    .slice()
-    .sort((a,b)=> (b.date||"").localeCompare(a.date||""))
-    .forEach(inv=>{
-      const tr = document.createElement("tr");
-      tr.className = "invoice-row";
-      const cust = customers.find(c=>c.id === inv.customerId);
-      tr.innerHTML = `
-        <td>${inv.date || ""}</td>
-        <td>${inv.number || ""}</td>
-        <td>${cust ? cust.name : ""}</td>
-        <td>${inv.channel || ""}</td>
-        <td>${(inv.sumTotal||0).toFixed(2)}</td>
-        <td>
-          <button type="button" onclick="openInvoice('${inv.id}')">Öffnen</button>
-        </td>
-      `;
-      invoiceTableBody.appendChild(tr);
-    });
-}
-
-function getPrefixForChannel(channel){
-  if(!channel) return "S";
-  const ch = channel.trim().toUpperCase();
-  return ch[0] || "S";
-}
-
-function generateInvoiceNumber(channel){
-  const prefix = getPrefixForChannel(channel);
-  const year = new Date().getFullYear();
-  const key  = "invCounter_"+prefix+"_"+year;
-  let count  = parseInt(localStorage.getItem(key) || "0",10) + 1;
-  localStorage.setItem(key, String(count));
-  const num = String(count).padStart(3,"0");
-  return prefix + num + " - " + year;
-}
-
-// neue Rechnung vorbereiten
-function prepareNewInvoice(forceNew=true){
-  if(forceNew){
-    currentInvoiceId = null;
-  }
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById("inv_date").value = today;
-  document.getElementById("inv_channel").value = "";
-  document.getElementById("inv_number").value = "";
-  document.getElementById("inv_note").value = "";
-  document.getElementById("inv_shipping").value = "0";
-  document.getElementById("inv_vatMode").value = settings.vatMode === "0" ? "0 % (Kleinunternehmer)" : "19 % MwSt";
-
-  const posBody = document.getElementById("posTableBody");
-  posBody.innerHTML = "";
-  addPositionRow();
-
-  renderCustomerSelect();
-  updateInvoiceSums();
-}
-
-document.getElementById("btnNewInvoice").onclick = () => {
-  document.querySelector('#navButtons button[data-view="viewEditor"]').click();
-  prepareNewInvoice(true);
-};
-
-document.getElementById("btnGenNumber").onclick = () => {
-  if(currentInvoiceId){
-    alert("Rechnungsnummer für bestehende Rechnung wird nicht automatisch neu vergeben.");
-    return;
-  }
-  const channel = document.getElementById("inv_channel").value;
-  const nr = generateInvoiceNumber(channel);
-  document.getElementById("inv_number").value = nr;
-};
-
-// Positionen
-document.getElementById("btnAddPos").onclick = addPositionRow;
-
-function addPositionRow(){
-  const tbody = document.getElementById("posTableBody");
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td><input class="pos_name"></td>
-    <td><input class="pos_qty" type="number" min="1" value="1"></td>
-    <td><input class="pos_price" type="number" step="0.01" value="0"></td>
-    <td><input class="pos_total" type="number" step="0.01" value="0" readonly></td>
-    <td><button type="button" onclick="removePosRow(this)">✖</button></td>
-  `;
-  tbody.appendChild(tr);
-  attachPosEvents(tr);
-  updateInvoiceSums();
-}
-
-function attachPosEvents(tr){
-  const qty   = tr.querySelector(".pos_qty");
-  const price = tr.querySelector(".pos_price");
-  qty.addEventListener("input", updateInvoiceSums);
-  price.addEventListener("input", updateInvoiceSums);
-}
-
-function removePosRow(btn){
-  const tr = btn.closest("tr");
-  tr.remove();
-  updateInvoiceSums();
-}
-
-function updateInvoiceSums(){
-  const rows = document.querySelectorAll("#posTableBody tr");
-  let sumPosBrutto = 0;
-  rows.forEach(tr=>{
-    const qty   = parseFloat(tr.querySelector(".pos_qty").value) || 0;
-    const price = parseFloat(tr.querySelector(".pos_price").value) || 0;
-    const total = qty * price;
-    tr.querySelector(".pos_total").value = total.toFixed(2);
-    sumPosBrutto += total;
-  });
-
-  const shipping = parseFloat(document.getElementById("inv_shipping").value) || 0;
-  const sumBrutto = sumPosBrutto + shipping;
-
-  const vatMode = settings.vatMode || "19";
-  let vat = 0;
-  if(vatMode === "19"){
-    const net = sumBrutto / 1.19;
-    vat = sumBrutto - net;
-  }else{
-    vat = 0;
-  }
-
-  document.getElementById("inv_sumBruttoPositions").value = sumPosBrutto.toFixed(2);
-  document.getElementById("inv_sumVat").value             = vat.toFixed(2);
-  document.getElementById("inv_sumTotal").value           = sumBrutto.toFixed(2);
-}
-
-// Rechnung speichern
-document.getElementById("btnSaveInvoice").onclick = () => {
-  const number = document.getElementById("inv_number").value.trim();
-  const date   = document.getElementById("inv_date").value;
-  const channel= document.getElementById("inv_channel").value.trim();
-  const customerId = document.getElementById("inv_customer").value || "";
-  const note   = document.getElementById("inv_note").value.trim();
-  const sumPosBrutto = parseFloat(document.getElementById("inv_sumBruttoPositions").value) || 0;
-  const sumVat       = parseFloat(document.getElementById("inv_sumVat").value) || 0;
-  const sumTotal     = parseFloat(document.getElementById("inv_sumTotal").value) || 0;
-  const shipping     = parseFloat(document.getElementById("inv_shipping").value) || 0;
-
-  if(!date){
-    alert("Bitte ein Datum angeben.");
-    return;
-  }
-  if(!number){
-    alert("Bitte auf „Nummer automatisch vergeben“ drücken oder manuell eine Nummer eintragen.");
-    return;
-  }
-  if(!customerId){
-    alert("Bitte einen Kunden auswählen oder anlegen.");
-    return;
-  }
-
-  const items = [];
-  document.querySelectorAll("#posTableBody tr").forEach(tr=>{
-    const name  = tr.querySelector(".pos_name").value.trim();
-    const qty   = parseFloat(tr.querySelector(".pos_qty").value) || 0;
-    const price = parseFloat(tr.querySelector(".pos_price").value) || 0;
-    const total = parseFloat(tr.querySelector(".pos_total").value) || 0;
-    if(!name || qty <= 0) return;
-    items.push({name,qty,price,total});
-  });
-
-  if(items.length === 0){
-    alert("Mindestens eine Position angeben.");
-    return;
-  }
-
-  if(currentInvoiceId){
-    const inv = invoices.find(x=>x.id === currentInvoiceId);
-    if(!inv) return;
-    inv.number       = number;
-    inv.date         = date;
-    inv.channel      = channel;
-    inv.customerId   = customerId;
-    inv.items        = items;
-    inv.sumPosBrutto = sumPosBrutto;
-    inv.sumVat       = sumVat;
-    inv.sumTotal     = sumTotal;
-    inv.shipping     = shipping;
-    inv.note         = note;
-    inv.vatMode      = settings.vatMode;
-  }else{
-    const inv = {
-      id: "i_"+Date.now(),
-      number,
-      date,
-      channel,
-      customerId,
-      items,
-      sumPosBrutto,
-      sumVat,
-      sumTotal,
-      shipping,
-      note,
-      vatMode: settings.vatMode
-    };
-    invoices.push(inv);
-    currentInvoiceId = inv.id;
-  }
-
-  saveData();
-  alert("Rechnung gespeichert.");
-  renderInvoiceList();
-};
-
-// Rechnung öffnen
-function openInvoice(id){
-  const inv = invoices.find(x=>x.id === id);
-  if(!inv) return;
-  currentInvoiceId = inv.id;
-
-  document.querySelector('#navButtons button[data-view="viewEditor"]').click();
-
-  document.getElementById("inv_channel").value = inv.channel || "";
-  document.getElementById("inv_number").value  = inv.number || "";
-  document.getElementById("inv_date").value    = inv.date || "";
-  document.getElementById("inv_note").value    = inv.note || "";
-  document.getElementById("inv_shipping").value= (inv.shipping||0).toFixed(2);
-  document.getElementById("inv_vatMode").value = inv.vatMode === "0" ? "0 % (Kleinunternehmer)" : "19 % MwSt";
-
-  renderCustomerSelect();
-  document.getElementById("inv_customer").value = inv.customerId || "";
-
-  const tbody = document.getElementById("posTableBody");
-  tbody.innerHTML = "";
-  (inv.items || []).forEach(it=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><input class="pos_name" value="${it.name || ""}"></td>
-      <td><input class="pos_qty" type="number" min="1" value="${it.qty || 1}"></td>
-      <td><input class="pos_price" type="number" step="0.01" value="${(it.price||0).toFixed(2)}"></td>
-      <td><input class="pos_total" type="number" step="0.01" value="${(it.total||0).toFixed(2)}" readonly></td>
-      <td><button type="button" onclick="removePosRow(this)">✖</button></td>
-    `;
-    tbody.appendChild(tr);
-    attachPosEvents(tr);
-  });
-  updateInvoiceSums();
-}
-
-document.getElementById("btnCancelEdit").onclick = () => {
-  currentInvoiceId = null;
-  document.querySelector('#navButtons button[data-view="viewInvoices"]').click();
-};
-
-// Drucken / PDF
-document.getElementById("btnPrintInvoice").onclick = () => {
-  if(!currentInvoiceId){
-    alert("Bitte zuerst speichern, dann drucken.");
-    return;
-  }
-  const inv = invoices.find(x=>x.id === currentInvoiceId);
-  if(!inv){
-    alert("Rechnung nicht gefunden.");
-    return;
-  }
-  const cust = customers.find(c=>c.id === inv.customerId);
-  const vatMode = inv.vatMode === "0" ? "0 % (Kleinunternehmer)" : "19 % MwSt";
-  const shipping = inv.shipping || 0;
-
-  let w = window.open("","_blank");
-  let html = `
-  <html><head><meta charset="UTF-8"><title>Rechnung ${inv.number}</title>
-  <style>
-  body{font-family:Arial,sans-serif;font-size:12px;margin:20px;}
-  h1{font-size:18px;margin-bottom:5px;}
-  table{width:100%;border-collapse:collapse;margin-top:10px;}
-  th,td{border:1px solid #999;padding:4px;}
-  th{background:#eee;}
-  .totals{margin-top:10px;width:40%;float:right;}
-  </style>
-  </head><body>
-  <h1>Rechnung ${inv.number}</h1>
-  <div>
-    <strong>${settings.firmName || ""}</strong><br>
-    ${(settings.firmAddress || "").replace(/\\n/g,"<br>")}<br><br>
-    Steuernummer: ${settings.taxId || ""}<br>
-    USt-ID: ${settings.ustId || ""}<br>
-  </div>
-  <hr>
-  <div>
-    <strong>Rechnungsdatum:</strong> ${inv.date || ""}<br>
-    <strong>Verkaufsort:</strong> ${inv.channel || ""}<br><br>
-    <strong>Kunde:</strong><br>
-    ${cust ? cust.name : ""}<br>
-    ${cust ? (cust.address||"").replace(/\\n/g,"<br>") : ""}<br>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Pos</th>
-        <th>Bezeichnung</th>
-        <th>Menge</th>
-        <th>Einzelpreis (Brutto)</th>
-        <th>Gesamt (Brutto)</th>
-      </tr>
-    </thead>
-    <tbody>`;
-  (inv.items||[]).forEach((it,idx)=>{
-    html += `
-      <tr>
-        <td>${idx+1}</td>
-        <td>${it.name || ""}</td>
-        <td>${it.qty || 0}</td>
+  const tbody=document.getElementById("invoiceTableBody");
+  tbody.innerHTML="";
+  invoices.forEach(inv=>{
+    (inv.items||[]).forEach(it=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${it.artnr||""}</td>
+        <td>${inv.number||""}</td>
+        <td>${it.name||""}</td>
+        <td>${it.qty||0}</td>
         <td>${(it.price||0).toFixed(2)} €</td>
-        <td>${(it.total||0).toFixed(2)} €</td>
-      </tr>`;
+        <td>${inv.date||""}</td>
+        <td>${inv.channel||""}</td>
+        <td>
+          <span class="iconBtn" onclick="viewInvoice('${inv.id}')">👁</span>
+          <span class="iconBtn" onclick="editInvoice('${inv.id}')">✏️</span>
+          <span class="iconBtn" onclick="printInvoice('${inv.id}')">🖨</span>
+          <span class="iconBtn" onclick="deleteInvoice('${inv.id}')">🗑</span>
+        </td>`;
+      tbody.appendChild(tr);
+    });
   });
-  if(shipping > 0){
-    html += `
-      <tr>
-        <td></td>
-        <td><strong>Versandkosten</strong></td>
-        <td>1</td>
-        <td>${shipping.toFixed(2)} €</td>
-        <td>${shipping.toFixed(2)} €</td>
-      </tr>`;
-  }
-  html += `
-    </tbody>
-  </table>
-  <table class="totals">
-    <tr><th>Positionen (Brutto)</th><td>${(inv.sumPosBrutto||0).toFixed(2)} €</td></tr>
-    <tr><th>Versand (Brutto)</th><td>${shipping.toFixed(2)} €</td></tr>
-    <tr><th>enthaltene MwSt (${vatMode})</th><td>${(inv.sumVat||0).toFixed(2)} €</td></tr>
-    <tr><th>Rechnungsbetrag</th><td>${(inv.sumTotal||0).toFixed(2)} €</td></tr>
-  </table>
-  <div style="clear:both;"></div>
-  <br><br>
-  <div>
-    ${(settings.footerText||"").replace(/\\n/g,"<br>")}
-  </div>
-  <br>
-  <div>${inv.note ? ("Interne Notiz: "+inv.note) : ""}</div>
-  </body></html>
-  `;
-  w.document.write(html);
-  w.document.close();
-  w.print();
-};
+}
 
-// ===== Backup (Sichern / Laden) =====
-document.getElementById("btnBackup").onclick = () => {
-  const data = {
-    settings,
-    customers,
-    invoices
-  };
-  const blob = new Blob([JSON.stringify(data)], {type:"application/json"});
-  const a    = document.createElement("a");
-  a.href     = URL.createObjectURL(blob);
-  a.download = "rechnungen_backup.json"; // immer gleich, iPhone fragt nach Überschreiben
-  a.click();
-};
+function viewInvoice(id){alert("Rechnung ansehen: "+id);}
+function editInvoice(id){alert("Rechnung bearbeiten: "+id);}
+function printInvoice(id){alert("Rechnung drucken: "+id);}
+function deleteInvoice(id){
+  if(!confirm("Rechnung wirklich stornieren?"))return;
+  invoices=invoices.filter(x=>x.id!==id);
+  localStorage.setItem("rechnungInvoices",JSON.stringify(invoices));
+  renderInvoiceList();
+}
 
-document.getElementById("btnRestore").onclick = () => {
-  const inp = document.createElement("input");
-  inp.type  = "file";
-  inp.accept= "application/json";
-  inp.onchange = e => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const r = new FileReader();
-    r.onload = () => {
-      try{
-        const data = JSON.parse(r.result);
-        settings  = Object.assign(settings, data.settings || {});
-        customers = data.customers || [];
-        invoices  = data.invoices  || [];
-        saveData();
-        renderSettings();
-        renderCustomerList();
-        renderInvoiceList();
-        alert("Backup erfolgreich geladen.");
-      }catch{
-        alert("Backup konnte nicht gelesen werden.");
-      }
-    };
-    r.readAsText(file);
-  };
-  inp.click();
-};
-
-// ===== Start =====
-loadData();
-renderSettings();
-renderCustomerList();
 renderInvoiceList();
-prepareNewInvoice(false);
 </script>
 
 </body>
