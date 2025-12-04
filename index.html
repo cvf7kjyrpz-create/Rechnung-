@@ -61,7 +61,6 @@ body{
 .section{
   display:none;
 }
-
 .section.active{
   display:block;
 }
@@ -78,7 +77,6 @@ th,td{
   padding:4px;
   white-space:nowrap;
 }
-
 th{
   background:#111;
   color:#bbb;
@@ -111,7 +109,6 @@ label{
   display:flex;
   gap:6px;
 }
-
 .form-row-inline .col{
   flex:1;
 }
@@ -121,7 +118,6 @@ button.primary{
   border-color:#0a84ff;
   color:#fff;
 }
-
 button.danger{
   border-color:#ff4d4d;
   color:#ffb3b3;
@@ -140,15 +136,7 @@ button.danger{
   border:1px solid #333;
 }
 
-/* Print Layout (für neues Fenster) */
-@media print{
-  body{
-    background:#fff;
-    color:#000;
-  }
-}
-
-/* Kleine Hinweise */
+/* Hinweise */
 .hint{
   font-size:10px;
   color:#999;
@@ -193,22 +181,25 @@ button.danger{
   <!-- RECHNUNGSEDITOR -->
   <div id="viewEditor" class="section">
     <div style="font-weight:bold;margin-bottom:6px;">Rechnung bearbeiten / erstellen</div>
+
     <div class="form-row-inline">
       <div class="col">
-        <label>Verkaufsort</label>
-        <select id="inv_channel">
-          <option value="Ebay">Ebay (E)</option>
-          <option value="Kleinanzeigen">Kleinanzeigen (K)</option>
-          <option value="Vinted">Vinted (V)</option>
-          <option value="Sonstiges">Sonstiges (S)</option>
-        </select>
-        <div class="hint">Der Anfangsbuchstabe bestimmt den Präfix der Rechnungsnummer.</div>
+        <label>Verkaufsort / Plattform</label>
+        <input id="inv_channel" list="channelSuggestions" placeholder="z.B. Ebay, Kleinanzeigen, Vinted, Flohmarkt">
+        <datalist id="channelSuggestions">
+          <option value="Ebay">
+          <option value="Kleinanzeigen">
+          <option value="Vinted">
+          <option value="Flohmarkt">
+        </datalist>
+        <div class="hint">Der erste Buchstabe bestimmt den Präfix der Rechnungsnummer.</div>
       </div>
       <div class="col">
         <label>Rechnungsnummer</label>
-        <input id="inv_number" readonly>
+        <input id="inv_number" placeholder="z.B. E001 - 2025">
         <div class="hint">
-          <button id="btnGenNumber" type="button">Nummer vergeben</button>
+          <button id="btnGenNumber" type="button">Nummer automatisch vergeben</button><br>
+          Du kannst sie danach trotzdem manuell ändern.
         </div>
       </div>
     </div>
@@ -221,7 +212,7 @@ button.danger{
       <div class="col">
         <label>Mehrwertsteuer-Modus</label>
         <input id="inv_vatMode" readonly>
-        <div class="hint">Änderbar unter „Einstellungen“.</div>
+        <div class="hint">Einstellbar unter „Einstellungen“ (19 % oder 0 %).</div>
       </div>
     </div>
 
@@ -254,22 +245,29 @@ button.danger{
 
     <div class="form-row-inline">
       <div class="col">
-        <label>Zwischensumme (Brutto)</label>
-        <input id="inv_sumBrutto" readonly>
+        <label>Versandkosten (Brutto €)</label>
+        <input id="inv_shipping" type="number" step="0.01" value="0">
+        <div class="hint">Wird in die Gesamtsumme eingerechnet und auf der Rechnung ausgewiesen.</div>
       </div>
+      <div class="col">
+        <label>Zwischensumme (Positionen, Brutto)</label>
+        <input id="inv_sumBruttoPositions" readonly>
+      </div>
+      <div class="col">
+        <label>Gesamt-Brutto inkl. Versand</label>
+        <input id="inv_sumTotal" readonly>
+      </div>
+    </div>
+
+    <div class="form-row-inline">
       <div class="col">
         <label>enthaltene MwSt</label>
         <input id="inv_sumVat" readonly>
       </div>
       <div class="col">
-        <label>Summe (Brutto)</label>
-        <input id="inv_sumTotal" readonly>
+        <label>Notiz / interne Bemerkung</label>
+        <textarea id="inv_note" rows="2"></textarea>
       </div>
-    </div>
-
-    <div class="form-row">
-      <label>Notiz / interne Bemerkung</label>
-      <textarea id="inv_note" rows="3"></textarea>
     </div>
 
     <div class="form-row-inline" style="margin-top:10px;">
@@ -296,8 +294,6 @@ button.danger{
         <tr>
           <th>Name</th>
           <th>Adresse</th>
-          <th>E-Mail</th>
-          <th>Telefon</th>
           <th>Aktion</th>
         </tr>
       </thead>
@@ -313,7 +309,7 @@ button.danger{
       <input id="set_firmName">
     </div>
     <div class="form-row">
-      <label>Adresse (eine Zeile oder mehrere Zeilen)</label>
+      <label>Adresse (mehrere Zeilen möglich)</label>
       <textarea id="set_firmAddress" rows="2"></textarea>
     </div>
     <div class="form-row-inline">
@@ -327,8 +323,9 @@ button.danger{
       </div>
     </div>
     <div class="form-row">
-      <label>Bankverbindung / IBAN / BIC</label>
-      <textarea id="set_bank" rows="2"></textarea>
+      <label>Standard-Fußtext unter jeder Rechnung</label>
+      <textarea id="set_footer" rows="3" placeholder="z.B. Vielen Dank für Ihren Einkauf."></textarea>
+      <div class="hint">Dieser Text erscheint immer unten auf der Rechnung.</div>
     </div>
     <div class="form-row">
       <label>Mehrwertsteuer-Modus</label>
@@ -364,7 +361,7 @@ let settings = {
   firmAddress: "",
   taxId: "",
   ustId: "",
-  bank: "",
+  footerText: "",
   vatMode: "19" // "19" oder "0"
 };
 
@@ -373,7 +370,7 @@ let invoices  = [];
 
 let currentInvoiceId = null;
 
-// ===== Helpers für Storage =====
+// ===== Storage =====
 function loadData(){
   try{
     const s = JSON.parse(localStorage.getItem("rechnungSettings") || "{}");
@@ -411,8 +408,8 @@ navButtons.forEach(btn=>{
     });
     if(view === "viewInvoices") renderInvoiceList();
     if(view === "viewCustomers") renderCustomerList();
-    if(view === "viewSettings") renderSettings();
-    if(view === "viewEditor") prepareNewInvoice(false);
+    if(view === "viewSettings")  renderSettings();
+    if(view === "viewEditor")    prepareNewInvoice(false);
   });
 });
 
@@ -422,7 +419,7 @@ function renderSettings(){
   document.getElementById("set_firmAddress").value = settings.firmAddress || "";
   document.getElementById("set_taxId").value       = settings.taxId || "";
   document.getElementById("set_ustId").value       = settings.ustId || "";
-  document.getElementById("set_bank").value        = settings.bank || "";
+  document.getElementById("set_footer").value      = settings.footerText || "";
   document.getElementById("set_vatMode").value     = settings.vatMode || "19";
 }
 
@@ -431,7 +428,7 @@ document.getElementById("btnSaveSettings").onclick = () => {
   settings.firmAddress = document.getElementById("set_firmAddress").value.trim();
   settings.taxId       = document.getElementById("set_taxId").value.trim();
   settings.ustId       = document.getElementById("set_ustId").value.trim();
-  settings.bank        = document.getElementById("set_bank").value.trim();
+  settings.footerText  = document.getElementById("set_footer").value.trim();
   settings.vatMode     = document.getElementById("set_vatMode").value;
   saveData();
   alert("Einstellungen gespeichert.");
@@ -446,8 +443,6 @@ function renderCustomerList(){
     tr.innerHTML = `
       <td>${c.name || ""}</td>
       <td>${(c.address||"").replace(/\\n/g,"<br>")}</td>
-      <td>${c.email || ""}</td>
-      <td>${c.phone || ""}</td>
       <td>
         <button type="button" onclick="editCustomer(${i})">✏️</button>
         <button type="button" class="danger" onclick="deleteCustomer(${i})">🗑</button>
@@ -477,18 +472,15 @@ function renderCustomerSelect(){
 }
 
 document.getElementById("btnAddCustomer").onclick = () => {
-  const name = prompt("Kundenname:");
-  if(!name) return;
-  const address = prompt("Adresse (mehrere Zeilen möglich, \\n für Zeilenumbruch):") || "";
-  const email   = prompt("E-Mail:") || "";
-  const phone   = prompt("Telefon:") || "";
-
+  const block = prompt("Name + Adresse (mehrere Zeilen, Name in der ersten Zeile):");
+  if(!block) return;
+  const lines = block.split(/\\r?\\n/);
+  const name = lines[0] || block;
+  const address = block;
   const c = {
     id: "c_"+Date.now(),
     name,
-    address,
-    email,
-    phone
+    address
   };
   customers.push(c);
   saveData();
@@ -497,14 +489,11 @@ document.getElementById("btnAddCustomer").onclick = () => {
 
 function editCustomer(i){
   const c = customers[i];
-  const name = prompt("Kundenname:", c.name) || c.name;
-  const address = prompt("Adresse:", c.address) || c.address;
-  const email   = prompt("E-Mail:", c.email) || c.email;
-  const phone   = prompt("Telefon:", c.phone) || c.phone;
-  c.name = name;
-  c.address = address;
-  c.email = email;
-  c.phone = phone;
+  const block = prompt("Name + Adresse bearbeiten:", c.address || (c.name||""));
+  if(!block) return;
+  const lines = block.split(/\\r?\\n/);
+  c.name    = lines[0] || block;
+  c.address = block;
   saveData();
   renderCustomerList();
 }
@@ -516,7 +505,6 @@ function deleteCustomer(i){
   renderCustomerList();
 }
 
-// aus Rechnung heraus neuen Kunden
 document.getElementById("btnNewCustomerFromInv").onclick = () => {
   document.querySelector('#navButtons button[data-view="viewCustomers"]').click();
   document.getElementById("btnAddCustomer").click();
@@ -551,10 +539,7 @@ function renderInvoiceList(){
 function getPrefixForChannel(channel){
   if(!channel) return "S";
   const ch = channel.trim().toUpperCase();
-  if(ch.startsWith("E")) return "E";
-  if(ch.startsWith("K")) return "K";
-  if(ch.startsWith("V")) return "V";
-  return ch[0];
+  return ch[0] || "S";
 }
 
 function generateInvoiceNumber(channel){
@@ -574,18 +559,18 @@ function prepareNewInvoice(forceNew=true){
   }
   const today = new Date().toISOString().slice(0,10);
   document.getElementById("inv_date").value = today;
-  document.getElementById("inv_channel").value = "Ebay";
+  document.getElementById("inv_channel").value = "";
   document.getElementById("inv_number").value = "";
   document.getElementById("inv_note").value = "";
+  document.getElementById("inv_shipping").value = "0";
   document.getElementById("inv_vatMode").value = settings.vatMode === "0" ? "0 % (Kleinunternehmer)" : "19 % MwSt";
 
-  // Positionen leeren
   const posBody = document.getElementById("posTableBody");
   posBody.innerHTML = "";
   addPositionRow();
 
-  updateInvoiceSums();
   renderCustomerSelect();
+  updateInvoiceSums();
 }
 
 document.getElementById("btnNewInvoice").onclick = () => {
@@ -595,7 +580,7 @@ document.getElementById("btnNewInvoice").onclick = () => {
 
 document.getElementById("btnGenNumber").onclick = () => {
   if(currentInvoiceId){
-    alert("Rechnungsnummer für bestehende Rechnung wird nicht neu vergeben.");
+    alert("Rechnungsnummer für bestehende Rechnung wird nicht automatisch neu vergeben.");
     return;
   }
   const channel = document.getElementById("inv_channel").value;
@@ -636,47 +621,50 @@ function removePosRow(btn){
 
 function updateInvoiceSums(){
   const rows = document.querySelectorAll("#posTableBody tr");
-  let sumBrutto = 0;
+  let sumPosBrutto = 0;
   rows.forEach(tr=>{
     const qty   = parseFloat(tr.querySelector(".pos_qty").value) || 0;
     const price = parseFloat(tr.querySelector(".pos_price").value) || 0;
     const total = qty * price;
     tr.querySelector(".pos_total").value = total.toFixed(2);
-    sumBrutto += total;
+    sumPosBrutto += total;
   });
+
+  const shipping = parseFloat(document.getElementById("inv_shipping").value) || 0;
+  const sumBrutto = sumPosBrutto + shipping;
 
   const vatMode = settings.vatMode || "19";
   let vat = 0;
-  let total = sumBrutto;
   if(vatMode === "19"){
     const net = sumBrutto / 1.19;
-    vat   = sumBrutto - net;
+    vat = sumBrutto - net;
   }else{
     vat = 0;
   }
 
-  document.getElementById("inv_sumBrutto").value = sumBrutto.toFixed(2);
-  document.getElementById("inv_sumVat").value    = vat.toFixed(2);
-  document.getElementById("inv_sumTotal").value  = total.toFixed(2);
+  document.getElementById("inv_sumBruttoPositions").value = sumPosBrutto.toFixed(2);
+  document.getElementById("inv_sumVat").value             = vat.toFixed(2);
+  document.getElementById("inv_sumTotal").value           = sumBrutto.toFixed(2);
 }
 
 // Rechnung speichern
 document.getElementById("btnSaveInvoice").onclick = () => {
   const number = document.getElementById("inv_number").value.trim();
   const date   = document.getElementById("inv_date").value;
-  const channel= document.getElementById("inv_channel").value;
+  const channel= document.getElementById("inv_channel").value.trim();
   const customerId = document.getElementById("inv_customer").value || "";
   const note   = document.getElementById("inv_note").value.trim();
-  const sumBrutto = parseFloat(document.getElementById("inv_sumBrutto").value) || 0;
-  const sumVat    = parseFloat(document.getElementById("inv_sumVat").value) || 0;
-  const sumTotal  = parseFloat(document.getElementById("inv_sumTotal").value) || 0;
+  const sumPosBrutto = parseFloat(document.getElementById("inv_sumBruttoPositions").value) || 0;
+  const sumVat       = parseFloat(document.getElementById("inv_sumVat").value) || 0;
+  const sumTotal     = parseFloat(document.getElementById("inv_sumTotal").value) || 0;
+  const shipping     = parseFloat(document.getElementById("inv_shipping").value) || 0;
 
   if(!date){
     alert("Bitte ein Datum angeben.");
     return;
   }
   if(!number){
-    alert("Bitte auf „Nummer vergeben“ drücken.");
+    alert("Bitte auf „Nummer automatisch vergeben“ drücken oder manuell eine Nummer eintragen.");
     return;
   }
   if(!customerId){
@@ -702,16 +690,17 @@ document.getElementById("btnSaveInvoice").onclick = () => {
   if(currentInvoiceId){
     const inv = invoices.find(x=>x.id === currentInvoiceId);
     if(!inv) return;
-    inv.number     = number;
-    inv.date       = date;
-    inv.channel    = channel;
-    inv.customerId = customerId;
-    inv.items      = items;
-    inv.sumBrutto  = sumBrutto;
-    inv.sumVat     = sumVat;
-    inv.sumTotal   = sumTotal;
-    inv.note       = note;
-    inv.vatMode    = settings.vatMode;
+    inv.number       = number;
+    inv.date         = date;
+    inv.channel      = channel;
+    inv.customerId   = customerId;
+    inv.items        = items;
+    inv.sumPosBrutto = sumPosBrutto;
+    inv.sumVat       = sumVat;
+    inv.sumTotal     = sumTotal;
+    inv.shipping     = shipping;
+    inv.note         = note;
+    inv.vatMode      = settings.vatMode;
   }else{
     const inv = {
       id: "i_"+Date.now(),
@@ -720,9 +709,10 @@ document.getElementById("btnSaveInvoice").onclick = () => {
       channel,
       customerId,
       items,
-      sumBrutto,
+      sumPosBrutto,
       sumVat,
       sumTotal,
+      shipping,
       note,
       vatMode: settings.vatMode
     };
@@ -743,10 +733,11 @@ function openInvoice(id){
 
   document.querySelector('#navButtons button[data-view="viewEditor"]').click();
 
-  document.getElementById("inv_channel").value = inv.channel || "Ebay";
+  document.getElementById("inv_channel").value = inv.channel || "";
   document.getElementById("inv_number").value  = inv.number || "";
   document.getElementById("inv_date").value    = inv.date || "";
   document.getElementById("inv_note").value    = inv.note || "";
+  document.getElementById("inv_shipping").value= (inv.shipping||0).toFixed(2);
   document.getElementById("inv_vatMode").value = inv.vatMode === "0" ? "0 % (Kleinunternehmer)" : "19 % MwSt";
 
   renderCustomerSelect();
@@ -787,6 +778,7 @@ document.getElementById("btnPrintInvoice").onclick = () => {
   }
   const cust = customers.find(c=>c.id === inv.customerId);
   const vatMode = inv.vatMode === "0" ? "0 % (Kleinunternehmer)" : "19 % MwSt";
+  const shipping = inv.shipping || 0;
 
   let w = window.open("","_blank");
   let html = `
@@ -836,22 +828,32 @@ document.getElementById("btnPrintInvoice").onclick = () => {
         <td>${(it.total||0).toFixed(2)} €</td>
       </tr>`;
   });
+  if(shipping > 0){
+    html += `
+      <tr>
+        <td></td>
+        <td><strong>Versandkosten</strong></td>
+        <td>1</td>
+        <td>${shipping.toFixed(2)} €</td>
+        <td>${shipping.toFixed(2)} €</td>
+      </tr>`;
+  }
   html += `
     </tbody>
   </table>
   <table class="totals">
-    <tr><th>Zwischensumme (Brutto)</th><td>${(inv.sumBrutto||0).toFixed(2)} €</td></tr>
+    <tr><th>Positionen (Brutto)</th><td>${(inv.sumPosBrutto||0).toFixed(2)} €</td></tr>
+    <tr><th>Versand (Brutto)</th><td>${shipping.toFixed(2)} €</td></tr>
     <tr><th>enthaltene MwSt (${vatMode})</th><td>${(inv.sumVat||0).toFixed(2)} €</td></tr>
     <tr><th>Rechnungsbetrag</th><td>${(inv.sumTotal||0).toFixed(2)} €</td></tr>
   </table>
   <div style="clear:both;"></div>
   <br><br>
   <div>
-    <strong>Bankverbindung:</strong><br>
-    ${(settings.bank||"").replace(/\\n/g,"<br>")}
+    ${(settings.footerText||"").replace(/\\n/g,"<br>")}
   </div>
   <br>
-  <div>${inv.note ? ("Hinweis: "+inv.note) : ""}</div>
+  <div>${inv.note ? ("Interne Notiz: "+inv.note) : ""}</div>
   </body></html>
   `;
   w.document.write(html);
