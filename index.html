@@ -23,6 +23,32 @@ th{color:#bbb;background:#111;position:sticky;top:0}
 #mwst[disabled]{opacity:0.5}
 </style>
 
+
+<style>
+.container, .wrapper, main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+input, textarea, select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+.actions {
+  position: sticky;
+  bottom: 0;
+  background: #000;
+  padding: 10px 0 6px 0;
+  display: flex;
+  gap: 8px;
+}
+.actions button {
+  flex: 1;
+}
+</style>
+
 </head>
 <body>
 
@@ -87,7 +113,7 @@ th{color:#bbb;background:#111;position:sticky;top:0}
       <div class="row">
         <input id="mwst" value="19" onblur="calcTotals()" style="flex:1">
         <label class="small" style="display:flex;align-items:center;gap:4px;">
-          <input type="checkbox" id="mwstToggle" onchange="toggleMwst()"> MwSt aktiv
+          <input type="checkbox" id="mwstToggle" onchange="toggleMwst()"> Kleinunternehmer
         </label>
       </div>
     </div>
@@ -103,10 +129,16 @@ th{color:#bbb;background:#111;position:sticky;top:0}
   <textarea id="company" rows="3" style="width:100%" placeholder="Firmenname&#10;Adresse&#10;Kontakt"></textarea>
   <input id="ustid" placeholder="USt-ID / Steuernummer">
 
-  <div class="actions">
-    <button onclick="saveInvoice()">Speichern</button>
-    <button onclick="showList()">Zur Liste</button>
-  </div>
+  
+  
+<div class="actions">
+  <button onclick="saveInvoice()">Speichern</button>
+  <button onclick="loadFromBuffer()">Verkäufe laden</button>
+  <button onclick="createPDF()">PDF erstellen</button>
+  <button onclick="showInvoiceList()">Rechnungsliste</button>
+</div>
+
+
 </div>
 
 <script>
@@ -269,6 +301,165 @@ function applyMwstSetting(){
   if(t) t.checked = on;
 }
 
+</script>
+
+
+<script>
+// ========== ZWISCHENSPEICHER LADEN ==========
+function loadFromBuffer(){
+  let buffer = JSON.parse(localStorage.getItem("invoiceBuffer") || "[]");
+  if(!Array.isArray(buffer) || buffer.length === 0){
+    alert("Kein Verkauf im Zwischenspeicher");
+    return;
+  }
+
+  buffer.forEach(item => {
+    addRow({
+      name: item.name,
+      menge: item.menge,
+      preis: item.preis
+    });
+  });
+
+  localStorage.removeItem("invoiceBuffer");
+  calcTotals();
+  alert("Verkäufe übernommen ✅");
+}
+
+// ========== KLEINUNTERNEHMER SPEICHERN ==========
+function toggleMwst(){
+  const klein = document.getElementById('mwstToggle').checked;
+  localStorage.setItem('kleinunternehmer', klein ? "1" : "0");
+
+  const mwInput = document.getElementById("mwst");
+  if(klein){
+    mwInput.value = 0;
+    mwInput.disabled = true;
+  } else {
+    mwInput.disabled = false;
+    if(!mwInput.value || mwInput.value == "0") mwInput.value = 19;
+  }
+  calcTotals();
+}
+
+function applyMwstSetting(){
+  const klein = localStorage.getItem('kleinunternehmer') === "1";
+  const t = document.getElementById('mwstToggle');
+  const mwInput = document.getElementById("mwst");
+
+  if(t) t.checked = klein;
+  if(klein){
+    mwInput.value = 0;
+    mwInput.disabled = true;
+  } else {
+    mwInput.disabled = false;
+  }
+}
+
+// ========== PDF ERZEUGEN ==========
+function createPDF(){
+  saveInvoice();
+  window.print();
+}
+
+// Apply Kleinunternehmer mode on load
+setTimeout(applyMwstSetting, 0);
+</script>
+
+
+<script>
+// ========== RECHNUNG BEIM PDF ERSTELLEN AUTOMATISCH SPEICHERN ==========
+(function(){
+  const _origCreatePDF = typeof createPDF === "function" ? createPDF : null;
+
+  window.createPDF = function(){
+    try{
+      if(typeof saveInvoice === "function") saveInvoice();
+
+      // zusätzlich immer in eine interne Liste schreiben
+      let list = JSON.parse(localStorage.getItem("invoiceList") || "[]");
+
+      const invoiceData = document.getElementById("invoiceView")
+        ? document.getElementById("invoiceView").innerHTML
+        : document.body.innerHTML;
+
+      list.unshift({
+        ts: Date.now(),
+        html: invoiceData
+      });
+
+      localStorage.setItem("invoiceList", JSON.stringify(list));
+    }catch(e){ console.error(e); }
+
+    // danach normal PDF/Print
+    if(_origCreatePDF){
+      _origCreatePDF();
+    } else {
+      window.print();
+    }
+  };
+})();
+</script>
+
+
+<div id="invoiceListModal" style="display:none;position:fixed;inset:0;background:#000d;z-index:9999;overflow:auto;">
+  <div style="max-width:520px;margin:40px auto;background:#111;padding:12px;border-radius:10px;">
+    <h3>Gespeicherte Rechnungen</h3>
+    <div id="invoiceListContainer"></div>
+    <button onclick="closeInvoiceList()" style="margin-top:10px;width:100%;">Schließen</button>
+  </div>
+</div>
+
+
+<script>
+function showInvoiceList(){
+  const list = JSON.parse(localStorage.getItem("invoiceList")||"[]");
+  const c = document.getElementById("invoiceListContainer");
+  c.innerHTML = "";
+
+  if(list.length === 0){
+    c.innerHTML = "<p>Keine gespeicherten Rechnungen.</p>";
+  }
+
+  list.forEach((inv,i) => {
+    const d = document.createElement("div");
+    d.style.border = "1px solid #444";
+    d.style.padding = "8px";
+    d.style.marginBottom = "6px";
+
+    const dt = new Date(inv.ts).toLocaleString();
+
+    d.innerHTML = `
+      <div><b>${dt}</b></div>
+      <button onclick="editInvoice(${i})">Bearbeiten</button>
+      <button onclick="deleteInvoice(${i})">Löschen</button>
+    `;
+    c.appendChild(d);
+  });
+
+  document.getElementById("invoiceListModal").style.display = "block";
+}
+
+function closeInvoiceList(){
+  document.getElementById("invoiceListModal").style.display = "none";
+}
+
+function deleteInvoice(i){
+  if(!confirm("Rechnung wirklich löschen?")) return;
+  const list = JSON.parse(localStorage.getItem("invoiceList")||"[]");
+  list.splice(i,1);
+  localStorage.setItem("invoiceList", JSON.stringify(list));
+  showInvoiceList();
+}
+
+function editInvoice(i){
+  const list = JSON.parse(localStorage.getItem("invoiceList")||"[]");
+  const data = list[i];
+  if(!data) return;
+  document.body.innerHTML = data.html;
+  alert("Rechnung geladen – du kannst jetzt bearbeiten und erneut speichern/PDF erstellen.");
+  closeInvoiceList();
+}
 </script>
 
 </body>
