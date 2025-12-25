@@ -2,366 +2,313 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Rechnung Final</title>
+    <title>Invoice Tool Clean</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
-            /* Dark Mode App Colors */
-            --bg-app: #0f172a;
-            --bg-panel: #1e293b;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --accent: #6366f1;
+            --bg-body: #0f172a;       /* Deep Blue Background */
+            --bg-card: #1e293b;       /* Card Background */
+            --text-main: #f1f5f9;     /* Text Color */
+            --accent: #6366f1;        /* Primary Color */
             --accent-hover: #4f46e5;
+            --success: #10b981;       /* Print Button */
             --border: #334155;
             --input-bg: #020617;
         }
 
         body {
-            margin: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-app);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-body);
             color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            overflow: hidden; /* Verhindert Scrollbalken im App-Modus */
-        }
-
-        /* --- LINKES PANEL (Eingabe) --- */
-        .sidebar {
-            width: 360px;
-            background-color: var(--bg-panel);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
+            margin: 0;
             padding: 20px;
-            overflow-y: auto;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
-            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Oben ausgerichtet */
+            min-height: 100vh;
         }
 
-        h2 { margin-top: 0; font-weight: 300; letter-spacing: 1px; color: var(--accent); font-size: 1.2rem; }
+        /* --- SCREEN MODE (DAS DASHBOARD) --- */
+        .dashboard {
+            width: 100%;
+            max-width: 500px; /* Schön kompakt */
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+        }
+
+        h1 { margin: 0 0 20px 0; font-size: 1.5rem; font-weight: 300; letter-spacing: 1px; color: white; text-align: center; }
         
-        .section-label {
-            font-size: 0.7rem;
+        .group-label {
+            font-size: 0.75rem;
             text-transform: uppercase;
             font-weight: 700;
-            color: var(--text-muted);
-            margin-top: 20px;
-            margin-bottom: 5px;
+            color: #94a3b8;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 2px;
+            padding-bottom: 5px;
         }
 
+        /* Inputs Styling */
         input, textarea {
             background: var(--input-bg);
             border: 1px solid var(--border);
             color: var(--text-main);
-            border-radius: 5px;
-            padding: 8px;
+            border-radius: 8px;
+            padding: 12px;
             width: 100%;
             font-family: inherit;
             box-sizing: border-box;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
         }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
 
+        /* Buttons */
         .btn {
             border: none;
-            border-radius: 6px;
-            padding: 12px;
+            border-radius: 8px;
+            padding: 16px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 0.9rem;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            margin-top: 10px;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
             width: 100%;
+            transition: transform 0.1s, background 0.2s;
         }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { background: var(--accent-hover); }
-        .btn-print { background: #10b981; color: white; margin-top: auto; }
+        .btn:active { transform: scale(0.98); }
+
+        .btn-import { background: var(--accent); color: white; margin-bottom: 10px; }
+        .btn-import:hover { background: var(--accent-hover); }
+
+        .btn-print { 
+            background: var(--success); 
+            color: white; 
+            margin-top: 30px; 
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
         .btn-print:hover { background: #059669; }
 
-        /* --- RECHTES PANEL (Vorschau) --- */
-        .preview-area {
-            flex: 1;
-            background: #0f172a;
-            display: flex;
-            justify-content: center;
-            padding: 40px;
-            overflow-y: auto;
+        .row { display: flex; gap: 15px; }
+        .col { flex: 1; }
+
+        /* --- HIDDEN INVOICE (NUR FÜR DRUCK SICHTBAR) --- */
+        #print-template {
+            display: none; /* Auf dem Bildschirm unsichtbar */
         }
 
-        .paper {
-            background: white;
-            color: black;
-            width: 210mm;
-            /* WICHTIG: Keine feste Höhe, damit Druck passt, aber min-height für Optik */
-            min-height: 297mm; 
-            padding: 15mm 20mm;
-            box-sizing: border-box;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        /* --- RECHNUNG DESIGN --- */
-        
-        /* Header */
-        .inv-header { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 25px; 
-            border-bottom: 1px solid #eee; 
-            padding-bottom: 10px; 
-        }
-        /* Update: Kleinerer Firmenname */
-        .inv-logo { font-size: 1.2rem; font-weight: 800; color: #333; text-transform: uppercase; margin: 0; }
-        .inv-slogan { font-size: 0.8rem; color: #666; margin-top: 2px; }
-        
-        .inv-meta { text-align: right; font-size: 0.8rem; color: #444; line-height: 1.4; }
-
-        /* Absenderzeile & Fenster */
-        .sender-line { font-size: 0.65rem; text-decoration: underline; color:#888; margin-bottom: 15px; }
-        .inv-window {
-            font-size: 0.9rem;
-            line-height: 1.3;
-            min-height: 35mm; 
-            margin-bottom: 10px;
-        }
-
-        /* Titel */
-        .inv-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; color: #111; }
-        .inv-intro { margin-bottom: 15px; font-size: 0.85rem; }
-
-        /* Tabelle (Kompakt) */
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { 
-            text-align: left; 
-            border-bottom: 1px solid #000; 
-            padding: 5px 2px; 
-            color: #444; 
-            text-transform: uppercase; 
-            font-size: 0.7rem; 
-        }
-        td { 
-            padding: 4px 2px; 
-            border-bottom: 1px solid #eee; 
-            vertical-align: top; 
-        }
-        .text-right { text-align: right; }
-        .total-row td { 
-            border-top: 1px solid #000; 
-            font-weight: bold; 
-            font-size: 1rem; 
-            padding-top: 8px; 
-            border-bottom: none; 
-        }
-
-        /* Anmerkung & Footer */
-        .inv-note {
-            margin-top: 15px;
-            padding: 8px;
-            background: #f9fafb;
-            border-left: 3px solid #333;
-            font-size: 0.8rem;
-            color: #444;
-            white-space: pre-wrap;
-        }
-        
-        .inv-footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 0.7rem;
-            color: #888;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-            line-height: 1.4;
-        }
-
-        /* --- DRUCK EINSTELLUNGEN (Fix für 2. Seite) --- */
-        @page {
-            size: A4;
-            margin: 0; /* Entfernt Standardränder des Druckers */
-        }
-
+        /* --- DRUCK MODUS --- */
         @media print {
             body { 
                 background: white; 
                 display: block; 
-                height: auto; 
-                width: 100%;
-                overflow: visible; 
+                padding: 0; 
+                margin: 0;
             }
-            .sidebar { display: none; }
-            .preview-area { display: block; padding: 0; background: white; margin: 0; }
+            .dashboard { display: none; } /* Dashboard ausblenden */
             
-            .paper { 
-                width: 100%; 
-                height: auto; 
-                min-height: auto; 
-                box-shadow: none; 
-                margin: 0; 
-                padding: 15mm 20mm; /* Der Innenabstand bleibt erhalten */
-                page-break-after: avoid;
+            #print-template {
+                display: block; /* Rechnung einblenden */
+                width: 100%;
+                color: black;
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                padding: 15mm 20mm;
+                box-sizing: border-box;
             }
 
-            .inv-note { background: none !important; border-left: none !important; padding: 5px 0; }
+            /* Exaktes Rechnungs-CSS (Kompakt) */
+            .inv-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+            .inv-logo { font-size: 1.1rem; font-weight: 800; text-transform: uppercase; margin: 0; color: #000; }
+            .inv-slogan { font-size: 0.8rem; color: #666; margin-top: 2px; }
+            .inv-meta { text-align: right; font-size: 0.8rem; color: #000; line-height: 1.4; }
+            
+            .sender-line { font-size: 0.65rem; text-decoration: underline; color: #666; margin-bottom: 15px; }
+            
+            .inv-window { font-size: 0.9rem; line-height: 1.3; min-height: 35mm; margin-bottom: 10px; }
+            
+            .inv-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
+            .inv-intro { margin-bottom: 10px; font-size: 0.9rem; }
+
+            table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+            th { text-align: left; border-bottom: 1px solid #000; padding: 4px 0; font-size: 0.7rem; text-transform: uppercase; }
+            td { padding: 4px 0; border-bottom: 1px solid #eee; }
+            .text-right { text-align: right; }
+            .total-row td { border-top: 1px solid #000; font-weight: bold; font-size: 1rem; padding-top: 10px; border-bottom: none; }
+
+            .inv-note { margin-top: 15px; font-size: 0.8rem; padding-top: 10px; }
+            
+            .inv-footer { 
+                position: fixed; 
+                bottom: 10mm; 
+                left: 20mm; 
+                right: 20mm; 
+                text-align: center; 
+                font-size: 0.7rem; 
+                color: #666; 
+                border-top: 1px solid #ccc; 
+                padding-top: 5px; 
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>Rechnung V3</h2>
+    <div class="dashboard">
+        <h1>🧾 Rechnung erstellen</h1>
 
-        <div class="section-label">0. Deine Firmendaten (Gespeichert)</div>
-        <input type="text" id="shopName" placeholder="Dein Shop Name" oninput="saveAndRender()">
-        <input type="text" id="shopSlogan" placeholder="Dein Slogan" oninput="saveAndRender()">
+        <div class="group-label">0. Deine Shop-Daten (Auto-Save)</div>
+        <div class="row">
+            <div class="col"><input type="text" id="shopName" placeholder="Shop Name" oninput="saveAndRender()"></div>
+            <div class="col"><input type="text" id="shopSlogan" placeholder="Slogan" oninput="saveAndRender()"></div>
+        </div>
         <input type="text" id="shopSender" placeholder="Absenderzeile (klein)" oninput="saveAndRender()">
-        <textarea id="shopFooter" rows="3" placeholder="Footer (IBAN, etc.)" oninput="saveAndRender()"></textarea>
+        <textarea id="shopFooter" rows="2" placeholder="Footer Infos (IBAN, UStID...)" oninput="saveAndRender()"></textarea>
 
-        <div class="section-label">1. Artikeldaten</div>
-        <button class="btn btn-primary" onclick="pasteFromClipboard()">
-            ✨ Aus Zwischenablage einfügen
-        </button>
+        <div class="group-label">1. Artikeldaten</div>
+        <button class="btn btn-import" onclick="pasteFromClipboard()">✨ Verkauf einfügen</button>
+        <div id="importStatus" style="font-size:0.8rem; color:#10b981; text-align:center; height:15px;"></div>
+
+        <div class="group-label">2. Kunde & Details</div>
+        <textarea id="addrInput" rows="4" placeholder="Adresse vom Label hier einfügen..." oninput="render()"></textarea>
         
-        <div class="section-label">2. Rechnungsinfos</div>
-        <textarea id="addrInput" rows="4" placeholder="Kundenadresse..." oninput="render()"></textarea>
-        
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1">
-                <label style="font-size:0.7rem; color:#888;">Nr.</label>
+        <div class="row">
+            <div class="col">
                 <input type="text" id="invNum" value="RE-2023-001" oninput="render()">
             </div>
-            <div style="flex:1">
-                <label style="font-size:0.7rem; color:#888;">Datum (Rechnung & Liefer)</label>
+            <div class="col">
                 <input type="text" id="invDateInput" oninput="render()">
             </div>
         </div>
 
-        <div class="section-label">3. Anmerkung</div>
-        <textarea id="noteInput" rows="2" placeholder="Z.B. Danke für Ihren Kauf..." oninput="render()"></textarea>
+        <div class="group-label">3. Anmerkung</div>
+        <textarea id="noteInput" rows="2" placeholder="Z.B. Danke für Ihren Einkauf..." oninput="render()"></textarea>
 
-        <button class="btn btn-print" onclick="window.print()">
-            🖨️ Drucken / PDF
-        </button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ PDF Vorschau & Drucken</button>
     </div>
 
-    <div class="preview-area">
-        <div class="paper">
-            
-            <div class="inv-header">
-                <div>
-                    <div class="inv-logo" id="outShopName">SHOP NAME</div>
-                    <div class="inv-slogan" id="outShopSlogan">Untertitel</div>
-                </div>
-                <div class="inv-meta">
-                    Rechnung Nr.: <span id="outInvNum"></span><br>
-                    Rechnungsdatum: <span id="outDate"></span><br>
-                    Lieferdatum: <span id="outDelivDate"></span>
-                </div>
+
+    <div id="print-template">
+        <div class="inv-header">
+            <div>
+                <div class="inv-logo" id="outShopName">SHOP NAME</div>
+                <div class="inv-slogan" id="outShopSlogan"></div>
             </div>
-
-            <div class="sender-line" id="outSender">Firma • Straße • Ort</div>
-            
-            <div class="inv-window" id="outAddress">
-                <span style="color:#ccc;">(Adresse einfügen...)</span>
-            </div>
-
-            <div class="inv-title">Rechnung</div>
-            <div class="inv-intro">Vielen Dank für Ihre Bestellung.</div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 5%">Pos</th>
-                        <th>Artikel</th>
-                        <th class="text-right" style="width: 10%">Menge</th>
-                        <th class="text-right" style="width: 15%">Einzel</th>
-                        <th class="text-right" style="width: 15%">Gesamt</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="5" style="text-align:center; padding:20px; color:#ddd;">Bitte auf "Einfügen" klicken...</td></tr>
-                </tbody>
-                <tfoot>
-                    <tr class="total-row">
-                        <td colspan="4" class="text-right">Rechnungsbetrag:</td>
-                        <td class="text-right" id="outTotal">0,00 €</td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <div id="outNote" style="display:none;" class="inv-note"></div>
-
-            <div class="inv-footer" id="outFooter">
-                Hier stehen deine Bankdaten...
+            <div class="inv-meta">
+                Rechnung Nr.: <span id="outInvNum"></span><br>
+                Rechnungsdatum: <span id="outDate"></span><br>
+                Lieferdatum: <span id="outDelivDate"></span>
             </div>
         </div>
+
+        <div class="sender-line" id="outSender"></div>
+        
+        <div class="inv-window" id="outAddress"></div>
+
+        <div class="inv-title">Rechnung</div>
+        <div class="inv-intro">Vielen Dank für Ihre Bestellung.</div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="5%">Pos</th>
+                    <th>Artikel</th>
+                    <th class="text-right" width="10%">Menge</th>
+                    <th class="text-right" width="15%">Einzel</th>
+                    <th class="text-right" width="15%">Gesamt</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="4" class="text-right">Rechnungsbetrag:</td>
+                    <td class="text-right" id="outTotal">0,00 €</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div id="outNote" class="inv-note" style="display:none"></div>
+
+        <div class="inv-footer" id="outFooter"></div>
     </div>
 
     <script>
-        // Start-Datum setzen (Heute)
+        // Init
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('invDateInput').value = today;
 
-        // --- 1. LOCAL STORAGE LOGIK ---
+        // --- LOAD & SAVE SHOP DATA ---
         window.onload = function() {
-            if(localStorage.getItem('shopName')) document.getElementById('shopName').value = localStorage.getItem('shopName');
-            if(localStorage.getItem('shopSlogan')) document.getElementById('shopSlogan').value = localStorage.getItem('shopSlogan');
-            if(localStorage.getItem('shopSender')) document.getElementById('shopSender').value = localStorage.getItem('shopSender');
-            if(localStorage.getItem('shopFooter')) document.getElementById('shopFooter').value = localStorage.getItem('shopFooter');
+            const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
+            fields.forEach(f => {
+                if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
+            });
             saveAndRender();
         }
 
         function saveAndRender() {
-            const sName = document.getElementById('shopName').value;
-            const sSlogan = document.getElementById('shopSlogan').value;
-            const sSender = document.getElementById('shopSender').value;
-            const sFooter = document.getElementById('shopFooter').value;
-
-            localStorage.setItem('shopName', sName);
-            localStorage.setItem('shopSlogan', sSlogan);
-            localStorage.setItem('shopSender', sSender);
-            localStorage.setItem('shopFooter', sFooter);
-
-            document.getElementById('outShopName').innerText = sName || "FIRMENNAME";
-            document.getElementById('outShopSlogan').innerText = sSlogan;
-            document.getElementById('outSender').innerText = sSender || "Firma • Straße • Ort";
-            document.getElementById('outFooter').innerHTML = sFooter ? sFooter.replace(/\n/g, '<br>') : "Bankdaten...";
+            const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
+            fields.forEach(f => {
+                const val = document.getElementById(f).value;
+                localStorage.setItem(f, val);
+            });
+            
+            // Render Hidden Print View
+            document.getElementById('outShopName').innerText = document.getElementById('shopName').value || "FIRMA";
+            document.getElementById('outShopSlogan').innerText = document.getElementById('shopSlogan').value;
+            document.getElementById('outSender').innerText = document.getElementById('shopSender').value || "Absenderzeile";
+            document.getElementById('outFooter').innerHTML = (document.getElementById('shopFooter').value || "").replace(/\n/g, '<br>');
 
             render();
         }
 
-        // --- 2. RENDER ---
+        // --- RENDER INPUTS TO HIDDEN VIEW ---
         function render() {
-            const dateVal = document.getElementById('invDateInput').value;
-            document.getElementById('outDate').innerText = dateVal;
-            document.getElementById('outDelivDate').innerText = dateVal; // Identisches Datum
-
+            // Datum & Nummer
+            const d = document.getElementById('invDateInput').value;
+            document.getElementById('outDate').innerText = d;
+            document.getElementById('outDelivDate').innerText = d;
             document.getElementById('outInvNum').innerText = document.getElementById('invNum').value;
 
+            // Adresse
             const addr = document.getElementById('addrInput').value;
-            document.getElementById('outAddress').innerHTML = addr ? addr.replace(/\n/g, '<br>') : '<span style="color:#ccc;">(Adresse einfügen...)</span>';
+            document.getElementById('outAddress').innerHTML = addr ? addr.replace(/\n/g, '<br>') : "";
 
+            // Note
             const note = document.getElementById('noteInput').value;
-            const noteEl = document.getElementById('outNote');
-            if (note.trim()) {
-                noteEl.style.display = 'block';
-                noteEl.innerText = note;
+            const el = document.getElementById('outNote');
+            if(note.trim()) {
+                el.style.display = 'block';
+                el.innerText = note;
             } else {
-                noteEl.style.display = 'none';
+                el.style.display = 'none';
             }
         }
 
-        // --- 3. IMPORT ---
+        // --- IMPORT ---
         async function pasteFromClipboard() {
+            const status = document.getElementById('importStatus');
             try {
                 const text = await navigator.clipboard.readText();
                 processData(text);
+                status.innerText = "✅ Artikel erfolgreich eingefügt!";
+                setTimeout(() => status.innerText = "", 3000);
             } catch (err) {
-                const fallback = prompt("Konnte nicht automatisch einfügen. STRG+V hier drücken:");
-                if(fallback) processData(fallback);
+                const fallback = prompt("Browser blockiert direkten Zugriff. Bitte STRG+V hier drücken:");
+                if(fallback) {
+                    processData(fallback);
+                    status.innerText = "✅ Artikel manuell eingefügt!";
+                }
             }
         }
 
@@ -372,14 +319,13 @@
             
             let total = 0;
             let pos = 1;
-            let hasItems = false;
 
             lines.forEach(line => {
                 if(!line.trim()) return;
+                // Regex: "2x Artikelname 19.99"
                 const match = line.match(/^(\d+)x\s+(.+)\s+(\d+[.,]\d{2})$/);
                 
                 if (match) {
-                    hasItems = true;
                     const qty = parseInt(match[1]);
                     const name = match[2];
                     const price = parseFloat(match[3].replace(',', '.'));
@@ -397,10 +343,6 @@
                     tbody.appendChild(tr);
                 }
             });
-
-            if(!hasItems) {
-                tbody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Format-Fehler. Erwarte: "1x Artikelname 9.99"</td></tr>';
-            }
             document.getElementById('outTotal').innerText = total.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €';
         }
     </script>
