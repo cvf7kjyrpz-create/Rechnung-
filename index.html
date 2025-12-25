@@ -2,15 +2,15 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Invoice Generator Dark</title>
+    <title>Invoice Generator Pro</title>
     <style>
         :root {
-            /* Dark Mode Palette */
-            --bg-app: #0f172a;       /* Sehr dunkles Blau */
-            --bg-panel: #1e293b;     /* Helleres Panel-Blau */
-            --text-main: #f1f5f9;    /* Fast Weiß */
-            --text-muted: #94a3b8;   /* Grau */
-            --accent: #6366f1;       /* Indigo */
+            /* Dark Mode Palette für die App */
+            --bg-app: #0f172a;
+            --bg-panel: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
             --accent-hover: #4f46e5;
             --border: #334155;
             --input-bg: #020617;
@@ -33,182 +33,218 @@
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            padding: 25px;
+            padding: 20px;
             overflow-y: auto;
             box-shadow: 5px 0 15px rgba(0,0,0,0.3);
             z-index: 10;
         }
 
-        h2 { margin-top: 0; font-weight: 300; letter-spacing: 1px; color: var(--accent); }
+        h2 { margin-top: 0; font-weight: 300; letter-spacing: 1px; color: var(--accent); font-size: 1.4rem; }
         
         .section-label {
             font-size: 0.75rem;
             text-transform: uppercase;
             font-weight: 700;
             color: var(--text-muted);
-            margin-top: 20px;
+            margin-top: 25px;
             margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
         }
 
-        /* Inputs im Dark Mode */
+        /* Inputs */
         textarea, input {
             background: var(--input-bg);
             border: 1px solid var(--border);
             color: var(--text-main);
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 6px;
+            padding: 10px;
             width: 100%;
             font-family: inherit;
             box-sizing: border-box;
-            transition: all 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
         }
         textarea:focus, input:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
-        /* Buttons */
         .btn {
             border: none;
-            border-radius: 8px;
-            padding: 14px;
+            border-radius: 6px;
+            padding: 12px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: transform 0.1s, background 0.2s;
-            margin-top: 10px;
+            font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 15px;
+            width: 100%;
         }
-        .btn:active { transform: scale(0.98); }
-        
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
+        .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { background: var(--accent-hover); }
-
-        .btn-print {
-            background: #10b981;
-            color: white;
-            margin-top: auto; /* Schiebt Button nach ganz unten */
-        }
+        .btn-print { background: #10b981; color: white; margin-top: auto; }
         .btn-print:hover { background: #059669; }
 
         /* --- RECHTE SEITE (VORSCHAU) --- */
         .preview-area {
             flex: 1;
             background: #0f172a;
-            background-image: radial-gradient(#1e293b 1px, transparent 1px);
-            background-size: 20px 20px;
             display: flex;
             justify-content: center;
             padding: 40px;
             overflow-y: auto;
         }
 
-        /* Das weiße Blatt Papier */
         .paper {
             background: white;
-            color: black; /* Wichtig: Rechnung ist schwarz auf weiß */
+            color: black;
             width: 210mm;
             min-height: 297mm;
-            padding: 20mm;
+            padding: 15mm 20mm; /* Weniger Padding oben */
             box-sizing: border-box;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
             position: relative;
         }
 
-        /* --- RECHNUNG STYLING (Print Design) --- */
-        .inv-header { display: flex; justify-content: space-between; margin-bottom: 45px; border-bottom: 2px solid #eee; padding-bottom: 20px;}
-        .inv-logo { font-size: 1.5rem; font-weight: 800; color: #333; text-transform: uppercase; }
-        .inv-meta { text-align: right; font-size: 0.9rem; color: #555; line-height: 1.5; }
+        /* --- RECHNUNG STYLING (KOMPAKT) --- */
+        
+        /* 1. Header Bereich */
+        .inv-header { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 20px; /* Reduziert von 45px */
+            border-bottom: 1px solid #eee; 
+            padding-bottom: 10px; 
+        }
+        .inv-logo { font-size: 1.6rem; font-weight: 800; color: #333; text-transform: uppercase; margin: 0; line-height: 1; }
+        .inv-slogan { font-size: 0.85rem; color: #666; margin-top: 5px; }
+        .inv-meta { text-align: right; font-size: 0.85rem; color: #555; line-height: 1.4; }
 
+        /* 2. Adress Bereich */
+        .sender-line { font-size: 0.7rem; text-decoration: underline; color:#888; margin-bottom: 10px; }
         .inv-window {
-            font-size: 1rem;
-            line-height: 1.4;
-            height: 40mm;
-            margin-bottom: 10px;
-            border-radius: 4px;
+            font-size: 0.95rem;
+            line-height: 1.3;
+            /* Feste Höhe entfernt, damit es hochrutscht, wenn wenig Text */
+            min-height: 30mm; 
+            margin-bottom: 10px; /* Reduziert */
         }
 
-        .inv-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 20px; color: #111; }
+        /* 3. Titel Bereich */
+        .inv-title { 
+            font-size: 1.6rem; 
+            font-weight: bold; 
+            margin-top: 10px; /* Reduziert */
+            margin-bottom: 10px; /* Reduziert */
+            color: #111; 
+        }
+        .inv-intro { margin-bottom: 10px; font-size: 0.9rem; }
 
-        /* Tabelle */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95rem; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 10px 5px; color: #444; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
-        td { padding: 12px 5px; border-bottom: 1px solid #eee; vertical-align: top; }
-        .text-right { text-align: right; }
-        .total-row td { border-top: 2px solid #000; font-weight: bold; font-size: 1.1rem; padding-top: 15px; border-bottom: none; }
+        /* 4. Tabelle (Sehr kompakt) */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
         
-        /* Das neue Textfeld auf der Rechnung */
+        th { 
+            text-align: left; 
+            border-bottom: 2px solid #000; 
+            padding: 5px 2px; /* Reduziert */
+            color: #444; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+        }
+        
+        td { 
+            padding: 4px 2px; /* SEHR WICHTIG: Reduziertes Padding für viele Artikel */
+            border-bottom: 1px solid #eee; 
+            vertical-align: top; 
+        }
+        
+        .text-right { text-align: right; }
+        
+        .total-row td { 
+            border-top: 2px solid #000; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            padding-top: 10px; 
+            border-bottom: none; 
+        }
+
+        /* 5. Fußnoten und Footer */
         .inv-note {
-            margin-top: 30px;
-            padding: 15px;
+            margin-top: 20px;
+            padding: 10px;
             background: #f9fafb;
-            border-left: 4px solid #333;
-            font-size: 0.9rem;
+            border-left: 3px solid #333;
+            font-size: 0.85rem;
             color: #444;
-            white-space: pre-wrap; /* Damit Zeilenumbrüche bleiben */
+            white-space: pre-wrap;
         }
         
         .inv-footer {
-            margin-top: 60px;
+            margin-top: 40px;
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #888;
             border-top: 1px solid #eee;
-            padding-top: 20px;
+            padding-top: 10px;
+            line-height: 1.4;
         }
 
-        /* --- DRUCK MODUS --- */
+        /* PRINT */
         @media print {
-            body { background: white; display: block; height: auto; overflow: visible; }
+            body { background: white; display: block; overflow: visible; }
             .sidebar { display: none; }
             .preview-area { display: block; padding: 0; background: white; }
-            .paper { width: 100%; box-shadow: none; margin: 0; padding: 20mm; }
-            .inv-note { background: none !important; border-left: none !important; padding: 10px 0; } /* Cleaner für Druck */
+            .paper { width: 100%; box-shadow: none; margin: 0; padding: 15mm 20mm; }
+            .inv-note { background: none !important; border-left: none !important; padding: 5px 0; }
         }
-
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h2>🧾 Rechnungs-Tool</h2>
+        <h2>Rechnung Pro</h2>
 
-        <div class="section-label">1. Verkauf importieren</div>
+        <div class="section-label">0. Deine Firmendaten (Einmalig)</div>
+        <input type="text" id="shopName" placeholder="Dein Shop Name" oninput="saveAndRender()">
+        <input type="text" id="shopSlogan" placeholder="Dein Slogan / Untertitel" oninput="saveAndRender()">
+        <input type="text" id="shopSender" placeholder="Absenderzeile (klein)" oninput="saveAndRender()">
+        <textarea id="shopFooter" rows="3" placeholder="Footer Infos (IBAN, UStID, Email...)" oninput="saveAndRender()"></textarea>
+
+        <div class="section-label">1. Artikel importieren</div>
         <button class="btn btn-primary" onclick="pasteFromClipboard()">
-            ✨ Einfügen aus Lager-App
+            ✨ Aus Zwischenablage einfügen
         </button>
-        <textarea id="hiddenPaste" style="height:0; opacity:0; padding:0; border:none;"></textarea>
         
-        <div class="section-label">2. Adresse (Versandlabel)</div>
-        <textarea id="addrInput" rows="4" placeholder="Name&#10;Straße&#10;Ort" oninput="render()"></textarea>
+        <div class="section-label">2. Kunde & Rechnung</div>
+        <textarea id="addrInput" rows="4" placeholder="Kundenadresse hier einfügen..." oninput="render()"></textarea>
+        
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1">
+                <label style="font-size:0.7rem; color:#888;">Rechnungs-Nr.</label>
+                <input type="text" id="invNum" value="RE-2023-001" oninput="render()">
+            </div>
+            <div style="flex:1">
+                <label style="font-size:0.7rem; color:#888;">Datum</label>
+                <input type="text" id="invDateInput" oninput="render()">
+            </div>
+        </div>
 
-        <div class="section-label">3. Anmerkung / Text</div>
-        <textarea id="noteInput" rows="3" placeholder="Z.B. Danke für den Einkauf!&#10;Lieferzeit 2-3 Tage." oninput="render()"></textarea>
-
-        <div class="section-label">Rechnungs-Nummer</div>
-        <input type="text" id="invNum" value="RE-2023-001" oninput="render()">
+        <div class="section-label">3. Anmerkung</div>
+        <textarea id="noteInput" rows="2" placeholder="Z.B. 'Vielen Dank' oder 'Lieferung KW 40'..." oninput="render()"></textarea>
 
         <button class="btn btn-print" onclick="window.print()">
-            🖨️ Drucken / PDF speichern
+            🖨️ Drucken / PDF
         </button>
     </div>
 
     <div class="preview-area">
         <div class="paper">
+            
             <div class="inv-header">
                 <div>
-                    <div class="inv-logo">DEIN SHOP</div>
-                    <div style="font-size:0.8rem; color:#666;">Dein Slogan hier</div>
+                    <div class="inv-logo" id="outShopName">DEIN SHOP NAME</div>
+                    <div class="inv-slogan" id="outShopSlogan">Dein Slogan</div>
                 </div>
                 <div class="inv-meta">
                     Datum: <span id="outDate"></span><br>
@@ -216,33 +252,31 @@
                 </div>
             </div>
 
-            <div style="font-size: 0.7rem; text-decoration: underline; color:#888; margin-bottom: 5px;">
-                Dein Shop GmbH • Musterstraße 1 • 12345 Musterstadt
-            </div>
-
+            <div class="sender-line" id="outSender">Dein Shop • Musterstraße 1 • 12345 Stadt</div>
+            
             <div class="inv-window" id="outAddress">
-                <span style="color:#ccc;">(Hier Adresse einfügen...)</span>
+                <span style="color:#ccc;">(Adresse vom Label einfügen...)</span>
             </div>
 
             <div class="inv-title">Rechnung</div>
-            <p>Vielen Dank für Ihre Bestellung. Folgende Positionen stellen wir in Rechnung:</p>
+            <div class="inv-intro">Hiermit stellen wir Ihnen folgende Positionen in Rechnung:</div>
 
             <table>
                 <thead>
                     <tr>
                         <th style="width: 5%">#</th>
-                        <th>Artikel / Leistung</th>
-                        <th class="text-right">Menge</th>
-                        <th class="text-right">Einzel</th>
-                        <th class="text-right">Gesamt</th>
+                        <th>Artikel</th>
+                        <th class="text-right" style="width: 10%">Menge</th>
+                        <th class="text-right" style="width: 15%">Einzel</th>
+                        <th class="text-right" style="width: 15%">Gesamt</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr><td colspan="5" style="text-align:center; padding:30px; color:#ddd;">Bitte auf "Einfügen" klicken...</td></tr>
+                    <tr><td colspan="5" style="text-align:center; padding:20px; color:#ddd;">Warte auf Import...</td></tr>
                 </tbody>
                 <tfoot>
                     <tr class="total-row">
-                        <td colspan="4" class="text-right">Gesamtbetrag:</td>
+                        <td colspan="4" class="text-right">Rechnungsbetrag:</td>
                         <td class="text-right" id="outTotal">0,00 €</td>
                     </tr>
                 </tfoot>
@@ -250,28 +284,62 @@
 
             <div id="outNote" style="display:none;" class="inv-note"></div>
 
-            <div class="inv-footer">
-                <p>Bitte überweisen Sie den Betrag innerhalb von 7 Tagen.<br>
-                <strong>Bankverbindung:</strong> IBAN DE12 3456 7890 0000 00 | BIC XXXXXXXX<br>
-                Es erfolgt kein Ausweis der Umsatzsteuer (Kleinunternehmer) / oder 19% MwSt.</p>
+            <div class="inv-footer" id="outFooter">
+                IBAN DE00 0000 0000 0000 00<br>
+                Steuer-Nr: 123/456/789
             </div>
         </div>
     </div>
 
     <script>
-        // Initialsierung
-        document.getElementById('outDate').innerText = new Date().toLocaleDateString('de-DE');
-        
-        // Globale Render Funktion für Textfelder
-        function render() {
-            // Adresse
-            const addr = document.getElementById('addrInput').value;
-            document.getElementById('outAddress').innerHTML = addr ? addr.replace(/\n/g, '<br>') : '<span style="color:#ccc;">(Hier Adresse einfügen...)</span>';
+        // Start-Datum setzen
+        const today = new Date().toLocaleDateString('de-DE');
+        document.getElementById('invDateInput').value = today;
 
-            // Nummer
+        // --- 1. SETTINGS LADEN & SPEICHERN ---
+        // Lädt die gespeicherten Shop-Daten beim Start
+        window.onload = function() {
+            if(localStorage.getItem('shopName')) document.getElementById('shopName').value = localStorage.getItem('shopName');
+            if(localStorage.getItem('shopSlogan')) document.getElementById('shopSlogan').value = localStorage.getItem('shopSlogan');
+            if(localStorage.getItem('shopSender')) document.getElementById('shopSender').value = localStorage.getItem('shopSender');
+            if(localStorage.getItem('shopFooter')) document.getElementById('shopFooter').value = localStorage.getItem('shopFooter');
+            
+            saveAndRender(); // Einmal rendern
+        }
+
+        function saveAndRender() {
+            // Werte aus Inputs holen
+            const sName = document.getElementById('shopName').value;
+            const sSlogan = document.getElementById('shopSlogan').value;
+            const sSender = document.getElementById('shopSender').value;
+            const sFooter = document.getElementById('shopFooter').value;
+
+            // Im Browser speichern
+            localStorage.setItem('shopName', sName);
+            localStorage.setItem('shopSlogan', sSlogan);
+            localStorage.setItem('shopSender', sSender);
+            localStorage.setItem('shopFooter', sFooter);
+
+            // Auf Papier schreiben
+            document.getElementById('outShopName').innerText = sName || "DEIN FIRMENNAME";
+            document.getElementById('outShopSlogan').innerText = sSlogan;
+            document.getElementById('outSender').innerText = sSender || "Deine Firma • Straße • Ort";
+            document.getElementById('outFooter').innerHTML = sFooter ? sFooter.replace(/\n/g, '<br>') : "Hier deine Bankdaten...";
+
+            render();
+        }
+
+        // --- 2. NORMALE RENDER FUNKTION ---
+        function render() {
+            // Datum & Nummer
+            document.getElementById('outDate').innerText = document.getElementById('invDateInput').value;
             document.getElementById('outInvNum').innerText = document.getElementById('invNum').value;
 
-            // Anmerkung (Das neue Feld)
+            // Adresse
+            const addr = document.getElementById('addrInput').value;
+            document.getElementById('outAddress').innerHTML = addr ? addr.replace(/\n/g, '<br>') : '<span style="color:#ccc;">(Adresse vom Label einfügen...)</span>';
+
+            // Anmerkung
             const note = document.getElementById('noteInput').value;
             const noteEl = document.getElementById('outNote');
             if (note.trim()) {
@@ -282,19 +350,17 @@
             }
         }
 
-        // Import Funktion
+        // --- 3. IMPORT LOGIK (Copy & Paste) ---
         async function pasteFromClipboard() {
             try {
                 const text = await navigator.clipboard.readText();
                 processData(text);
             } catch (err) {
-                // Fallback: Benutzer muss manuell einfügen
-                const fallback = prompt("Automatisches Einfügen blockiert. Bitte hier STRG+V drücken:");
+                const fallback = prompt("Konnte nicht automatisch einfügen. Bitte STRG+V hier drücken:");
                 if(fallback) processData(fallback);
             }
         }
 
-        // Datenverarbeitung
         function processData(text) {
             const lines = text.split('\n');
             const tbody = document.getElementById('tableBody');
@@ -306,8 +372,7 @@
 
             lines.forEach(line => {
                 if(!line.trim()) return;
-
-                // Regex Format: "2x Artikelname 19.99"
+                // Sucht nach: "Menge x Name Preis"
                 const match = line.match(/^(\d+)x\s+(.+)\s+(\d+[.,]\d{2})$/);
                 
                 if (match) {
@@ -332,7 +397,7 @@
             });
 
             if(!hasItems) {
-                tbody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Konnte keine Daten erkennen. Format muss sein: "2x Name 10.00"</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Format Fehler: Brauche "1x Name 10.00"</td></tr>';
             }
 
             document.getElementById('outTotal').innerText = total.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €';
