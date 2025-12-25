@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V5</title>
+    <title>Rechnung V6</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,7 +12,7 @@
     <style>
         :root {
             --bg-cockpit: #121212;
-            --bg-preview: #e5e5e5;
+            --bg-preview: #d0d0d0; /* Etwas dunklerer Kontrast zum Papier */
             --paper: #ffffff;
             --btn-bg: #2c2c2e;
             --text-light: #e0e0e0;
@@ -23,89 +23,88 @@
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
-            overflow: hidden; 
+            overflow: hidden; /* GLOBALER SCROLL-STOPP */
             display: flex;
             flex-direction: column;
             background: var(--bg-cockpit);
         }
 
-        /* --- 1. COCKPIT (OBEN) --- */
+        /* --- 1. COCKPIT (OBEN - KOMPAKT) --- */
         .cockpit {
-            height: 40vh; /* Etwas mehr Platz für die Felder */
+            flex: 0 0 auto; /* Feste Höhe, wächst nicht */
             background: var(--bg-cockpit);
             color: var(--text-light);
-            padding: 15px 20px;
+            padding: 10px 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             z-index: 10;
             border-bottom: 1px solid var(--border);
-            padding-top: max(15px, env(safe-area-inset-top));
+            padding-top: max(10px, env(safe-area-inset-top));
         }
 
         .cockpit-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
         }
-        .app-title { font-weight: 600; font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
-        .settings-btn { font-size: 1.1rem; cursor: pointer; opacity: 0.7; }
+        .app-title { font-weight: 600; font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .settings-btn { font-size: 1rem; cursor: pointer; opacity: 0.7; padding: 4px; }
 
         .action-row { display: flex; gap: 8px; }
         
         .btn {
-            border: 1px solid var(--border); border-radius: 6px; height: 38px;
-            font-weight: 500; font-size: 0.85rem; cursor: pointer;
+            border: 1px solid var(--border); border-radius: 6px; height: 34px;
+            font-weight: 500; font-size: 0.8rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 6px;
             background: var(--btn-bg); color: #fff; transition: 0.2s;
         }
-        .btn:active { background: #444; transform: scale(0.98); }
+        .btn:active { background: #444; transform: scale(0.96); }
         .btn-paste { flex: 1; }
-        .btn-print { width: 50px; font-size: 1.2rem; }
+        .btn-print { width: 40px; font-size: 1.1rem; }
 
-        /* Eingabefelder im Cockpit */
+        /* Eingabefelder im Cockpit - Extra Klein */
         .input-compact {
             background: #1c1c1e; border: 1px solid var(--border);
-            border-radius: 6px; color: #ddd; padding: 8px;
-            font-family: inherit; font-size: 0.9rem; resize: none;
-            width: 100%; box-sizing: border-box;
+            border-radius: 5px; color: #ddd; padding: 6px;
+            font-family: inherit; font-size: 0.85rem; resize: none;
+            width: 100%; box-sizing: border-box; display: block;
         }
         .input-compact:focus { outline: none; border-color: #666; background: #222; }
         
-        /* Höhen Anpassung */
-        #addrInput { height: 60px; } /* Kleiner als vorher */
-        #freeInput { height: 45px; } /* Für den Freitext */
+        #addrInput { height: 50px; }
+        #freeInput { height: 35px; }
 
-        .label-small { font-size: 0.7rem; color: #666; margin-left: 2px; text-transform: uppercase; }
+        .label-small { font-size: 0.65rem; color: #555; margin-left: 2px; text-transform: uppercase; display: block; margin-bottom: 1px;}
 
-        /* --- 2. PREVIEW (UNTEN) --- */
+        /* --- 2. PREVIEW (UNTEN - FIT TO SCREEN) --- */
         .preview-area {
-            height: 60vh; 
+            flex: 1; /* Nimmt den Rest des Platzes */
             background: var(--bg-preview);
-            overflow: hidden; /* Scrollen passiert im Wrapper */
+            overflow: hidden; /* Kein Scrollen */
             display: flex; 
             justify-content: center;
-            align-items: flex-start;
-            padding-top: 20px;
+            align-items: center; /* Zentriert das Blatt vertikal */
             position: relative;
         }
 
-        /* Wrapper für den Zoom-Effekt */
+        /* Der Trick: Fester Container, der skaliert wird */
         .paper-scaler {
-            transform: scale(0.65); /* 65% Größe -> Viel Übersicht */
-            transform-origin: top center;
-            height: auto;
-            /* Scrollbar erlauben, falls Rechnung sehr lang ist */
-            overflow-y: visible;
+            width: 210mm; height: 297mm; /* Echtes A4 Maß */
+            transform-origin: center center;
+            /* Start Scale (wird per JS angepasst wenn nötig, aber CSS reicht oft) */
+            transform: scale(0.42); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            background: white;
+            display: flex; flex-direction: column;
         }
 
-        .paper {
-            background: var(--paper);
-            width: 210mm; min-height: 297mm; /* Echtes A4 */
+        /* Das Papier Layout */
+        .paper-content {
             padding: 20mm;
+            width: 100%; height: 100%;
             box-sizing: border-box;
             color: black;
             font-size: 11pt; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             position: relative;
         }
 
@@ -126,13 +125,11 @@
         .r { text-align: right; }
         .total-row td { border-top: 2px solid #000; border-bottom: none; font-weight: 700; font-size: 14pt; padding-top: 15px; }
         
-        /* Der neue Freitext Bereich */
         .p-freetext { margin-top: 15px; font-size: 10pt; white-space: pre-wrap; }
-
         .p-note { background: #f5f5f5; padding: 10px; font-size: 9pt; color: #444; margin-top: 25px; border-radius: 4px; }
-        .p-footer { margin-top: 50px; text-align: center; font-size: 8pt; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
+        .p-footer { position: absolute; bottom: 15mm; left: 0; right: 0; text-align: center; font-size: 8pt; color: #888; border-top: 1px solid #eee; padding-top: 10px; width: 80%; margin: 0 auto; }
 
-        /* --- MODAL --- */
+        /* --- MODAL & TOAST --- */
         .modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(2px); z-index: 2000;
@@ -140,20 +137,19 @@
         }
         .modal.open { display: flex; }
         .modal-box { 
-            background: #1c1c1e; width: 85%; max-width: 320px; 
-            border-radius: 12px; padding: 20px; border: 1px solid #333; 
+            background: #1c1c1e; width: 85%; max-width: 300px; 
+            border-radius: 12px; padding: 15px; border: 1px solid #333; 
         }
-        .modal h2 { margin: 0 0 15px 0; color: white; font-size: 1.1rem; }
+        .modal h2 { margin: 0 0 15px 0; color: white; font-size: 1rem; }
         .modal-input { 
             background: #2c2c2e; width: 100%; border: none; color: white;
-            margin-bottom: 10px; padding: 10px; border-radius: 6px; box-sizing: border-box; 
+            margin-bottom: 8px; padding: 10px; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;
         }
         .btn-save { background: #fff; color: #000; width: 100%; border:none; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer;}
 
-        /* --- TOAST --- */
         .toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: #fff; color: black; padding: 8px 16px; border-radius: 20px;
+            background: #fff; color: black; padding: 6px 14px; border-radius: 20px;
             font-weight: 600; font-size: 0.8rem; z-index: 3000; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         .toast.show { transform: translateX(-50%) translateY(0); }
@@ -164,13 +160,17 @@
             body { display: block; background: white; height: auto; overflow: visible; }
             .cockpit, .modal, .toast { display: none !important; }
             .preview-area { height: auto; padding: 0; display: block; background: white; overflow: visible; }
-            .paper-scaler { transform: none; height: auto; overflow: visible; } /* Zoom entfernen beim Drucken */
-            .paper { 
-                box-shadow: none; width: 100%; max-width: none; min-height: 0; 
-                margin: 0; padding: 20mm; 
-            }
-            .p-footer { position: fixed; bottom: 10mm; left: 0; right: 0; }
+            /* Zoom entfernen für echten Druck */
+            .paper-scaler { width: 100%; height: auto; transform: none; box-shadow: none; display: block; }
+            .paper-content { padding: 20mm; width: 100%; height: auto; }
+            .p-footer { position: fixed; bottom: 10mm; left: 0; right: 0; width: 100%; }
         }
+
+        /* --- RESPONSIVE SCALING FIX --- */
+        /* Damit es auf verschiedenen Handys immer passt ohne Scrollen */
+        @media (max-width: 380px) { .paper-scaler { transform: scale(0.38); } }
+        @media (min-width: 381px) and (max-width: 450px) { .paper-scaler { transform: scale(0.42); } }
+        @media (min-width: 451px) { .paper-scaler { transform: scale(0.5); } }
     </style>
 </head>
 <body>
@@ -179,13 +179,13 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp</span>
+            <span class="app-title">Rechnung</span>
             <div class="settings-btn" onclick="toggleModal()">⚙️</div>
         </div>
         
         <div class="action-row">
             <button class="btn btn-paste" onclick="pasteClip()">📋 Einfügen</button>
-            <button class="btn btn-print" onclick="window.print()">🖨️ PDF</button>
+            <button class="btn btn-print" onclick="window.print()">🖨️</button>
         </div>
 
         <div>
@@ -200,7 +200,7 @@
 
     <div class="preview-area">
         <div class="paper-scaler">
-            <div class="paper" id="paper">
+            <div class="paper-content" id="paper">
                 
                 <div class="p-header">
                     <div>
@@ -214,7 +214,6 @@
                 </div>
 
                 <div class="p-sender" id="outSender">Absenderzeile</div>
-                
                 <div class="p-addr" id="outAddr"></div>
 
                 <div class="p-title">Rechnung</div>
@@ -230,7 +229,7 @@
                         </tr>
                     </thead>
                     <tbody id="tbody">
-                        <tr><td colspan="5" style="text-align:center; color:#ccc; padding:20px; font-size:9pt;">Keine Daten. Bitte 'Einfügen' klicken.</td></tr>
+                        <tr><td colspan="5" style="text-align:center; color:#ccc; padding:20px; font-size:9pt;">Warte auf Daten...</td></tr>
                     </tbody>
                     <tfoot>
                         <tr class="total-row">
@@ -241,9 +240,7 @@
                 </table>
 
                 <div id="outFreeText" class="p-freetext"></div>
-
                 <div id="outNote" class="p-note" style="display:none"></div>
-
                 <div class="p-footer" id="outFooter"></div>
             </div>
         </div>
@@ -259,16 +256,14 @@
             <input class="modal-input" id="shopSlogan" placeholder="Slogan" oninput="save()">
             <input class="modal-input" id="shopSender" placeholder="Absenderzeile" oninput="save()">
             <textarea class="modal-input" id="shopFooter" rows="3" placeholder="Footer (IBAN etc.)" oninput="save()"></textarea>
-            <button class="btn-save" onclick="toggleModal()">Fertig</button>
+            <button class="btn-save" onclick="toggleModal()">Speichern</button>
         </div>
     </div>
 
     <script>
-        // --- SETUP ---
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('outDate').innerText = today;
 
-        // --- STORAGE & SETTINGS ---
         const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
         function load() {
             let hasData = false;
@@ -294,17 +289,13 @@
             document.getElementById('outFooter').innerHTML = (document.getElementById('shopFooter').value || "").replace(/\n/g, '<br>');
         }
 
-        function toggleModal() {
-            document.getElementById('modal').classList.toggle('open');
-        }
-
-        // --- LIVE UPDATES ---
+        function toggleModal() { document.getElementById('modal').classList.toggle('open'); }
+        
         function updateView() {
             document.getElementById('outAddr').innerText = document.getElementById('addrInput').value;
             document.getElementById('outFreeText').innerText = document.getElementById('freeInput').value;
         }
 
-        // --- PASTE LOGIC ---
         async function pasteClip() {
             try {
                 const text = await navigator.clipboard.readText();
@@ -316,7 +307,6 @@
                         return;
                     } catch(e) {}
                 }
-                // Fallback Textmodus
                 renderTextMode(text);
                 showToast("Text eingefügt!");
             } catch(e) { alert("Zugriff verweigert. Bitte manuell kopieren."); }
@@ -329,20 +319,15 @@
         }
 
         function renderInvoice(data) {
-            // Meta
             if(data.invoiceNr) {
                 document.getElementById('outNum').innerText = data.invoiceNr;
                 document.title = data.invoiceNr; 
             }
             if(data.date) {
                 const p = data.date.split('-'); 
-                if(p.length===3) {
-                    const d = `${p[2]}.${p[1]}.${p[0]}`;
-                    document.getElementById('outDate').innerText = d;
-                }
+                if(p.length===3) document.getElementById('outDate').innerText = `${p[2]}.${p[1]}.${p[0]}`;
             }
             
-            // Note / Platform
             const noteEl = document.getElementById('outNote');
             if(data.platform) {
                 noteEl.style.display = 'block';
@@ -351,7 +336,6 @@
                 noteEl.style.display = 'none';
             }
 
-            // Table
             const tb = document.getElementById('tbody'); tb.innerHTML = '';
             let total = 0; let pos = 1;
 
@@ -360,7 +344,6 @@
                     const qty = item.qty || 1;
                     const totalP = item.priceTotal || 0;
                     const singleP = totalP / qty;
-                    
                     const tr = document.createElement('tr');
                     tr.innerHTML = `<td>${pos++}</td><td>${item.name}</td><td class="r">${qty}</td><td class="r">${fmt(singleP)}</td><td class="r">${fmt(totalP)}</td>`;
                     tb.appendChild(tr);
@@ -396,9 +379,7 @@
             document.getElementById('outTotal').innerText = fmt(total);
         }
 
-        function fmt(num) {
-            return num.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €';
-        }
+        function fmt(num) { return num.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €'; }
 
         window.onload = load;
     </script>
