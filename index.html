@@ -3,75 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung App</title>
+    <title>Rechnung</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Rechnung">
-    
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/0f172a/ffffff?text=RE">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/000000/ffffff?text=R">
 
     <style>
         :root {
-            /* Dark Mode Palette */
-            --bg-body: #000000;       /* Echtes Schwarz für OLED Screens */
-            --bg-card: #1c1c1e;       /* iOS Dunkelgrau */
-            --text-main: #ffffff;
-            --text-muted: #8e8e93;    /* iOS Grau */
-            --accent: #0a84ff;        /* iOS Blau */
-            --border: #38383a;
+            --bg-body: #000000;
+            --bg-card: #1c1c1e;
             --input-bg: #2c2c2e;
+            --text-main: #ffffff;
+            --text-muted: #8e8e93;
+            --border: #38383a;
+            --btn-primary: #ffffff;
+            --btn-text-primary: #000000;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0;
-            padding: 20px 15px 40px 15px; /* Platz unten für Scrollen */
+            padding: 20px 15px 50px 15px;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- MOBILE DASHBOARD --- */
-        .app-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding-bottom: 50px;
+        /* --- HEADER --- */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-top: 10px;
         }
 
         h1 {
             font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            margin-top: 10px;
-            text-align: center;
-            background: linear-gradient(90deg, #0a84ff, #5e5ce6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
         }
 
-        .section-title {
-            font-size: 0.8rem;
+        .settings-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .settings-btn:active { transform: scale(0.9); }
+
+        /* --- MAIN UI --- */
+        .section-label {
+            font-size: 0.75rem;
             text-transform: uppercase;
-            color: var(--text-muted);
-            margin-top: 30px;
-            margin-bottom: 10px;
-            padding-left: 5px;
             font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding-left: 5px;
             letter-spacing: 0.5px;
         }
 
-        /* iOS Style Cards */
         .card {
             background: var(--bg-card);
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .input-row {
             border-bottom: 1px solid var(--border);
-            padding: 0;
         }
         .input-row:last-child { border-bottom: none; }
 
@@ -81,64 +92,103 @@
             color: var(--text-main);
             width: 100%;
             padding: 16px;
-            font-size: 16px; /* Verhindert Auto-Zoom auf iPhone */
+            font-size: 17px;
             font-family: inherit;
             box-sizing: border-box;
             display: block;
         }
+        input:focus, textarea:focus { outline: none; background: #333; }
         input::placeholder, textarea::placeholder { color: #555; }
-        input:focus, textarea:focus { outline: none; background: #3a3a3c; }
 
-        /* Buttons */
+        /* --- BUTTONS --- */
         .btn {
-            background: var(--bg-card);
-            color: var(--accent);
             border: none;
             border-radius: 12px;
             padding: 16px;
             width: 100%;
             font-size: 17px;
             font-weight: 600;
-            margin-top: 10px;
             cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-bottom: 15px;
+            transition: opacity 0.2s;
         }
-        .btn:active { opacity: 0.7; transform: scale(0.98); }
+        .btn:active { opacity: 0.7; }
+
+        .btn-secondary {
+            background: var(--input-bg);
+            color: var(--text-main);
+        }
 
         .btn-primary {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);
+            background: var(--btn-primary);
+            color: var(--btn-text-primary);
             margin-top: 30px;
             padding: 18px;
+            font-weight: 700;
         }
 
         .status-msg {
             text-align: center;
-            color: #30d158; /* iOS Grün */
+            color: #30d158;
             font-size: 0.9rem;
-            margin-top: 10px;
-            min-height: 20px;
-            font-weight: 500;
+            height: 20px;
+            margin-bottom: 10px;
         }
 
-        /* Flex Grid für Datum/Nummer */
-        .flex-row { display: flex; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-top: 5px;}
+        /* Flex Grid */
+        .flex-row { display: flex; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px;}
         .flex-row > div { flex: 1; background: var(--bg-card); }
         .flex-row input { text-align: center; }
 
-        /* --- DRUCK CSS (Versteckt, nur beim Drucken aktiv) --- */
+
+        /* --- POPUP / MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            align-items: center; /* Center vertical */
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #1c1c1e;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.open .modal-content { transform: translateY(0); }
+
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title { font-size: 1.2rem; font-weight: bold; }
+        .close-btn { 
+            background: #333; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer;
+        }
+
+        /* --- DRUCK CSS (Hidden) --- */
         #print-area { display: none; }
 
         @media print {
-            body { 
-                background: white; 
-                margin: 0; 
-                padding: 0; 
-                color: black; 
-                -webkit-print-color-adjust: exact; 
-            }
-            .app-container { display: none; }
+            body { background: white; margin: 0; padding: 0; color: black; -webkit-print-color-adjust: exact; }
+            .app-header, .section-label, .card, .btn, .status-msg, .flex-row, .modal-overlay { display: none !important; }
             
             #print-area {
                 display: block;
@@ -148,74 +198,84 @@
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             }
 
-            /* Kompaktes Rechnungsdesign */
-            .inv-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-            .inv-shop { font-size: 14pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
-            .inv-slogan { font-size: 9pt; color: #555; }
+            /* Clean Invoice Design */
+            .inv-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+            .inv-shop { font-size: 14pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; color: #000; }
+            .inv-slogan { font-size: 9pt; color: #666; }
             .inv-meta { text-align: right; font-size: 9pt; line-height: 1.4; }
             
-            .sender-line { font-size: 7pt; color: #777; text-decoration: underline; margin-bottom: 10px; }
+            .sender-line { font-size: 7pt; color: #777; text-decoration: underline; margin-bottom: 15px; }
             .inv-address { font-size: 10pt; line-height: 1.4; min-height: 30mm; margin-bottom: 15px; }
             
             .inv-title { font-size: 16pt; font-weight: bold; margin-bottom: 10px; }
             .inv-intro { font-size: 10pt; margin-bottom: 10px; }
 
             table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 20px; }
-            th { text-align: left; border-bottom: 1px solid #000; padding: 4px 0; font-weight: bold; font-size: 8pt; text-transform: uppercase; }
-            td { padding: 4px 0; border-bottom: 1px solid #eee; }
+            th { text-align: left; border-bottom: 1px solid #000; padding: 5px 0; font-weight: bold; font-size: 8pt; text-transform: uppercase; }
+            td { padding: 5px 0; border-bottom: 1px solid #eee; }
             .r { text-align: right; }
             
             .total-row td { border-top: 1px solid #000; font-weight: bold; font-size: 11pt; padding-top: 10px; border-bottom: none; }
-            .inv-note { margin-top: 15px; font-size: 9pt; background: #f5f5f5; padding: 8px; border-left: 2px solid #333; }
+            .inv-note { margin-top: 15px; font-size: 9pt; background: #f9f9f9; padding: 10px; border-left: 2px solid #000; }
             .inv-footer { position: fixed; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 7pt; color: #666; }
         }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <h1>Rechnung App</h1>
-
-        <div class="section-title">Deine Firma</div>
-        <div class="card">
-            <div class="input-row"><input type="text" id="shopName" placeholder="Shop Name" oninput="saveData()"></div>
-            <div class="input-row"><input type="text" id="shopSlogan" placeholder="Slogan (Optional)" oninput="saveData()"></div>
-            <div class="input-row"><input type="text" id="shopSender" placeholder="Absenderzeile (klein)" oninput="saveData()"></div>
-            <div class="input-row"><textarea id="shopFooter" rows="2" placeholder="Footer Infos (IBAN...)" oninput="saveData()"></textarea></div>
-        </div>
-
-        <div class="section-title">Verkauf Importieren</div>
-        <button class="btn" onclick="pasteFromClipboard()">
-            📋 Aus Zwischenablage einfügen
-        </button>
-        <div id="status" class="status-msg"></div>
-
-        <div class="section-title">Kunde & Details</div>
-        <div class="card">
-            <div class="input-row">
-                <textarea id="addrInput" rows="4" placeholder="Adresse hier einfügen..." oninput="render()"></textarea>
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Firmendaten</div>
+                <button class="close-btn" onclick="closeSettings()">×</button>
             </div>
-        </div>
-
-        <div class="flex-row">
-            <div><input type="text" id="invNum" value="RE-2024-001" oninput="render()"></div>
-            <div><input type="text" id="invDateInput" oninput="render()"></div>
-        </div>
-
-        <div class="section-title">Anmerkung</div>
-        <div class="card">
-            <div class="input-row">
-                <textarea id="noteInput" rows="2" placeholder="Z.B. Danke für Ihren Einkauf..." oninput="render()"></textarea>
+            <p style="color:#888; font-size:0.9rem; margin-bottom:15px;">Wird für alle zukünftigen Rechnungen gespeichert.</p>
+            
+            <div class="card" style="margin-bottom:0; border: 1px solid #333;">
+                <div class="input-row"><input type="text" id="shopName" placeholder="Dein Shop Name" oninput="saveData()"></div>
+                <div class="input-row"><input type="text" id="shopSlogan" placeholder="Slogan / Zusatz" oninput="saveData()"></div>
+                <div class="input-row"><input type="text" id="shopSender" placeholder="Absenderzeile (klein)" oninput="saveData()"></div>
+                <div class="input-row"><textarea id="shopFooter" rows="3" placeholder="Footer (IBAN, UStID...)" oninput="saveData()"></textarea></div>
             </div>
+            
+            <button class="btn btn-secondary" style="margin-top:20px; margin-bottom:0;" onclick="closeSettings()">Speichern & Schließen</button>
         </div>
-
-        <button class="btn btn-primary" onclick="window.print()">
-            PDF Erstellen
-        </button>
-        <p style="text-align:center; color:#555; font-size:0.8rem; margin-top:10px;">
-            Im Druckdialog "Teilen" wählen, um als Datei zu speichern.
-        </p>
     </div>
+
+    <div class="app-header">
+        <h1>Rechnung</h1>
+        <button class="settings-btn" onclick="openSettings()">⚙️</button>
+    </div>
+
+    <div class="section-label">Artikel</div>
+    <button class="btn btn-secondary" onclick="pasteFromClipboard()">
+        📋 Verkauf einfügen
+    </button>
+    <div id="status" class="status-msg"></div>
+
+    <div class="section-label">Kunde</div>
+    <div class="card">
+        <div class="input-row">
+            <textarea id="addrInput" rows="4" placeholder="Adresse vom Label..." oninput="render()"></textarea>
+        </div>
+    </div>
+
+    <div class="flex-row">
+        <div><input type="text" id="invNum" value="RE-2024-001" oninput="render()"></div>
+        <div><input type="text" id="invDateInput" oninput="render()"></div>
+    </div>
+
+    <div class="section-label">Anmerkung</div>
+    <div class="card">
+        <div class="input-row">
+            <textarea id="noteInput" rows="2" placeholder="Z.B. Danke für Ihren Einkauf..." oninput="render()"></textarea>
+        </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="window.print()">
+        PDF Erstellen
+    </button>
+
 
     <div id="print-area">
         <div class="inv-header">
@@ -259,17 +319,40 @@
     </div>
 
     <script>
-        // Initialsierung
+        // INIT
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('invDateInput').value = today;
 
-        // --- SPEICHERN & LADEN ---
+        // --- POPUP LOGIC ---
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.style.display = 'flex';
+            // Kleiner Timeout für Animation
+            setTimeout(() => modal.classList.add('open'), 10);
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.remove('open');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        // --- SAVE & LOAD ---
         function loadData() {
             const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
+            let hasData = false;
             fields.forEach(id => {
-                if(localStorage.getItem(id)) document.getElementById(id).value = localStorage.getItem(id);
+                if(localStorage.getItem(id)) {
+                    document.getElementById(id).value = localStorage.getItem(id);
+                    hasData = true;
+                }
             });
             render();
+            
+            // Wenn keine Daten da sind (erste Benutzung), öffne Popup automatisch
+            if(!hasData) {
+                setTimeout(openSettings, 500);
+            }
         }
 
         function saveData() {
@@ -280,15 +363,15 @@
             render();
         }
 
-        // --- RENDER FÜR DRUCK ---
+        // --- RENDER FOR PRINT ---
         function render() {
-            // Firmendaten
+            // Firma
             document.getElementById('outShopName').innerText = document.getElementById('shopName').value || "DEIN SHOP";
             document.getElementById('outShopSlogan').innerText = document.getElementById('shopSlogan').value;
             document.getElementById('outSender').innerText = document.getElementById('shopSender').value || "Firma • Straße • Ort";
             document.getElementById('outFooter').innerHTML = (document.getElementById('shopFooter').value || "").replace(/\n/g, '<br>');
 
-            // Rechnungsdaten
+            // Rechnung
             const date = document.getElementById('invDateInput').value;
             document.getElementById('outDate').innerText = date;
             document.getElementById('outDelivDate').innerText = date;
@@ -309,18 +392,17 @@
             }
         }
 
-        // --- IMPORT LOGIK ---
+        // --- IMPORT ---
         async function pasteFromClipboard() {
             const status = document.getElementById('status');
             try {
-                // Versuche API Zugriff (iOS fragt vielleicht um Erlaubnis)
                 const text = await navigator.clipboard.readText();
                 processData(text);
                 status.innerText = "✅ Eingefügt!";
                 setTimeout(() => status.innerText = "", 2000);
             } catch (err) {
-                // Fallback für strikte Browser
-                alert("Bitte klicke in das Adressfeld oder irgendwo hin und drücke 'Einfügen' auf deiner Tastatur, falls der Button blockiert wird.");
+                // iOS Safari benötigt manchmal einen manuellen Trigger oder fragt beim ersten Mal
+                alert("Bitte tippe kurz in das Adressfeld und versuche es erneut, oder füge den Text manuell ein.");
             }
         }
 
@@ -357,7 +439,6 @@
             document.getElementById('outTotal').innerText = total.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €';
         }
 
-        // Start
         window.onload = loadData;
     </script>
 </body>
