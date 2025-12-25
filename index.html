@@ -1,466 +1,342 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Rechnungs-App</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{margin:0;font-family:Arial,sans-serif;background:#000;color:#fff}
-header{padding:10px;border-bottom:2px solid #333}
-input,textarea,button{background:#111;color:#fff;border:1px solid #444;border-radius:6px;padding:6px;font-size:12px}
-button{cursor:pointer}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.col{flex:1}
-h2{margin:6px 0}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border-bottom:1px solid #222;padding:6px;font-size:11px;text-align:left}
-th{color:#bbb;background:#111;position:sticky;top:0}
-.actions{display:flex;gap:6px;margin-top:10px}
-.small{font-size:10px;color:#bbb}
-#listView{display:none}
-.selected{background:#0b2a4a}
+    <meta charset="UTF-8">
+    <title>Invoice Generator Dark</title>
+    <style>
+        :root {
+            /* Dark Mode Palette */
+            --bg-app: #0f172a;       /* Sehr dunkles Blau */
+            --bg-panel: #1e293b;     /* Helleres Panel-Blau */
+            --text-main: #f1f5f9;    /* Fast Weiß */
+            --text-muted: #94a3b8;   /* Grau */
+            --accent: #6366f1;       /* Indigo */
+            --accent-hover: #4f46e5;
+            --border: #334155;
+            --input-bg: #020617;
+        }
 
-#mwst[disabled]{opacity:0.5}
-</style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
 
+        /* --- LINKE SEITE (CONTROLS) --- */
+        .sidebar {
+            width: 380px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
 
-<style>
-.container, .wrapper, main {
-  max-width: 520px;
-  margin: 0 auto;
-  padding: 10px 12px;
-  box-sizing: border-box;
-}
-input, textarea, select {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-.actions {
-  position: sticky;
-  bottom: 0;
-  background: #000;
-  padding: 10px 0 6px 0;
-  display: flex;
-  gap: 8px;
-}
-.actions button {
-  flex: 1;
-}
-</style>
+        h2 { margin-top: 0; font-weight: 300; letter-spacing: 1px; color: var(--accent); }
+        
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 20px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
 
+        /* Inputs im Dark Mode */
+        textarea, input {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s, background 0.2s;
+            margin-top: 10px;
+        }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        .btn-print {
+            background: #10b981;
+            color: white;
+            margin-top: auto; /* Schiebt Button nach ganz unten */
+        }
+        .btn-print:hover { background: #059669; }
+
+        /* --- RECHTE SEITE (VORSCHAU) --- */
+        .preview-area {
+            flex: 1;
+            background: #0f172a;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Das weiße Blatt Papier */
+        .paper {
+            background: white;
+            color: black; /* Wichtig: Rechnung ist schwarz auf weiß */
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* --- RECHNUNG STYLING (Print Design) --- */
+        .inv-header { display: flex; justify-content: space-between; margin-bottom: 45px; border-bottom: 2px solid #eee; padding-bottom: 20px;}
+        .inv-logo { font-size: 1.5rem; font-weight: 800; color: #333; text-transform: uppercase; }
+        .inv-meta { text-align: right; font-size: 0.9rem; color: #555; line-height: 1.5; }
+
+        .inv-window {
+            font-size: 1rem;
+            line-height: 1.4;
+            height: 40mm;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .inv-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 20px; color: #111; }
+
+        /* Tabelle */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95rem; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 10px 5px; color: #444; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        td { padding: 12px 5px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .text-right { text-align: right; }
+        .total-row td { border-top: 2px solid #000; font-weight: bold; font-size: 1.1rem; padding-top: 15px; border-bottom: none; }
+        
+        /* Das neue Textfeld auf der Rechnung */
+        .inv-note {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f9fafb;
+            border-left: 4px solid #333;
+            font-size: 0.9rem;
+            color: #444;
+            white-space: pre-wrap; /* Damit Zeilenumbrüche bleiben */
+        }
+        
+        .inv-footer {
+            margin-top: 60px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        /* --- DRUCK MODUS --- */
+        @media print {
+            body { background: white; display: block; height: auto; overflow: visible; }
+            .sidebar { display: none; }
+            .preview-area { display: block; padding: 0; background: white; }
+            .paper { width: 100%; box-shadow: none; margin: 0; padding: 20mm; }
+            .inv-note { background: none !important; border-left: none !important; padding: 10px 0; } /* Cleaner für Druck */
+        }
+
+    </style>
 </head>
 <body>
 
-<header class="row">
-  <button onclick="showEditor()">Neue Rechnung</button>
-  <input id="search" placeholder="Rechnung suchen…" oninput="renderList()">
-</header>
+    <div class="sidebar">
+        <h2>🧾 Rechnungs-Tool</h2>
 
-<div id="listView" style="padding:10px">
-  <table>
-    <thead>
-      <tr>
-        <th>Nr</th>
-        <th>Datum</th>
-        <th>Empfänger</th>
-        <th>Summe</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="listBody"></tbody>
-  </table>
-</div>
+        <div class="section-label">1. Verkauf importieren</div>
+        <button class="btn btn-primary" onclick="pasteFromClipboard()">
+            ✨ Einfügen aus Lager-App
+        </button>
+        <textarea id="hiddenPaste" style="height:0; opacity:0; padding:0; border:none;"></textarea>
+        
+        <div class="section-label">2. Adresse (Versandlabel)</div>
+        <textarea id="addrInput" rows="4" placeholder="Name&#10;Straße&#10;Ort" oninput="render()"></textarea>
 
-<div id="editor" style="padding:10px">
-  <div class="row">
-    <div class="col">
-      <label class="small">Rechnungsnummer</label>
-      <input id="invNr">
+        <div class="section-label">3. Anmerkung / Text</div>
+        <textarea id="noteInput" rows="3" placeholder="Z.B. Danke für den Einkauf!&#10;Lieferzeit 2-3 Tage." oninput="render()"></textarea>
+
+        <div class="section-label">Rechnungs-Nummer</div>
+        <input type="text" id="invNum" value="RE-2023-001" oninput="render()">
+
+        <button class="btn btn-print" onclick="window.print()">
+            🖨️ Drucken / PDF speichern
+        </button>
     </div>
-    <div class="col">
-      <label class="small">Datum</label>
-      <input type="date" id="invDate">
+
+    <div class="preview-area">
+        <div class="paper">
+            <div class="inv-header">
+                <div>
+                    <div class="inv-logo">DEIN SHOP</div>
+                    <div style="font-size:0.8rem; color:#666;">Dein Slogan hier</div>
+                </div>
+                <div class="inv-meta">
+                    Datum: <span id="outDate"></span><br>
+                    Rechnung Nr.: <span id="outInvNum"></span>
+                </div>
+            </div>
+
+            <div style="font-size: 0.7rem; text-decoration: underline; color:#888; margin-bottom: 5px;">
+                Dein Shop GmbH • Musterstraße 1 • 12345 Musterstadt
+            </div>
+
+            <div class="inv-window" id="outAddress">
+                <span style="color:#ccc;">(Hier Adresse einfügen...)</span>
+            </div>
+
+            <div class="inv-title">Rechnung</div>
+            <p>Vielen Dank für Ihre Bestellung. Folgende Positionen stellen wir in Rechnung:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%">#</th>
+                        <th>Artikel / Leistung</th>
+                        <th class="text-right">Menge</th>
+                        <th class="text-right">Einzel</th>
+                        <th class="text-right">Gesamt</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5" style="text-align:center; padding:30px; color:#ddd;">Bitte auf "Einfügen" klicken...</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="4" class="text-right">Gesamtbetrag:</td>
+                        <td class="text-right" id="outTotal">0,00 €</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div id="outNote" style="display:none;" class="inv-note"></div>
+
+            <div class="inv-footer">
+                <p>Bitte überweisen Sie den Betrag innerhalb von 7 Tagen.<br>
+                <strong>Bankverbindung:</strong> IBAN DE12 3456 7890 0000 00 | BIC XXXXXXXX<br>
+                Es erfolgt kein Ausweis der Umsatzsteuer (Kleinunternehmer) / oder 19% MwSt.</p>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <h2>Empfänger</h2>
-  <textarea id="address" rows="4" style="width:100%" placeholder="Name&#10;Straße Nr.&#10;PLZ Ort&#10;Land"></textarea>
-
-  <h2>Positionen</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Artikel</th>
-        <th>Menge</th>
-        <th>Preis</th>
-        <th>Gesamt</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="posBody"></tbody>
-  </table>
-
-  <button onclick="addRow()">+ Position</button>
-
-  <div class="row" style="margin-top:10px">
-    <div class="col">
-      <label class="small">Versand (€)</label>
-      <input id="shipping" value="0" onblur="calcTotals()">
-    </div>
-    <div class="col">
-      <label class="small">MwSt %</label>
-      <div class="row">
-        <input id="mwst" value="19" onblur="calcTotals()" style="flex:1">
-        <label class="small" style="display:flex;align-items:center;gap:4px;">
-          <input type="checkbox" id="mwstToggle" onchange="toggleMwst()"> Kleinunternehmer
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <div style="margin-top:6px">
-    <div class="small">Zwischensumme: <span id="subSum">0.00</span> €</div>
-    <div class="small">MwSt: <span id="mwstSum">0.00</span> €</div>
-    <div><b>Gesamt: <span id="totalSum">0.00</span> €</b></div>
-  </div>
-
-  <h2>Firmenangaben</h2>
-  <textarea id="company" rows="3" style="width:100%" placeholder="Firmenname&#10;Adresse&#10;Kontakt"></textarea>
-  <input id="ustid" placeholder="USt-ID / Steuernummer">
-
-  
-  
-<div class="actions">
-  <button onclick="saveInvoice()">Speichern</button>
-  <button onclick="loadFromBuffer()">Verkäufe laden</button>
-  <button onclick="createPDF()">PDF erstellen</button>
-  <button onclick="showInvoiceList()">Rechnungsliste</button>
-</div>
-
-
-</div>
-
-<script>
-let invoices = JSON.parse(localStorage.getItem("invoices") || "[]");
-let editIndex = -1;
-
-function nextNr(){
-  const last = parseInt(localStorage.getItem("invoiceCounter") || "0",10) + 1;
-  localStorage.setItem("invoiceCounter", last);
-  return String(last).padStart(5,"0");
-}
-
-function showEditor(){
-  document.getElementById("listView").style.display = "none";
-  document.getElementById("editor").style.display = "block";
-  editIndex = -1;
-
-  document.getElementById("invNr").value = nextNr();
-  document.getElementById("invDate").valueAsDate = new Date();
-  document.getElementById("address").value = "";
-  document.getElementById("shipping").value = 0;
-  document.getElementById("mwst").value = 19; applyMwstSetting();
-  document.getElementById("company").value = "";
-  document.getElementById("ustid").value = "";
-
-  document.getElementById("posBody").innerHTML = "";
-  addRow();
-}
-
-function showList(){
-  document.getElementById("editor").style.display = "none";
-  document.getElementById("listView").style.display = "block";
-  renderList();
-}
-
-function addRow(data={name:"",menge:1,preis:0}){
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td><input value="${data.name}"></td>
-    <td><input type="number" value="${data.menge}" onblur="calcTotals()"></td>
-    <td><input type="number" value="${data.preis}" onblur="calcTotals()"></td>
-    <td class="sum">0.00</td>
-    <td><button onclick="this.closest('tr').remove();calcTotals()">✕</button></td>
-  `;
-  document.getElementById("posBody").appendChild(tr);
-  calcTotals();
-}
-
-function calcTotals(){
-  let sum = 0;
-  document.querySelectorAll("#posBody tr").forEach(tr=>{
-    const m = parseFloat(tr.children[1].children[0].value)||0;
-    const p = parseFloat(tr.children[2].children[0].value)||0;
-    const g = m*p;
-    tr.querySelector(".sum").innerText = g.toFixed(2);
-    sum += g;
-  });
-
-  const ship = parseFloat(document.getElementById("shipping").value)||0;
-  const mwActive = document.getElementById('mwstToggle')?.checked;
-  const mw = mwActive ? (parseFloat(document.getElementById("mwst").value)||0) : 0;
-
-  document.getElementById("subSum").innerText = sum.toFixed(2);
-  const mwVal = sum * mw / 100;
-  document.getElementById("mwstSum").innerText = mwVal.toFixed(2);
-  document.getElementById("totalSum").innerText = (sum + mwVal + ship).toFixed(2);
-}
-
-function saveInvoice(){
-  const inv = {
-    nr: document.getElementById("invNr").value,
-    date: document.getElementById("invDate").value,
-    address: document.getElementById("address").value,
-    shipping: document.getElementById("shipping").value,
-    mwst: document.getElementById("mwst").value,
-    company: document.getElementById("company").value,
-    ustid: document.getElementById("ustid").value,
-    positions: [],
-    total: document.getElementById("totalSum").innerText
-  };
-
-  document.querySelectorAll("#posBody tr").forEach(tr=>{
-    inv.positions.push({
-      name: tr.children[0].children[0].value,
-      menge: tr.children[1].children[0].value,
-      preis: tr.children[2].children[0].value,
-      gesamt: tr.children[3].innerText
-    });
-  });
-
-  if(editIndex>=0) invoices[editIndex] = inv;
-  else invoices.push(inv);
-
-  localStorage.setItem("invoices", JSON.stringify(invoices));
-  showList();
-}
-
-function renderList(){
-  const q = document.getElementById("search").value.toLowerCase();
-  const body = document.getElementById("listBody");
-  body.innerHTML = "";
-
-  invoices.forEach((i,idx)=>{
-    if(q && !(
-      i.nr.includes(q) ||
-      i.address.toLowerCase().includes(q)
-    )) return;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i.nr}</td>
-      <td>${i.date}</td>
-      <td>${i.address.split('\n')[0]}</td>
-      <td>${i.total} €</td>
-      <td>
-        <button onclick="editInv(${idx})">✏️</button>
-      </td>
-    `;
-    body.appendChild(tr);
-  });
-}
-
-function editInv(i){
-  const inv = invoices[i];
-  editIndex = i;
-  showEditor();
-
-  document.getElementById("invNr").value = inv.nr;
-  document.getElementById("invDate").value = inv.date;
-  document.getElementById("address").value = inv.address;
-  document.getElementById("shipping").value = inv.shipping;
-  document.getElementById("mwst").value = inv.mwst;
-  document.getElementById("company").value = inv.company;
-  document.getElementById("ustid").value = inv.ustid;
-
-  document.getElementById("posBody").innerHTML = "";
-  inv.positions.forEach(p=>addRow(p));
-  calcTotals();
-}
-
-const pending = JSON.parse(localStorage.getItem("pendingInvoiceData") || "null");
-if(pending){
-  showEditor();
-  addRow(pending);
-  localStorage.removeItem("pendingInvoiceData");
-}else{
-  showList();
-  setTimeout(applyMwstSetting, 0);
-}
-
-function toggleMwst(){
-  const on = document.getElementById('mwstToggle').checked;
-  localStorage.setItem('mwstActive', on ? "1" : "0");
-  calcTotals();
-}
-
-function applyMwstSetting(){
-  const on = localStorage.getItem('mwstActive') === "1";
-  const t = document.getElementById('mwstToggle');
-  if(t) t.checked = on;
-}
-
-</script>
-
-
-<script>
-// ========== ZWISCHENSPEICHER LADEN ==========
-function loadFromBuffer(){
-  let buffer = JSON.parse(localStorage.getItem("invoiceBuffer") || "[]");
-  if(!Array.isArray(buffer) || buffer.length === 0){
-    alert("Kein Verkauf im Zwischenspeicher");
-    return;
-  }
-
-  buffer.forEach(item => {
-    addRow({
-      name: item.name,
-      menge: item.menge,
-      preis: item.preis
-    });
-  });
-
-  localStorage.removeItem("invoiceBuffer");
-  calcTotals();
-  alert("Verkäufe übernommen ✅");
-}
-
-// ========== KLEINUNTERNEHMER SPEICHERN ==========
-function toggleMwst(){
-  const klein = document.getElementById('mwstToggle').checked;
-  localStorage.setItem('kleinunternehmer', klein ? "1" : "0");
-
-  const mwInput = document.getElementById("mwst");
-  if(klein){
-    mwInput.value = 0;
-    mwInput.disabled = true;
-  } else {
-    mwInput.disabled = false;
-    if(!mwInput.value || mwInput.value == "0") mwInput.value = 19;
-  }
-  calcTotals();
-}
-
-function applyMwstSetting(){
-  const klein = localStorage.getItem('kleinunternehmer') === "1";
-  const t = document.getElementById('mwstToggle');
-  const mwInput = document.getElementById("mwst");
-
-  if(t) t.checked = klein;
-  if(klein){
-    mwInput.value = 0;
-    mwInput.disabled = true;
-  } else {
-    mwInput.disabled = false;
-  }
-}
-
-// ========== PDF ERZEUGEN ==========
-function createPDF(){
-  saveInvoice();
-  window.print();
-}
-
-// Apply Kleinunternehmer mode on load
-setTimeout(applyMwstSetting, 0);
-</script>
-
-
-<script>
-// ========== RECHNUNG BEIM PDF ERSTELLEN AUTOMATISCH SPEICHERN ==========
-(function(){
-  const _origCreatePDF = typeof createPDF === "function" ? createPDF : null;
-
-  window.createPDF = function(){
-    try{
-      if(typeof saveInvoice === "function") saveInvoice();
-
-      // zusätzlich immer in eine interne Liste schreiben
-      let list = JSON.parse(localStorage.getItem("invoiceList") || "[]");
-
-      const invoiceData = document.getElementById("invoiceView")
-        ? document.getElementById("invoiceView").innerHTML
-        : document.body.innerHTML;
-
-      list.unshift({
-        ts: Date.now(),
-        html: invoiceData
-      });
-
-      localStorage.setItem("invoiceList", JSON.stringify(list));
-    }catch(e){ console.error(e); }
-
-    // danach normal PDF/Print
-    if(_origCreatePDF){
-      _origCreatePDF();
-    } else {
-      window.print();
-    }
-  };
-})();
-</script>
-
-
-<div id="invoiceListModal" style="display:none;position:fixed;inset:0;background:#000d;z-index:9999;overflow:auto;">
-  <div style="max-width:520px;margin:40px auto;background:#111;padding:12px;border-radius:10px;">
-    <h3>Gespeicherte Rechnungen</h3>
-    <div id="invoiceListContainer"></div>
-    <button onclick="closeInvoiceList()" style="margin-top:10px;width:100%;">Schließen</button>
-  </div>
-</div>
-
-
-<script>
-function showInvoiceList(){
-  const list = JSON.parse(localStorage.getItem("invoiceList")||"[]");
-  const c = document.getElementById("invoiceListContainer");
-  c.innerHTML = "";
-
-  if(list.length === 0){
-    c.innerHTML = "<p>Keine gespeicherten Rechnungen.</p>";
-  }
-
-  list.forEach((inv,i) => {
-    const d = document.createElement("div");
-    d.style.border = "1px solid #444";
-    d.style.padding = "8px";
-    d.style.marginBottom = "6px";
-
-    const dt = new Date(inv.ts).toLocaleString();
-
-    d.innerHTML = `
-      <div><b>${dt}</b></div>
-      <button onclick="editInvoice(${i})">Bearbeiten</button>
-      <button onclick="deleteInvoice(${i})">Löschen</button>
-    `;
-    c.appendChild(d);
-  });
-
-  document.getElementById("invoiceListModal").style.display = "block";
-}
-
-function closeInvoiceList(){
-  document.getElementById("invoiceListModal").style.display = "none";
-}
-
-function deleteInvoice(i){
-  if(!confirm("Rechnung wirklich löschen?")) return;
-  const list = JSON.parse(localStorage.getItem("invoiceList")||"[]");
-  list.splice(i,1);
-  localStorage.setItem("invoiceList", JSON.stringify(list));
-  showInvoiceList();
-}
-
-function editInvoice(i){
-  const list = JSON.parse(localStorage.getItem("invoiceList")||"[]");
-  const data = list[i];
-  if(!data) return;
-  document.body.innerHTML = data.html;
-  alert("Rechnung geladen – du kannst jetzt bearbeiten und erneut speichern/PDF erstellen.");
-  closeInvoiceList();
-}
-</script>
-
+    <script>
+        // Initialsierung
+        document.getElementById('outDate').innerText = new Date().toLocaleDateString('de-DE');
+        
+        // Globale Render Funktion für Textfelder
+        function render() {
+            // Adresse
+            const addr = document.getElementById('addrInput').value;
+            document.getElementById('outAddress').innerHTML = addr ? addr.replace(/\n/g, '<br>') : '<span style="color:#ccc;">(Hier Adresse einfügen...)</span>';
+
+            // Nummer
+            document.getElementById('outInvNum').innerText = document.getElementById('invNum').value;
+
+            // Anmerkung (Das neue Feld)
+            const note = document.getElementById('noteInput').value;
+            const noteEl = document.getElementById('outNote');
+            if (note.trim()) {
+                noteEl.style.display = 'block';
+                noteEl.innerText = note;
+            } else {
+                noteEl.style.display = 'none';
+            }
+        }
+
+        // Import Funktion
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                processData(text);
+            } catch (err) {
+                // Fallback: Benutzer muss manuell einfügen
+                const fallback = prompt("Automatisches Einfügen blockiert. Bitte hier STRG+V drücken:");
+                if(fallback) processData(fallback);
+            }
+        }
+
+        // Datenverarbeitung
+        function processData(text) {
+            const lines = text.split('\n');
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            let total = 0;
+            let pos = 1;
+            let hasItems = false;
+
+            lines.forEach(line => {
+                if(!line.trim()) return;
+
+                // Regex Format: "2x Artikelname 19.99"
+                const match = line.match(/^(\d+)x\s+(.+)\s+(\d+[.,]\d{2})$/);
+                
+                if (match) {
+                    hasItems = true;
+                    const qty = parseInt(match[1]);
+                    const name = match[2];
+                    const price = parseFloat(match[3].replace(',', '.'));
+                    
+                    const rowSum = qty * price;
+                    total += rowSum;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${pos++}</td>
+                        <td>${name}</td>
+                        <td class="text-right">${qty}</td>
+                        <td class="text-right">${price.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
+                        <td class="text-right">${rowSum.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            if(!hasItems) {
+                tbody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Konnte keine Daten erkennen. Format muss sein: "2x Name 10.00"</td></tr>';
+            }
+
+            document.getElementById('outTotal').innerText = total.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €';
+        }
+    </script>
 </body>
 </html>
