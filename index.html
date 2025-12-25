@@ -16,9 +16,9 @@
             --separator: #38383a;
             --text-main: #ffffff;
             --text-muted: #8e8e93;
+            --accent: #0a84ff;
         }
 
-        /* --- SCREEN STYLES --- */
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
@@ -37,7 +37,6 @@
             box-sizing: border-box;
         }
 
-        /* UI Elements */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-top: env(safe-area-inset-top); }
         h1 { font-size: 1.5rem; font-weight: 600; margin: 0; }
         .settings-icon { font-size: 1.2rem; padding: 10px; cursor: pointer; opacity: 0.7; }
@@ -61,9 +60,10 @@
             border-radius: 10px; margin-bottom: 10px; cursor: pointer;
         }
         .btn:active { background: #333; }
+        .btn-paste { background: #1c1c1e; color: var(--accent); border: 1px solid #333; }
         .btn-main { background: white; color: black; font-weight: 600; margin-top: 20px; padding: 16px; }
 
-        .status { text-align: center; color: #30d158; font-size: 0.8rem; height: 20px; opacity: 0; transition: opacity 0.3s; }
+        .status { text-align: center; color: #30d158; font-size: 0.8rem; height: 20px; opacity: 0; transition: opacity 0.3s; margin-bottom: 10px; }
         .status.show { opacity: 1; }
 
         .grid-2 { display: flex; gap: 1px; background: var(--separator); border-radius: 10px; overflow: hidden; margin-bottom: 25px; }
@@ -81,45 +81,25 @@
         .modal-head { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .close { background: none; border: none; color: #888; font-size: 1.5rem; }
 
-        /* --- PRINT STYLES (Clean Version) --- */
+        /* --- PRINT STYLES --- */
         #print-layer { display: none; }
 
         @media print {
-            /* 1. SEITENRÄNDER AUF 0 SETZEN */
-            @page {
-                margin: 0mm; /* Entfernt Kopf/Fußzeilen im Browser */
-                size: A4;
-            }
-
-            /* 2. ALLES RESETTEN */
+            @page { margin: 0mm; size: A4; }
             html, body {
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-                color: black !important;
-                width: 100%;
-                height: 100%;
-                overflow: visible !important;
-                position: static !important;
+                margin: 0 !important; padding: 0 !important;
+                background: white !important; color: black !important;
+                width: 100%; height: 100%; overflow: visible !important; position: static !important;
                 -webkit-print-color-adjust: exact;
             }
-
-            /* UI Verstecken */
             .app-scroller, .modal { display: none !important; }
 
-            /* 3. PAPIER-LAYOUT */
             #print-layer {
-                display: block !important;
-                position: relative;
-                width: 100%;
-                height: 100%;
-                /* Wir simulieren den Rand hier mit Padding, damit der Drucker-Rand 0 bleiben kann */
-                padding: 15mm 20mm; 
-                box-sizing: border-box;
-                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                display: block !important; position: relative;
+                width: 100%; height: 100%; padding: 15mm 20mm; 
+                box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             }
 
-            /* Rechnung Style */
             .p-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
             .p-shop { font-size: 14pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
             .p-sub { font-size: 9pt; color: #666; }
@@ -138,17 +118,10 @@
             
             .p-note { margin-top: 20px; font-size: 9pt; background: #f5f5f5 !important; padding: 10px; border-left: 2px solid #000; color: black; }
             
-            /* Footer */
             .p-footer { 
-                position: fixed; 
-                bottom: 10mm; 
-                left: 0; 
-                right: 0; 
-                text-align: center; 
-                font-size: 7pt; 
-                color: #666; 
-                border-top: 1px solid #eee; 
-                padding-top: 5px; 
+                position: fixed; bottom: 10mm; left: 0; right: 0; 
+                text-align: center; font-size: 7pt; color: #666; 
+                border-top: 1px solid #eee; padding-top: 5px; 
             }
         }
     </style>
@@ -177,27 +150,29 @@
             <div class="settings-icon" onclick="toggleModal()">⚙️</div>
         </div>
 
-        <div class="label">Import</div>
-        <button class="btn" onclick="pasteClip()">📋 Einfügen</button>
-        <div id="status" class="status">✅ Eingefügt!</div>
+        <button class="btn btn-paste" onclick="pasteClip()">📋 Daten aus Lager einfügen</button>
+        <div id="status" class="status">✅ Daten erfolgreich übernommen!</div>
 
-        <div class="label">Kunde</div>
+        <div class="label">Kunde (Manuell / Copy-Paste)</div>
         <div class="group">
-            <div class="row"><textarea id="addr" rows="4" placeholder="Adresse..." oninput="render()"></textarea></div>
+            <div class="row"><textarea id="addr" rows="4" placeholder="Name & Adresse des Kunden hier..." oninput="render()"></textarea></div>
         </div>
 
         <div class="label">Details</div>
         <div class="grid-2">
-            <div><input type="text" id="invNum" value="RE-2024-001" oninput="render()"></div>
-            <div><input type="text" id="invDate" oninput="render()"></div>
+            <div><input type="text" id="invNum" value="RE-2024-001" oninput="render()" placeholder="Nr."></div>
+            <div><input type="text" id="invDate" oninput="render()" placeholder="Datum"></div>
         </div>
 
         <div class="label">Anmerkung</div>
         <div class="group">
             <div class="row"><textarea id="note" rows="2" placeholder="Text..." oninput="render()"></textarea></div>
         </div>
+        
+        <div class="label">Vorschau Summe</div>
+        <div id="previewTotal" style="text-align:center; font-size:1.5rem; font-weight:bold; margin-bottom:20px; color:var(--text-main);">0,00 €</div>
 
-        <button class="btn btn-main" onclick="window.print()">PDF Erstellen</button>
+        <button class="btn btn-main" onclick="window.print()">Drucken / PDF</button>
     </div>
 
     <div id="print-layer">
@@ -233,14 +208,17 @@
     </div>
 
     <script>
+        // INIT
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('invDate').value = today;
 
+        // MODAL
         function toggleModal() {
             const m = document.getElementById('modal');
-            if(m.style.display === 'flex') { m.style.display='none'; } else { m.style.display='flex'; }
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
+        // STORAGE
         const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
         function load() {
             let hasData = false;
@@ -251,6 +229,7 @@
                 }
             });
             render();
+            // Wenn leer, öffne Settings
             if(!hasData) setTimeout(toggleModal, 600);
         }
         function save() {
@@ -258,8 +237,10 @@
             render();
         }
 
+        // RENDER PRINT VIEW
         function render() {
-            document.getElementById('outShop').innerText = document.getElementById('shopName').value || "DEIN SHOP";
+            const shopName = document.getElementById('shopName').value || "DEIN SHOP";
+            document.getElementById('outShop').innerText = shopName;
             document.getElementById('outSlogan').innerText = document.getElementById('shopSlogan').value;
             document.getElementById('outSender').innerText = document.getElementById('shopSender').value || "Absender";
             document.getElementById('outFooter').innerHTML = (document.getElementById('shopFooter').value || "").replace(/\n/g, '<br>');
@@ -267,7 +248,16 @@
             const d = document.getElementById('invDate').value;
             document.getElementById('outDate').innerText = d;
             document.getElementById('outDeliv').innerText = d;
-            document.getElementById('outNum').innerText = document.getElementById('invNum').value;
+            
+            const num = document.getElementById('invNum').value;
+            document.getElementById('outNum').innerText = num;
+            
+            // NEU: Setze Dokument-Titel für Dateinamen beim Speichern
+            if(num && num !== "RE-2024-001") {
+                document.title = num;
+            } else {
+                document.title = "Rechnung";
+            }
             
             const addr = document.getElementById('addr').value;
             document.getElementById('outAddr').innerHTML = addr ? addr.replace(/\n/g, '<br>') : "";
@@ -277,16 +267,96 @@
             if(n.trim()) { ne.style.display='block'; ne.innerText=n; } else { ne.style.display='none'; }
         }
 
+        // PASTE LOGIC (THE MAGIC)
         async function pasteClip() {
             const s = document.getElementById('status');
             try {
                 const text = await navigator.clipboard.readText();
-                process(text);
-                s.classList.add('show'); setTimeout(() => s.classList.remove('show'), 2000);
-            } catch(e) { alert("Bitte manuell einfügen."); }
+                
+                // Versuch, JSON zu parsen (kommt von Lager App)
+                if(text.trim().startsWith('{')) {
+                    try {
+                        const data = JSON.parse(text);
+                        processJSON(data);
+                        s.innerText = "✅ Daten aus Lager übernommen!";
+                        s.classList.add('show'); 
+                        setTimeout(() => s.classList.remove('show'), 2000);
+                        return;
+                    } catch(e) { console.log("Kein valides JSON, versuche Textmodus"); }
+                }
+
+                // Fallback: Alter Textmodus (falls man manuell was reinkopiert)
+                processText(text);
+                s.innerText = "✅ Text eingefügt!";
+                s.classList.add('show'); 
+                setTimeout(() => s.classList.remove('show'), 2000);
+
+            } catch(e) { alert("Bitte Zugriff auf Zwischenablage erlauben oder manuell einfügen."); }
         }
 
-        function process(text) {
+        // VERARBEITUNG DER LAGER-DATEN
+        function processJSON(data) {
+            // 1. Meta Daten
+            if(data.invoiceNr) document.getElementById('invNum').value = data.invoiceNr;
+            
+            // Datum formatieren YYYY-MM-DD -> DD.MM.YYYY
+            if(data.date) {
+                const parts = data.date.split('-'); 
+                if(parts.length === 3) document.getElementById('invDate').value = `${parts[2]}.${parts[1]}.${parts[0]}`;
+            }
+
+            // Plattform Info in die Notiz, falls Notiz noch leer
+            if(data.platform && !document.getElementById('note').value) {
+                document.getElementById('note').value = `Verkauf über ${data.platform}`;
+            }
+
+            // 2. Tabelle aufbauen
+            const tb = document.getElementById('tbody');
+            tb.innerHTML = '';
+            let total = 0;
+            let pos = 1;
+
+            // Artikel
+            if(data.items && Array.isArray(data.items)) {
+                data.items.forEach(item => {
+                    const qty = item.qty || 1;
+                    const totalItemPrice = item.priceTotal || 0;
+                    const singlePrice = totalItemPrice / qty; // Einzelpreis berechnen
+                    
+                    addTableRow(tb, pos++, item.name, qty, singlePrice, totalItemPrice);
+                    total += totalItemPrice;
+                });
+            }
+
+            // Versand als eigene Zeile
+            if(data.shipping && data.shipping > 0) {
+                addTableRow(tb, pos++, "Versand & Verpackung", 1, data.shipping, data.shipping);
+                total += data.shipping;
+            }
+
+            // 3. Summe updaten
+            const totalStr = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+            document.getElementById('outTotal').innerText = totalStr;
+            document.getElementById('previewTotal').innerText = totalStr;
+
+            render();
+        }
+
+        // HELFER: Tabellenzeile hinzufügen
+        function addTableRow(tbody, pos, text, qty, single, total) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${pos}</td>
+                <td>${text}</td>
+                <td class="r">${qty}</td>
+                <td class="r">${single.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                <td class="r">${total.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // FALLBACK: ALTER TEXT MODUS
+        function processText(text) {
             const lines = text.split('\n');
             const tb = document.getElementById('tbody'); tb.innerHTML = '';
             let total = 0; let pos = 1;
@@ -297,12 +367,13 @@
                 if(m) {
                     const q = parseInt(m[1]); const p = parseFloat(m[3].replace(',', '.'));
                     const sum = q*p; total+=sum;
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${pos++}</td><td>${m[2]}</td><td class="r">${q}</td><td class="r">${p.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${sum.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
-                    tb.appendChild(tr);
+                    addTableRow(tb, pos++, m[2], q, p, sum);
                 }
             });
-            document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+            const totalStr = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+            document.getElementById('outTotal').innerText = totalStr;
+            document.getElementById('previewTotal').innerText = totalStr;
+            render();
         }
 
         window.onload = load;
