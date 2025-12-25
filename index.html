@@ -3,214 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V7</title>
+    <title>Rechnung V8</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/1c1c1e/ffffff?text=R">
 
     <style>
         :root {
-            --bg-app: #121212;      /* Komplett dunkler Hintergrund */
-            --bg-panel: #1c1c1e;    /* Etwas heller für Eingabefelder */
+            --bg-app: #121212;
+            --bg-panel: #1c1c1e;
             --paper: #ffffff;
-            --text-main: #e0e0e0;
-            --text-muted: #888;
+            --text-muted: #666;
             --border: #333;
-            --accent: #fff;         /* Weißer Akzent für Buttons */
         }
 
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
-            overflow: hidden; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background: var(--bg-app);
+            color: white;
             display: flex;
             flex-direction: column;
-            background: var(--bg-app);
-            color: var(--text-main);
+            overflow: hidden;
         }
 
-        /* --- 1. COCKPIT (OBEN) --- */
+        /* --- COCKPIT --- */
         .cockpit {
             flex: 0 0 auto;
             background: var(--bg-app);
             padding: 10px 15px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 10;
             border-bottom: 1px solid var(--border);
+            z-index: 100;
             padding-top: max(10px, env(safe-area-inset-top));
         }
 
-        .cockpit-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
-        }
-        .app-title { font-weight: 700; font-size: 0.9rem; color: var(--text-muted); letter-spacing: 1px; }
-        .settings-btn { font-size: 1.1rem; cursor: pointer; padding: 5px; color: var(--text-muted); }
-
-        .action-row { display: flex; gap: 8px; }
+        .cockpit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .app-title { font-weight: 700; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
         
+        .action-row { display: flex; gap: 8px; margin-bottom: 8px; }
         .btn {
-            border: 1px solid var(--border); border-radius: 6px; height: 36px;
-            font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            background: var(--bg-panel); color: #fff; transition: 0.2s;
+            border: 1px solid var(--border); border-radius: 8px; height: 40px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            background: var(--bg-panel); color: #fff; flex: 1;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn:active { background: #444; }
-        .btn-paste { flex: 1; }
-        .btn-print { width: 44px; font-size: 1.1rem; }
+        .btn-print { flex: 0 0 50px; font-size: 1.2rem; }
+        .btn:active { background: #333; }
 
-        /* Eingabefelder */
         .input-dark {
             background: var(--bg-panel); border: 1px solid var(--border);
-            border-radius: 6px; color: #fff; padding: 8px;
-            font-family: inherit; font-size: 0.9rem; resize: none;
-            width: 100%; box-sizing: border-box; display: block;
+            border-radius: 8px; color: #fff; padding: 10px;
+            font-size: 0.95rem; width: 100%; box-sizing: border-box; resize: none;
+            margin-bottom: 8px; display: block;
         }
-        .input-dark:focus { outline: none; border-color: #666; }
-        
-        #addrInput { height: 50px; }
-        #freeInput { height: 35px; }
 
-        .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-left: 2px; margin-bottom: 2px; display: block;}
-
-        /* --- 2. PREVIEW AREA (UNTEN) --- */
+        /* --- PREVIEW AREA (Scrollbar!) --- */
         .preview-area {
             flex: 1;
-            background: var(--bg-app); /* Gleiche Farbe wie oben */
-            position: relative;
-            overflow: hidden;
-            display: flex; 
-            justify-content: center;
-            align-items: flex-start; /* Oben anfangen */
-            padding-top: 20px;
+            overflow-y: auto; /* Erlaubt vertikales Scrollen in der Vorschau */
+            -webkit-overflow-scrolling: touch;
+            padding: 10px;
+            background: #000; /* Tiefschwarz hinter dem Papier */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* DER TRICK:
-           Wir skalieren das A4 Blatt so, dass es in die Breite des Handys passt.
-           Das Aspect Ratio (Verhältnis) bleibt dabei 100% erhalten.
-        */
+        /* Skalierung basierend auf der Gerätebreite */
         .paper-scaler {
-            width: 210mm; 
-            height: 297mm; 
-            background: white;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5); /* Schatten für "Schwebe"-Effekt */
             transform-origin: top center;
-            /* Standard Scale für Handys (wird per JS optimiert) */
-            transform: scale(0.44); 
+            width: 210mm; 
+            height: 297mm;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            /* Standard Zoom für iPhones */
+            transform: scale(0.45); 
+            margin-bottom: -150mm; /* Gleicht den Raum aus, der durch Scale entsteht */
         }
+
+        /* Anpassung für verschiedene Displaygrößen */
+        @media (max-width: 400px) { .paper-scaler { transform: scale(0.42); margin-bottom: -165mm; } }
+        @media (min-width: 401px) { .paper-scaler { transform: scale(0.48); margin-bottom: -145mm; } }
 
         .paper-content {
             padding: 20mm;
             width: 100%; height: 100%;
             box-sizing: border-box;
-            color: black; /* Text auf Papier immer schwarz */
-            font-size: 11pt; 
+            color: black;
+            font-size: 11pt;
             position: relative;
         }
 
-        /* --- DRUCK DESIGN --- */
+        /* --- RECHNUNG LAYOUT --- */
         .p-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid #000; padding-bottom: 10px; }
-        .p-shop { font-size: 16pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; color: #000; }
-        .p-sub { font-size: 9pt; color: #666; }
-        .p-meta { text-align: right; font-size: 9pt; line-height: 1.4; }
-        
-        .p-sender { font-size: 7pt; color: #777; text-decoration: underline; margin-bottom: 15px; }
-        .p-addr { font-size: 10pt; line-height: 1.4; min-height: 25mm; margin-bottom: 15px; white-space: pre-wrap; }
-        
-        .p-title { font-size: 20pt; font-weight: 700; color: #000; margin-bottom: 15px; margin-top: 5px; }
+        .p-shop { font-size: 18pt; font-weight: 800; text-transform: uppercase; }
+        .p-meta { text-align: right; font-size: 10pt; }
+        .p-sender { font-size: 8pt; color: #777; text-decoration: underline; margin-bottom: 15px; }
+        .p-addr { font-size: 11pt; line-height: 1.4; min-height: 25mm; margin-bottom: 20px; white-space: pre-wrap; color: #000; }
+        .p-title { font-size: 22pt; font-weight: 700; margin-bottom: 20px; }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 6px 0; font-size: 8pt; text-transform: uppercase; color: #333; font-weight: 700; }
-        td { padding: 8px 0; border-bottom: 1px solid #eee; vertical-align: top; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 9pt; text-transform: uppercase; }
+        td { padding: 10px 0; border-bottom: 1px solid #eee; }
         .r { text-align: right; }
-        .total-row td { border-top: 2px solid #000; border-bottom: none; font-weight: 700; font-size: 12pt; padding-top: 10px; }
+        .total-row td { border-top: 2px solid #000; font-weight: 700; font-size: 14pt; padding-top: 15px; border-bottom: none; }
         
         .p-freetext { margin-top: 15px; font-size: 10pt; white-space: pre-wrap; }
-        .p-note { background: #eee; padding: 8px; font-size: 9pt; color: #333; margin-top: 20px; border-radius: 4px; }
-        .p-footer { position: absolute; bottom: 15mm; left: 0; right: 0; text-align: center; font-size: 7pt; color: #888; border-top: 1px solid #ccc; padding-top: 8px; width: 85%; margin: 0 auto; }
+        .p-note { background: #f0f0f0; padding: 10px; font-size: 9pt; margin-top: 25px; border-radius: 4px; }
+        .p-footer { position: absolute; bottom: 15mm; left: 20mm; right: 20mm; text-align: center; font-size: 8pt; color: #888; border-top: 1px solid #ccc; padding-top: 10px; }
 
-        /* --- MODAL --- */
+        /* MODAL */
         .modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85); z-index: 2000;
+            background: rgba(0,0,0,0.9); z-index: 2000;
             display: none; justify-content: center; align-items: center;
         }
         .modal.open { display: flex; }
-        .modal-box { 
-            background: #1c1c1e; width: 85%; max-width: 300px; 
-            border-radius: 12px; padding: 15px; border: 1px solid #333; 
-        }
-        .modal h2 { margin: 0 0 15px 0; color: white; font-size: 1rem; }
-        .modal-input { 
-            background: #2c2c2e; width: 100%; border: none; color: white;
-            margin-bottom: 8px; padding: 10px; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;
-        }
-        .btn-save { background: #fff; color: #000; width: 100%; border:none; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer;}
+        .modal-box { background: #1c1c1e; width: 90%; max-width: 320px; border-radius: 15px; padding: 20px; }
+        .btn-save { background: white; color: black; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
 
-        /* --- TOAST --- */
-        .toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: #fff; color: black; padding: 8px 16px; border-radius: 20px;
-            font-weight: 600; font-size: 0.8rem; z-index: 3000; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); }
-
-        /* --- PRINT MEDIA QUERY --- */
+        /* PRINT */
         @media print {
             @page { margin: 0; size: A4; }
-            body { display: block; background: white; height: auto; overflow: visible; }
-            .cockpit, .modal, .toast { display: none !important; }
-            .preview-area { height: auto; padding: 0; display: block; background: white; overflow: visible; }
-            .paper-scaler { width: 100%; height: auto; transform: none; box-shadow: none; }
-            .paper-content { padding: 20mm; width: 100%; height: auto; }
-            .p-footer { position: fixed; bottom: 10mm; left: 0; right: 0; width: 100%; }
+            body { display: block; background: white; overflow: visible; }
+            .cockpit, .modal { display: none !important; }
+            .preview-area { display: block; background: white; padding: 0; overflow: visible; }
+            .paper-scaler { transform: none !important; margin: 0 !important; width: 100%; height: auto; box-shadow: none; }
+            .p-footer { position: fixed; bottom: 10mm; }
         }
-
-        /* --- RESPONSIVE SCALING --- 
-           Passt das A4 Blatt exakt an die Breite des Handys an
-        */
-        @media (max-width: 360px) { .paper-scaler { transform: scale(0.38); } }
-        @media (min-width: 361px) and (max-width: 400px) { .paper-scaler { transform: scale(0.43); } }
-        @media (min-width: 401px) { .paper-scaler { transform: scale(0.48); } }
     </style>
 </head>
 <body>
 
-    <div id="toast" class="toast">Eingefügt!</div>
-
     <div class="cockpit">
         <div class="cockpit-header">
             <span class="app-title">RechnungsApp</span>
-            <div class="settings-btn" onclick="toggleModal()">⚙️</div>
+            <span onclick="toggleModal()" style="cursor:pointer; opacity:0.5;">⚙️</span>
         </div>
         
         <div class="action-row">
-            <button class="btn btn-paste" onclick="pasteClip()">📋 Einfügen</button>
+            <button class="btn" onclick="pasteClip()">📋 Daten einfügen</button>
             <button class="btn btn-print" onclick="window.print()">🖨️</button>
         </div>
 
-        <div>
-            <span class="lbl">Kunde</span>
-            <textarea id="addrInput" class="input-dark" oninput="updateView()"></textarea>
-        </div>
-        <div>
-            <span class="lbl">Freitext</span>
-            <textarea id="freeInput" class="input-dark" oninput="updateView()"></textarea>
-        </div>
+        <textarea id="addrInput" class="input-dark" rows="3" placeholder="Kunden-Adresse..." oninput="updateView()"></textarea>
+        <textarea id="freeInput" class="input-dark" rows="2" placeholder="Freitext (optional)..." oninput="updateView()"></textarea>
     </div>
 
     <div class="preview-area">
         <div class="paper-scaler">
-            <div class="paper-content" id="paper">
-                
+            <div class="paper-content">
                 <div class="p-header">
                     <div>
                         <div class="p-shop" id="outShop">SHOP NAME</div>
-                        <div class="p-sub" id="outSlogan"></div>
+                        <div id="outSlogan" style="font-size:10pt; color:#666;"></div>
                     </div>
                     <div class="p-meta">
                         Rechnung Nr: <strong id="outNum">RE-000</strong><br>
@@ -225,22 +172,13 @@
 
                 <table>
                     <thead>
-                        <tr>
-                            <th width="5%">#</th>
-                            <th>Beschreibung</th>
-                            <th class="r" width="10%">Menge</th>
-                            <th class="r" width="15%">Einzel</th>
-                            <th class="r" width="15%">Gesamt</th>
-                        </tr>
+                        <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="15%">Einzel</th><th class="r" width="15%">Gesamt</th></tr>
                     </thead>
                     <tbody id="tbody">
-                        <tr><td colspan="5" style="text-align:center; color:#ccc; padding:20px; font-size:9pt;">Daten einfügen...</td></tr>
+                        <tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">Keine Daten</td></tr>
                     </tbody>
                     <tfoot>
-                        <tr class="total-row">
-                            <td colspan="4" class="r">Gesamtbetrag</td>
-                            <td class="r" id="outTotal">0,00 €</td>
-                        </tr>
+                        <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
                     </tfoot>
                 </table>
 
@@ -253,14 +191,11 @@
 
     <div class="modal" id="modal">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <h2>Firmendaten</h2>
-                <span onclick="toggleModal()" style="color:#888; font-size:1.5rem; cursor:pointer;">&times;</span>
-            </div>
-            <input class="modal-input" id="shopName" placeholder="Shop Name" oninput="save()">
-            <input class="modal-input" id="shopSlogan" placeholder="Slogan" oninput="save()">
-            <input class="modal-input" id="shopSender" placeholder="Absenderzeile" oninput="save()">
-            <textarea class="modal-input" id="shopFooter" rows="3" placeholder="Footer (IBAN etc.)" oninput="save()"></textarea>
+            <h2 style="margin-top:0; font-size:1.1rem;">Firmendaten</h2>
+            <input class="input-dark" id="shopName" placeholder="Shop Name" oninput="save()">
+            <input class="input-dark" id="shopSlogan" placeholder="Slogan" oninput="save()">
+            <input class="input-dark" id="shopSender" placeholder="Absenderzeile" oninput="save()">
+            <textarea class="input-dark" id="shopFooter" rows="3" placeholder="Footer Infos..." oninput="save()"></textarea>
             <button class="btn-save" onclick="toggleModal()">Speichern</button>
         </div>
     </div>
@@ -269,123 +204,61 @@
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('outDate').innerText = today;
 
-        const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
         function load() {
-            let hasData = false;
-            fields.forEach(f => {
-                if(localStorage.getItem(f)) {
-                    document.getElementById(f).value = localStorage.getItem(f);
-                    hasData = true;
-                }
+            ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'].forEach(f => {
+                if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
             });
             updateFirmData();
-            if(!hasData) setTimeout(toggleModal, 800);
         }
 
         function save() {
-            fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
+            ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'].forEach(f => localStorage.setItem(f, document.getElementById(f).value));
             updateFirmData();
         }
 
         function updateFirmData() {
-            document.getElementById('outShop').innerText = document.getElementById('shopName').value || "SHOP NAME";
+            document.getElementById('outShop').innerText = document.getElementById('shopName').value || "DEIN SHOP";
             document.getElementById('outSlogan').innerText = document.getElementById('shopSlogan').value;
-            document.getElementById('outSender').innerText = document.getElementById('shopSender').value || "Absender";
+            document.getElementById('outSender').innerText = document.getElementById('shopSender').value;
             document.getElementById('outFooter').innerHTML = (document.getElementById('shopFooter').value || "").replace(/\n/g, '<br>');
         }
 
         function toggleModal() { document.getElementById('modal').classList.toggle('open'); }
-        
         function updateView() {
             document.getElementById('outAddr').innerText = document.getElementById('addrInput').value;
             document.getElementById('outFreeText').innerText = document.getElementById('freeInput').value;
         }
 
         async function pasteClip() {
-            try {
-                const text = await navigator.clipboard.readText();
-                if(text.trim().startsWith('{')) {
-                    try {
-                        const data = JSON.parse(text);
-                        renderInvoice(data);
-                        showToast("Daten eingefügt!");
-                        return;
-                    } catch(e) {}
+            const text = await navigator.clipboard.readText();
+            if(text.trim().startsWith('{')) {
+                const data = JSON.parse(text);
+                if(data.invoiceNr) document.getElementById('outNum').innerText = data.invoiceNr;
+                if(data.date) {
+                    const p = data.date.split('-'); 
+                    if(p.length===3) document.getElementById('outDate').innerText = `${p[2]}.${p[1]}.${p[0]}`;
                 }
-                renderTextMode(text);
-                showToast("Text eingefügt!");
-            } catch(e) { alert("Bitte manuell einfügen."); }
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
-        }
-
-        function renderInvoice(data) {
-            if(data.invoiceNr) {
-                document.getElementById('outNum').innerText = data.invoiceNr;
-                document.title = data.invoiceNr; 
-            }
-            if(data.date) {
-                const p = data.date.split('-'); 
-                if(p.length===3) document.getElementById('outDate').innerText = `${p[2]}.${p[1]}.${p[0]}`;
-            }
-            
-            const noteEl = document.getElementById('outNote');
-            if(data.platform) {
-                noteEl.style.display = 'block';
-                noteEl.innerText = "Verkauf über " + data.platform;
-            } else {
-                noteEl.style.display = 'none';
-            }
-
-            const tb = document.getElementById('tbody'); tb.innerHTML = '';
-            let total = 0; let pos = 1;
-
-            if(data.items && Array.isArray(data.items)) {
+                const tb = document.getElementById('tbody'); tb.innerHTML = '';
+                let total = 0; let pos = 1;
                 data.items.forEach(item => {
-                    const qty = item.qty || 1;
-                    const totalP = item.priceTotal || 0;
-                    const singleP = totalP / qty;
+                    const sum = item.priceTotal; total += sum;
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${pos++}</td><td>${item.name}</td><td class="r">${qty}</td><td class="r">${fmt(singleP)}</td><td class="r">${fmt(totalP)}</td>`;
+                    tr.innerHTML = `<td>${pos++}</td><td>${item.name}</td><td class="r">${item.qty}</td><td class="r">${(sum/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${sum.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
                     tb.appendChild(tr);
-                    total += totalP;
                 });
-            }
-
-            if(data.shipping && data.shipping > 0) {
-                 const tr = document.createElement('tr');
-                 tr.innerHTML = `<td>${pos++}</td><td>Versand & Verpackung</td><td class="r">1</td><td class="r">${fmt(data.shipping)}</td><td class="r">${fmt(data.shipping)}</td>`;
-                 tb.appendChild(tr);
-                 total += data.shipping;
-            }
-
-            document.getElementById('outTotal').innerText = fmt(total);
-        }
-
-        function renderTextMode(text) {
-            const lines = text.split('\n');
-            const tb = document.getElementById('tbody'); tb.innerHTML = '';
-            let total = 0; let pos = 1;
-            lines.forEach(l => {
-                if(!l.trim()) return;
-                const m = l.match(/^(\d+)x\s+(.+)\s+(\d+[.,]\d{2})$/);
-                if(m) {
-                    const q = parseInt(m[1]); const p = parseFloat(m[3].replace(',', '.'));
-                    const sum = q*p; total+=sum;
+                if(data.shipping > 0) {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${pos++}</td><td>${m[2]}</td><td class="r">${q}</td><td class="r">${fmt(p)}</td><td class="r">${fmt(sum)}</td>`;
+                    tr.innerHTML = `<td>${pos++}</td><td>Versand</td><td class="r">1</td><td class="r">${data.shipping.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${data.shipping.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
                     tb.appendChild(tr);
+                    total += data.shipping;
                 }
-            });
-            document.getElementById('outTotal').innerText = fmt(total);
+                document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+                if(data.platform) {
+                    document.getElementById('outNote').style.display = 'block';
+                    document.getElementById('outNote').innerText = "Verkauf über " + data.platform;
+                }
+            }
         }
-
-        function fmt(num) { return num.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €'; }
-
         window.onload = load;
     </script>
 </body>
