@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V4</title>
+    <title>Rechnung V5</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,150 +11,163 @@
 
     <style>
         :root {
-            --bg-cockpit: #1c1c1e;
-            --bg-preview: #f2f2f7;
+            --bg-cockpit: #121212;
+            --bg-preview: #e5e5e5;
             --paper: #ffffff;
-            --accent: #0a84ff;
-            --text-light: #ffffff;
-            --text-dark: #000000;
+            --btn-bg: #2c2c2e;
+            --text-light: #e0e0e0;
+            --border: #333;
         }
 
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
-            overflow: hidden; /* Kein Scrollen auf Body, wir splitten den Screen */
+            overflow: hidden; 
             display: flex;
             flex-direction: column;
+            background: var(--bg-cockpit);
         }
 
         /* --- 1. COCKPIT (OBEN) --- */
         .cockpit {
-            height: 35vh; /* Oberes Drittel */
+            height: 40vh; /* Etwas mehr Platz für die Felder */
             background: var(--bg-cockpit);
             color: var(--text-light);
             padding: 15px 20px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             z-index: 10;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid var(--border);
             padding-top: max(15px, env(safe-area-inset-top));
         }
 
         .cockpit-header {
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;
         }
-        .app-title { font-weight: 700; font-size: 1.1rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .settings-btn { font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        .app-title { font-weight: 600; font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .settings-btn { font-size: 1.1rem; cursor: pointer; opacity: 0.7; }
 
-        .action-row { display: flex; gap: 10px; }
+        .action-row { display: flex; gap: 8px; }
         
         .btn {
-            border: none; border-radius: 8px; padding: 0 15px; height: 44px;
-            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            border: 1px solid var(--border); border-radius: 6px; height: 38px;
+            font-weight: 500; font-size: 0.85rem; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: var(--btn-bg); color: #fff; transition: 0.2s;
         }
-        .btn-paste { background: #333; color: var(--accent); flex: 1; border: 1px solid #444; }
-        .btn-print { background: var(--accent); color: white; width: 60px; }
-        .btn-paste:active, .btn-print:active { transform: scale(0.96); opacity: 0.8; }
+        .btn:active { background: #444; transform: scale(0.98); }
+        .btn-paste { flex: 1; }
+        .btn-print { width: 50px; font-size: 1.2rem; }
 
-        .addr-input {
-            flex-grow: 1; /* Nimmt restlichen Platz */
-            background: #2c2c2e; border: 1px solid #333;
-            border-radius: 8px; color: white; padding: 10px;
-            font-family: inherit; font-size: 1rem; resize: none;
+        /* Eingabefelder im Cockpit */
+        .input-compact {
+            background: #1c1c1e; border: 1px solid var(--border);
+            border-radius: 6px; color: #ddd; padding: 8px;
+            font-family: inherit; font-size: 0.9rem; resize: none;
+            width: 100%; box-sizing: border-box;
         }
-        .addr-input:focus { outline: none; border-color: var(--accent); }
+        .input-compact:focus { outline: none; border-color: #666; background: #222; }
+        
+        /* Höhen Anpassung */
+        #addrInput { height: 60px; } /* Kleiner als vorher */
+        #freeInput { height: 45px; } /* Für den Freitext */
+
+        .label-small { font-size: 0.7rem; color: #666; margin-left: 2px; text-transform: uppercase; }
 
         /* --- 2. PREVIEW (UNTEN) --- */
         .preview-area {
-            height: 65vh; /* Untere zwei Drittel */
+            height: 60vh; 
             background: var(--bg-preview);
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 20px;
-            display: flex; justify-content: center;
+            overflow: hidden; /* Scrollen passiert im Wrapper */
+            display: flex; 
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            position: relative;
         }
 
-        /* Das Papierblatt */
+        /* Wrapper für den Zoom-Effekt */
+        .paper-scaler {
+            transform: scale(0.65); /* 65% Größe -> Viel Übersicht */
+            transform-origin: top center;
+            height: auto;
+            /* Scrollbar erlauben, falls Rechnung sehr lang ist */
+            overflow-y: visible;
+        }
+
         .paper {
             background: var(--paper);
-            width: 100%; max-width: 210mm; /* A4 Breite */
-            min-height: 297mm; /* A4 Höhe */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 15mm 15mm;
+            width: 210mm; min-height: 297mm; /* Echtes A4 */
+            padding: 20mm;
             box-sizing: border-box;
             color: black;
-            font-size: 10pt; /* Druckgröße */
+            font-size: 11pt; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             position: relative;
-            transform-origin: top center;
-        }
-        
-        /* Zoom für kleine Screens, damit man das Blatt sieht */
-        @media (max-width: 450px) {
-            .paper { font-size: 11pt; padding: 10mm; } 
         }
 
-        /* --- INVOICE STYLING (Inside Paper) --- */
-        .p-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        .p-shop { font-size: 16pt; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; color: #000; }
-        .p-sub { font-size: 9pt; color: #666; }
-        .p-meta { text-align: right; font-size: 9pt; line-height: 1.5; }
-        .p-meta strong { color: #000; }
-
-        .p-sender { font-size: 7pt; color: #888; text-decoration: underline; margin-bottom: 15px; }
-        .p-addr { font-size: 11pt; line-height: 1.4; min-height: 30mm; margin-bottom: 20px; white-space: pre-wrap; }
+        /* --- DRUCK DESIGN (Innerhalb Paper) --- */
+        .p-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+        .p-shop { font-size: 18pt; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; color: #000; }
+        .p-sub { font-size: 10pt; color: #666; }
+        .p-meta { text-align: right; font-size: 10pt; line-height: 1.5; }
         
-        .p-title-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; }
-        .p-title { font-size: 20pt; font-weight: 700; color: #000; }
-        .p-total-badge { font-size: 14pt; font-weight: 700; color: #000; }
+        .p-sender { font-size: 8pt; color: #888; text-decoration: underline; margin-bottom: 15px; }
+        .p-addr { font-size: 11pt; line-height: 1.4; min-height: 30mm; margin-bottom: 10px; white-space: pre-wrap; }
+        
+        .p-title { font-size: 22pt; font-weight: 700; color: #000; margin-bottom: 20px; margin-top: 10px; }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 8pt; text-transform: uppercase; color: #444; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 9pt; text-transform: uppercase; color: #333; font-weight: 600; }
         td { padding: 10px 0; border-bottom: 1px solid #eee; vertical-align: top; }
         .r { text-align: right; }
-        .total-row td { border-top: 2px solid #000; border-bottom: none; font-weight: 700; font-size: 12pt; padding-top: 15px; }
+        .total-row td { border-top: 2px solid #000; border-bottom: none; font-weight: 700; font-size: 14pt; padding-top: 15px; }
         
-        .p-note { background: #f9f9f9; padding: 10px; border-left: 3px solid #ccc; font-size: 9pt; color: #444; margin-top: 20px; }
+        /* Der neue Freitext Bereich */
+        .p-freetext { margin-top: 15px; font-size: 10pt; white-space: pre-wrap; }
+
+        .p-note { background: #f5f5f5; padding: 10px; font-size: 9pt; color: #444; margin-top: 25px; border-radius: 4px; }
         .p-footer { margin-top: 50px; text-align: center; font-size: 8pt; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
 
         /* --- MODAL --- */
         .modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(2px); z-index: 2000;
             display: none; justify-content: center; align-items: center;
         }
         .modal.open { display: flex; }
         .modal-box { 
-            background: #1c1c1e; width: 85%; max-width: 350px; 
-            border-radius: 16px; padding: 20px; border: 1px solid #333; 
+            background: #1c1c1e; width: 85%; max-width: 320px; 
+            border-radius: 12px; padding: 20px; border: 1px solid #333; 
         }
-        .modal h2 { margin: 0 0 15px 0; color: white; font-size: 1.2rem; }
+        .modal h2 { margin: 0 0 15px 0; color: white; font-size: 1.1rem; }
         .modal-input { 
             background: #2c2c2e; width: 100%; border: none; color: white;
-            margin-bottom: 10px; padding: 12px; border-radius: 8px; box-sizing: border-box; 
+            margin-bottom: 10px; padding: 10px; border-radius: 6px; box-sizing: border-box; 
         }
-        .btn-save { background: var(--accent); color: white; width: 100%; border:none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 5px; }
+        .btn-save { background: #fff; color: #000; width: 100%; border:none; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer;}
 
         /* --- TOAST --- */
         .toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: #30d158; color: black; padding: 8px 16px; border-radius: 20px;
-            font-weight: 600; font-size: 0.9rem; z-index: 3000; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: #fff; color: black; padding: 8px 16px; border-radius: 20px;
+            font-weight: 600; font-size: 0.8rem; z-index: 3000; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         .toast.show { transform: translateX(-50%) translateY(0); }
 
-        /* --- PRINT MEDIA QUERY (Das Wichtigste!) --- */
+        /* --- PRINT MEDIA QUERY --- */
         @media print {
             @page { margin: 0; size: A4; }
             body { display: block; background: white; height: auto; overflow: visible; }
             .cockpit, .modal, .toast { display: none !important; }
-            .preview-area { height: auto; padding: 0; overflow: visible; display: block; background: white; }
+            .preview-area { height: auto; padding: 0; display: block; background: white; overflow: visible; }
+            .paper-scaler { transform: none; height: auto; overflow: visible; } /* Zoom entfernen beim Drucken */
             .paper { 
                 box-shadow: none; width: 100%; max-width: none; min-height: 0; 
-                margin: 0; padding: 15mm 20mm; transform: none; 
+                margin: 0; padding: 20mm; 
             }
             .p-footer { position: fixed; bottom: 10mm; left: 0; right: 0; }
         }
@@ -166,73 +179,79 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">Rechnung</span>
+            <span class="app-title">RechnungsApp</span>
             <div class="settings-btn" onclick="toggleModal()">⚙️</div>
         </div>
         
         <div class="action-row">
-            <button class="btn btn-paste" onclick="pasteClip()">📋 Daten einfügen</button>
-            <button class="btn btn-print" onclick="window.print()">🖨️</button>
+            <button class="btn btn-paste" onclick="pasteClip()">📋 Einfügen</button>
+            <button class="btn btn-print" onclick="window.print()">🖨️ PDF</button>
         </div>
 
-        <textarea id="addrInput" class="addr-input" placeholder="Kundenadresse hier einfügen..." oninput="updateAddr()"></textarea>
+        <div>
+            <span class="label-small">Kunde (Adresse)</span>
+            <textarea id="addrInput" class="input-compact" oninput="updateView()"></textarea>
+        </div>
+        <div>
+            <span class="label-small">Freitext (unter Artikel)</span>
+            <textarea id="freeInput" class="input-compact" oninput="updateView()"></textarea>
+        </div>
     </div>
 
     <div class="preview-area">
-        <div class="paper" id="paper">
-            
-            <div class="p-header">
-                <div>
-                    <div class="p-shop" id="outShop">SHOP NAME</div>
-                    <div class="p-sub" id="outSlogan">Slogan</div>
+        <div class="paper-scaler">
+            <div class="paper" id="paper">
+                
+                <div class="p-header">
+                    <div>
+                        <div class="p-shop" id="outShop">SHOP NAME</div>
+                        <div class="p-sub" id="outSlogan"></div>
+                    </div>
+                    <div class="p-meta">
+                        Rechnung Nr: <strong id="outNum">RE-000</strong><br>
+                        Rechnungsdatum: <span id="outDate">-</span>
+                    </div>
                 </div>
-                <div class="p-meta">
-                    Rechnung Nr: <strong id="outNum">RE-000</strong><br>
-                    Datum: <span id="outDate">-</span><br>
-                    Lieferdatum: <span id="outDeliv">-</span>
-                </div>
-            </div>
 
-            <div class="p-sender" id="outSender">Absenderzeile</div>
-            
-            <div class="p-addr" id="outAddr"></div>
+                <div class="p-sender" id="outSender">Absenderzeile</div>
+                
+                <div class="p-addr" id="outAddr"></div>
 
-            <div class="p-title-row">
                 <div class="p-title">Rechnung</div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="5%">#</th>
+                            <th>Beschreibung</th>
+                            <th class="r" width="10%">Menge</th>
+                            <th class="r" width="15%">Einzel</th>
+                            <th class="r" width="15%">Gesamt</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        <tr><td colspan="5" style="text-align:center; color:#ccc; padding:20px; font-size:9pt;">Keine Daten. Bitte 'Einfügen' klicken.</td></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="4" class="r">Gesamtbetrag</td>
+                            <td class="r" id="outTotal">0,00 €</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div id="outFreeText" class="p-freetext"></div>
+
+                <div id="outNote" class="p-note" style="display:none"></div>
+
+                <div class="p-footer" id="outFooter"></div>
             </div>
-
-            <div style="margin-bottom: 15px;">Vielen Dank für Ihre Bestellung.</div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th width="5%">#</th>
-                        <th>Beschreibung</th>
-                        <th class="r" width="10%">Menge</th>
-                        <th class="r" width="15%">Einzel</th>
-                        <th class="r" width="15%">Gesamt</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody">
-                    <tr><td colspan="5" style="text-align:center; color:#ccc; padding:20px;">Keine Daten. Bitte oben 'Einfügen' klicken.</td></tr>
-                </tbody>
-                <tfoot>
-                    <tr class="total-row">
-                        <td colspan="4" class="r">Gesamtbetrag</td>
-                        <td class="r" id="outTotal">0,00 €</td>
-                    </tr>
-                </tfoot>
-            </table>
-
-            <div id="outNote" class="p-note" style="display:none"></div>
-
-            <div class="p-footer" id="outFooter">Footer Infos</div>
         </div>
     </div>
 
     <div class="modal" id="modal">
         <div class="modal-box">
-            <div style="display:flex; justify-content:space-between;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                 <h2>Firmendaten</h2>
                 <span onclick="toggleModal()" style="color:#888; font-size:1.5rem; cursor:pointer;">&times;</span>
             </div>
@@ -248,7 +267,6 @@
         // --- SETUP ---
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('outDate').innerText = today;
-        document.getElementById('outDeliv').innerText = today;
 
         // --- STORAGE & SETTINGS ---
         const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
@@ -280,10 +298,10 @@
             document.getElementById('modal').classList.toggle('open');
         }
 
-        // --- LIVE ADDRESS UPDATE ---
-        function updateAddr() {
-            const txt = document.getElementById('addrInput').value;
-            document.getElementById('outAddr').innerText = txt;
+        // --- LIVE UPDATES ---
+        function updateView() {
+            document.getElementById('outAddr').innerText = document.getElementById('addrInput').value;
+            document.getElementById('outFreeText').innerText = document.getElementById('freeInput').value;
         }
 
         // --- PASTE LOGIC ---
@@ -314,14 +332,13 @@
             // Meta
             if(data.invoiceNr) {
                 document.getElementById('outNum').innerText = data.invoiceNr;
-                document.title = data.invoiceNr; // Dateiname für PDF
+                document.title = data.invoiceNr; 
             }
             if(data.date) {
                 const p = data.date.split('-'); 
                 if(p.length===3) {
                     const d = `${p[2]}.${p[1]}.${p[0]}`;
                     document.getElementById('outDate').innerText = d;
-                    document.getElementById('outDeliv').innerText = d;
                 }
             }
             
