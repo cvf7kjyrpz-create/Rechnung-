@@ -2,444 +2,334 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Rechnung</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Rechnung">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/000000/ffffff?text=R">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/1c1c1e/ffffff?text=R">
 
     <style>
         :root {
             --bg-body: #000000;
             --bg-card: #1c1c1e;
-            --input-bg: #2c2c2e;
+            --separator: #38383a;
             --text-main: #ffffff;
             --text-muted: #8e8e93;
-            --border: #38383a;
-            --btn-primary: #ffffff;
-            --btn-text-primary: #000000;
+            --accent: #ffffff; /* Weiß statt Blau für puren Look */
+            --danger: #ff453a;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
+        /* --- 1. DAS FIXIEREN (ANTI-BOUNCE) --- */
+        html, body {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
             background-color: var(--bg-body);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
             color: var(--text-main);
-            margin: 0;
-            padding: 20px 15px 50px 15px;
-            -webkit-tap-highlight-color: transparent;
+            overflow: hidden; /* Verhindert das Scrollen des gesamten Bodys */
+            position: fixed;  /* Tackert die App fest */
         }
 
-        /* --- HEADER --- */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-top: 10px;
+        /* --- 2. SCROLL-CONTAINER --- */
+        .app-scroller {
+            height: 100%;
+            width: 100%;
+            overflow-y: auto; /* Nur hier drin wird gescrollt */
+            -webkit-overflow-scrolling: touch; /* Weiches Scrollen */
+            padding: 50px 20px 100px 20px; /* Platz oben und unten */
+            box-sizing: border-box;
         }
 
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
+        /* --- UI DESIGN (DEZENT) --- */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-top: env(safe-area-inset-top);
+        }
+        h1 { font-size: 1.5rem; font-weight: 600; margin: 0; letter-spacing: -0.5px; }
+
+        .settings-icon {
+            font-size: 1.2rem; padding: 10px; cursor: pointer; opacity: 0.7;
         }
 
-        .settings-btn {
+        .label {
+            font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 6px; padding-left: 4px; letter-spacing: 0.5px; font-weight: 500;
+        }
+
+        /* iOS Style List Group */
+        .group {
             background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        .settings-btn:active { transform: scale(0.9); }
-
-        /* --- MAIN UI --- */
-        .section-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            padding-left: 5px;
-            letter-spacing: 0.5px;
-        }
-
-        .card {
-            background: var(--bg-card);
-            border-radius: 14px;
+            border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
-
-        .input-row {
-            border-bottom: 1px solid var(--border);
+        .row {
+            border-bottom: 1px solid var(--separator);
+            position: relative;
         }
-        .input-row:last-child { border-bottom: none; }
+        .row:last-child { border-bottom: none; }
 
         input, textarea {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            width: 100%;
-            padding: 16px;
-            font-size: 17px;
-            font-family: inherit;
-            box-sizing: border-box;
-            display: block;
+            background: transparent; border: none; color: white;
+            width: 100%; padding: 14px 16px; font-size: 16px;
+            font-family: inherit; display: block; box-sizing: border-box;
         }
-        input:focus, textarea:focus { outline: none; background: #333; }
+        input:focus, textarea:focus { outline: none; background: #2c2c2e; }
         input::placeholder, textarea::placeholder { color: #555; }
 
-        /* --- BUTTONS --- */
+        /* Buttons */
         .btn {
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            width: 100%;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            margin-bottom: 15px;
-            transition: opacity 0.2s;
+            background: var(--bg-card); color: var(--text-main);
+            border: none; width: 100%; padding: 14px;
+            font-size: 16px; font-weight: 500; border-radius: 10px;
+            margin-bottom: 10px; cursor: pointer; text-align: center;
+            transition: background 0.2s;
         }
-        .btn:active { opacity: 0.7; }
-
-        .btn-secondary {
-            background: var(--input-bg);
-            color: var(--text-main);
+        .btn:active { background: #333; }
+        
+        .btn-main {
+            background: var(--text-main); color: black; font-weight: 600;
+            margin-top: 20px; padding: 16px;
         }
 
-        .btn-primary {
-            background: var(--btn-primary);
-            color: var(--btn-text-primary);
-            margin-top: 30px;
-            padding: 18px;
-            font-weight: 700;
+        .status { 
+            text-align: center; color: #30d158; font-size: 0.8rem; 
+            height: 20px; margin-bottom: 5px; opacity: 0; transition: opacity 0.3s; 
         }
+        .status.show { opacity: 1; }
 
-        .status-msg {
-            text-align: center;
-            color: #30d158;
-            font-size: 0.9rem;
-            height: 20px;
-            margin-bottom: 10px;
+        /* 2-Spalten Layout für Datum/Nr */
+        .grid-2 { display: flex; gap: 1px; background: var(--separator); border-radius: 10px; overflow: hidden; margin-bottom: 25px; }
+        .grid-2 > div { flex: 1; background: var(--bg-card); }
+        .grid-2 input { text-align: center; }
+
+        /* --- MODAL (POPUP) --- */
+        .modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            z-index: 999; display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s;
         }
-
-        /* Flex Grid */
-        .flex-row { display: flex; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px;}
-        .flex-row > div { flex: 1; background: var(--bg-card); }
-        .flex-row input { text-align: center; }
-
-
-        /* --- POPUP / MODAL --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            display: none; /* Hidden by default */
-            align-items: center; /* Center vertical */
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
+        .modal.open { display: flex; opacity: 1; }
+        .modal-box {
+            background: #1c1c1e; width: 85%; max-width: 350px;
+            border-radius: 14px; padding: 20px; box-shadow: 0 10px 30px black;
+            border: 1px solid #333; transform: scale(0.95); transition: transform 0.2s;
         }
+        .modal.open .modal-box { transform: scale(1); }
+        .modal-head { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .modal-title { font-weight: 600; font-size: 1.1rem; }
+        .close { background: none; border: none; color: #888; font-size: 1.5rem; padding: 0; }
 
-        .modal-overlay.open {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: #1c1c1e;
-            width: 90%;
-            max-width: 400px;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            border: 1px solid #333;
-            transform: translateY(20px);
-            transition: transform 0.3s;
-        }
-        .modal-overlay.open .modal-content { transform: translateY(0); }
-
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px;
-        }
-        .modal-title { font-size: 1.2rem; font-weight: bold; }
-        .close-btn { 
-            background: #333; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer;
-        }
-
-        /* --- DRUCK CSS (Hidden) --- */
-        #print-area { display: none; }
+        /* --- DRUCK CSS (VERSTECKT) --- */
+        #print-layer { display: none; }
 
         @media print {
-            body { background: white; margin: 0; padding: 0; color: black; -webkit-print-color-adjust: exact; }
-            .app-header, .section-label, .card, .btn, .status-msg, .flex-row, .modal-overlay { display: none !important; }
-            
-            #print-area {
-                display: block;
-                width: 100%;
-                padding: 15mm 20mm;
-                box-sizing: border-box;
+            @page { margin: 0; size: A4; }
+            body { 
+                position: static; overflow: visible; background: white; color: black; 
+                width: 100%; height: auto;
+            }
+            .app-scroller, .modal { display: none !important; }
+
+            #print-layer {
+                display: block; width: 210mm; min-height: 296mm;
+                padding: 15mm 20mm; box-sizing: border-box;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                position: relative;
             }
 
-            /* Clean Invoice Design */
-            .inv-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-            .inv-shop { font-size: 14pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; color: #000; }
-            .inv-slogan { font-size: 9pt; color: #666; }
-            .inv-meta { text-align: right; font-size: 9pt; line-height: 1.4; }
+            /* Clean Invoice Style */
+            .p-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+            .p-shop { font-size: 14pt; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+            .p-sub { font-size: 9pt; color: #666; }
+            .p-meta { text-align: right; font-size: 9pt; line-height: 1.4; }
             
-            .sender-line { font-size: 7pt; color: #777; text-decoration: underline; margin-bottom: 15px; }
-            .inv-address { font-size: 10pt; line-height: 1.4; min-height: 30mm; margin-bottom: 15px; }
-            
-            .inv-title { font-size: 16pt; font-weight: bold; margin-bottom: 10px; }
-            .inv-intro { font-size: 10pt; margin-bottom: 10px; }
+            .p-sender { font-size: 7pt; color: #777; text-decoration: underline; margin-bottom: 15px; }
+            .p-addr { font-size: 10pt; line-height: 1.4; min-height: 35mm; margin-bottom: 15px; }
+            .p-title { font-size: 16pt; font-weight: bold; margin-bottom: 10px; }
+            .p-intro { font-size: 10pt; margin-bottom: 15px; }
 
             table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 20px; }
-            th { text-align: left; border-bottom: 1px solid #000; padding: 5px 0; font-weight: bold; font-size: 8pt; text-transform: uppercase; }
+            th { text-align: left; border-bottom: 1px solid #000; padding: 5px 0; font-size: 8pt; text-transform: uppercase; }
             td { padding: 5px 0; border-bottom: 1px solid #eee; }
             .r { text-align: right; }
+            .total td { border-top: 1px solid #000; font-weight: bold; font-size: 11pt; padding-top: 10px; border-bottom: none; }
             
-            .total-row td { border-top: 1px solid #000; font-weight: bold; font-size: 11pt; padding-top: 10px; border-bottom: none; }
-            .inv-note { margin-top: 15px; font-size: 9pt; background: #f9f9f9; padding: 10px; border-left: 2px solid #000; }
-            .inv-footer { position: fixed; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 7pt; color: #666; }
+            .p-note { margin-top: 20px; font-size: 9pt; background: #f5f5f5; padding: 10px; border-left: 2px solid #000; }
+            .p-footer { 
+                position: absolute; bottom: 15mm; left: 20mm; right: 20mm; 
+                text-align: center; font-size: 7pt; color: #666; 
+                border-top: 1px solid #eee; padding-top: 5px; 
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Firmendaten</div>
-                <button class="close-btn" onclick="closeSettings()">×</button>
+    <div class="modal" id="modal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <span class="modal-title">Firmendaten</span>
+                <button class="close" onclick="toggleModal()">×</button>
             </div>
-            <p style="color:#888; font-size:0.9rem; margin-bottom:15px;">Wird für alle zukünftigen Rechnungen gespeichert.</p>
-            
-            <div class="card" style="margin-bottom:0; border: 1px solid #333;">
-                <div class="input-row"><input type="text" id="shopName" placeholder="Dein Shop Name" oninput="saveData()"></div>
-                <div class="input-row"><input type="text" id="shopSlogan" placeholder="Slogan / Zusatz" oninput="saveData()"></div>
-                <div class="input-row"><input type="text" id="shopSender" placeholder="Absenderzeile (klein)" oninput="saveData()"></div>
-                <div class="input-row"><textarea id="shopFooter" rows="3" placeholder="Footer (IBAN, UStID...)" oninput="saveData()"></textarea></div>
+            <div class="group">
+                <div class="row"><input type="text" id="shopName" placeholder="Shop Name" oninput="save()"></div>
+                <div class="row"><input type="text" id="shopSlogan" placeholder="Slogan" oninput="save()"></div>
+                <div class="row"><input type="text" id="shopSender" placeholder="Absenderzeile" oninput="save()"></div>
+                <div class="row"><textarea id="shopFooter" rows="3" placeholder="Footer Infos..." oninput="save()"></textarea></div>
             </div>
-            
-            <button class="btn btn-secondary" style="margin-top:20px; margin-bottom:0;" onclick="closeSettings()">Speichern & Schließen</button>
+            <button class="btn" onclick="toggleModal()">Speichern & Schließen</button>
         </div>
     </div>
 
-    <div class="app-header">
-        <h1>Rechnung</h1>
-        <button class="settings-btn" onclick="openSettings()">⚙️</button>
-    </div>
-
-    <div class="section-label">Artikel</div>
-    <button class="btn btn-secondary" onclick="pasteFromClipboard()">
-        📋 Verkauf einfügen
-    </button>
-    <div id="status" class="status-msg"></div>
-
-    <div class="section-label">Kunde</div>
-    <div class="card">
-        <div class="input-row">
-            <textarea id="addrInput" rows="4" placeholder="Adresse vom Label..." oninput="render()"></textarea>
+    <div class="app-scroller">
+        
+        <div class="header">
+            <h1>Rechnung</h1>
+            <div class="settings-icon" onclick="toggleModal()">⚙️</div>
         </div>
-    </div>
 
-    <div class="flex-row">
-        <div><input type="text" id="invNum" value="RE-2024-001" oninput="render()"></div>
-        <div><input type="text" id="invDateInput" oninput="render()"></div>
-    </div>
+        <div class="label">Import</div>
+        <button class="btn" onclick="pasteClip()">📋 Aus Zwischenablage einfügen</button>
+        <div id="status" class="status">✅ Eingefügt!</div>
 
-    <div class="section-label">Anmerkung</div>
-    <div class="card">
-        <div class="input-row">
-            <textarea id="noteInput" rows="2" placeholder="Z.B. Danke für Ihren Einkauf..." oninput="render()"></textarea>
+        <div class="label">Kunde</div>
+        <div class="group">
+            <div class="row"><textarea id="addr" rows="4" placeholder="Adresse vom Label..." oninput="render()"></textarea></div>
         </div>
+
+        <div class="label">Details</div>
+        <div class="grid-2">
+            <div><input type="text" id="invNum" value="RE-2024-001" oninput="render()"></div>
+            <div><input type="text" id="invDate" oninput="render()"></div>
+        </div>
+
+        <div class="label">Anmerkung</div>
+        <div class="group">
+            <div class="row"><textarea id="note" rows="2" placeholder="Optionaler Text..." oninput="render()"></textarea></div>
+        </div>
+
+        <button class="btn btn-main" onclick="window.print()">PDF Erstellen</button>
     </div>
 
-    <button class="btn btn-primary" onclick="window.print()">
-        PDF Erstellen
-    </button>
 
-
-    <div id="print-area">
-        <div class="inv-header">
+    <div id="print-layer">
+        <div class="p-header">
             <div>
-                <div class="inv-shop" id="outShopName">SHOP</div>
-                <div class="inv-slogan" id="outShopSlogan"></div>
+                <div class="p-shop" id="outShop">SHOP</div>
+                <div class="p-sub" id="outSlogan"></div>
             </div>
-            <div class="inv-meta">
-                Rechnung Nr.: <span id="outInvNum"></span><br>
+            <div class="p-meta">
+                Rechnung Nr.: <span id="outNum"></span><br>
                 Datum: <span id="outDate"></span><br>
-                Lieferdatum: <span id="outDelivDate"></span>
+                Lieferdatum: <span id="outDeliv"></span>
             </div>
         </div>
 
-        <div class="sender-line" id="outSender">Absender</div>
-        <div class="inv-address" id="outAddress"></div>
-        <div class="inv-title">Rechnung</div>
-        <div class="inv-intro">Vielen Dank für Ihre Bestellung.</div>
+        <div class="p-sender" id="outSender">Absender</div>
+        <div class="p-addr" id="outAddr"></div>
+        <div class="p-title">Rechnung</div>
+        <div class="p-intro">Vielen Dank für Ihre Bestellung.</div>
 
         <table>
             <thead>
-                <tr>
-                    <th width="5%">#</th>
-                    <th>Artikel</th>
-                    <th class="r" width="10%">Menge</th>
-                    <th class="r" width="15%">Einzel</th>
-                    <th class="r" width="15%">Gesamt</th>
-                </tr>
+                <tr><th width="5%">#</th><th>Artikel</th><th class="r" width="10%">Menge</th><th class="r" width="15%">Einzel</th><th class="r" width="15%">Gesamt</th></tr>
             </thead>
-            <tbody id="tableBody"></tbody>
+            <tbody id="tbody"></tbody>
             <tfoot>
-                <tr class="total-row">
-                    <td colspan="4" class="r">Gesamtbetrag:</td>
-                    <td class="r" id="outTotal">0,00 €</td>
-                </tr>
+                <tr class="total"><td colspan="4" class="r">Gesamtbetrag:</td><td class="r" id="outTotal">0,00 €</td></tr>
             </tfoot>
         </table>
 
-        <div id="outNote" class="inv-note" style="display:none"></div>
-        <div class="inv-footer" id="outFooter"></div>
+        <div id="outNote" class="p-note" style="display:none"></div>
+        <div class="p-footer" id="outFooter"></div>
     </div>
 
     <script>
-        // INIT
         const today = new Date().toLocaleDateString('de-DE');
-        document.getElementById('invDateInput').value = today;
+        document.getElementById('invDate').value = today;
 
-        // --- POPUP LOGIC ---
-        function openSettings() {
-            const modal = document.getElementById('settingsModal');
-            modal.style.display = 'flex';
-            // Kleiner Timeout für Animation
-            setTimeout(() => modal.classList.add('open'), 10);
+        // Modal Logic
+        function toggleModal() {
+            const m = document.getElementById('modal');
+            if(m.style.display === 'flex') {
+                m.classList.remove('open'); setTimeout(() => m.style.display = 'none', 300);
+            } else {
+                m.style.display = 'flex'; setTimeout(() => m.classList.add('open'), 10);
+            }
         }
 
-        function closeSettings() {
-            const modal = document.getElementById('settingsModal');
-            modal.classList.remove('open');
-            setTimeout(() => modal.style.display = 'none', 300);
-        }
-
-        // --- SAVE & LOAD ---
-        function loadData() {
-            const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
+        // Data Handling
+        const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
+        
+        function load() {
             let hasData = false;
-            fields.forEach(id => {
-                if(localStorage.getItem(id)) {
-                    document.getElementById(id).value = localStorage.getItem(id);
+            fields.forEach(f => {
+                if(localStorage.getItem(f)) {
+                    document.getElementById(f).value = localStorage.getItem(f);
                     hasData = true;
                 }
             });
             render();
-            
-            // Wenn keine Daten da sind (erste Benutzung), öffne Popup automatisch
-            if(!hasData) {
-                setTimeout(openSettings, 500);
-            }
+            if(!hasData) setTimeout(toggleModal, 600);
         }
 
-        function saveData() {
-            const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
-            fields.forEach(id => {
-                localStorage.setItem(id, document.getElementById(id).value);
-            });
+        function save() {
+            fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
             render();
         }
 
-        // --- RENDER FOR PRINT ---
         function render() {
-            // Firma
-            document.getElementById('outShopName').innerText = document.getElementById('shopName').value || "DEIN SHOP";
-            document.getElementById('outShopSlogan').innerText = document.getElementById('shopSlogan').value;
-            document.getElementById('outSender').innerText = document.getElementById('shopSender').value || "Firma • Straße • Ort";
+            // Print Output Mapping
+            document.getElementById('outShop').innerText = document.getElementById('shopName').value || "DEIN SHOP";
+            document.getElementById('outSlogan').innerText = document.getElementById('shopSlogan').value;
+            document.getElementById('outSender').innerText = document.getElementById('shopSender').value || "Absender";
             document.getElementById('outFooter').innerHTML = (document.getElementById('shopFooter').value || "").replace(/\n/g, '<br>');
-
-            // Rechnung
-            const date = document.getElementById('invDateInput').value;
-            document.getElementById('outDate').innerText = date;
-            document.getElementById('outDelivDate').innerText = date;
-            document.getElementById('outInvNum').innerText = document.getElementById('invNum').value;
-
-            // Adresse
-            const addr = document.getElementById('addrInput').value;
-            document.getElementById('outAddress').innerHTML = addr ? addr.replace(/\n/g, '<br>') : "";
-
-            // Note
-            const note = document.getElementById('noteInput').value;
-            const el = document.getElementById('outNote');
-            if(note.trim()) {
-                el.style.display = 'block';
-                el.innerText = note;
-            } else {
-                el.style.display = 'none';
-            }
+            
+            const d = document.getElementById('invDate').value;
+            document.getElementById('outDate').innerText = d;
+            document.getElementById('outDeliv').innerText = d;
+            document.getElementById('outNum').innerText = document.getElementById('invNum').value;
+            
+            const addr = document.getElementById('addr').value;
+            document.getElementById('outAddr').innerHTML = addr ? addr.replace(/\n/g, '<br>') : "";
+            
+            const n = document.getElementById('note').value;
+            const ne = document.getElementById('outNote');
+            if(n.trim()) { ne.style.display='block'; ne.innerText=n; } else { ne.style.display='none'; }
         }
 
-        // --- IMPORT ---
-        async function pasteFromClipboard() {
-            const status = document.getElementById('status');
+        async function pasteClip() {
+            const s = document.getElementById('status');
             try {
                 const text = await navigator.clipboard.readText();
-                processData(text);
-                status.innerText = "✅ Eingefügt!";
-                setTimeout(() => status.innerText = "", 2000);
-            } catch (err) {
-                // iOS Safari benötigt manchmal einen manuellen Trigger oder fragt beim ersten Mal
-                alert("Bitte tippe kurz in das Adressfeld und versuche es erneut, oder füge den Text manuell ein.");
-            }
+                process(text);
+                s.classList.add('show'); setTimeout(() => s.classList.remove('show'), 2000);
+            } catch(e) { alert("Zugriff verweigert. Bitte manuell einfügen."); }
         }
 
-        function processData(text) {
+        function process(text) {
             const lines = text.split('\n');
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+            const tb = document.getElementById('tbody'); tb.innerHTML = '';
+            let total = 0; let pos = 1;
             
-            let total = 0;
-            let pos = 1;
-
-            lines.forEach(line => {
-                if(!line.trim()) return;
-                const match = line.match(/^(\d+)x\s+(.+)\s+(\d+[.,]\d{2})$/);
-                
-                if (match) {
-                    const qty = parseInt(match[1]);
-                    const name = match[2];
-                    const price = parseFloat(match[3].replace(',', '.'));
-                    const sum = qty * price;
-                    total += sum;
-
+            lines.forEach(l => {
+                if(!l.trim()) return;
+                const m = l.match(/^(\d+)x\s+(.+)\s+(\d+[.,]\d{2})$/);
+                if(m) {
+                    const q = parseInt(m[1]); const p = parseFloat(m[3].replace(',', '.'));
+                    const sum = q*p; total+=sum;
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${pos++}</td>
-                        <td>${name}</td>
-                        <td class="r">${qty}</td>
-                        <td class="r">${price.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
-                        <td class="r">${sum.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
-                    `;
-                    tbody.appendChild(tr);
+                    tr.innerHTML = `<td>${pos++}</td><td>${m[2]}</td><td class="r">${q}</td><td class="r">${p.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${sum.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
+                    tb.appendChild(tr);
                 }
             });
-            document.getElementById('outTotal').innerText = total.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €';
+            document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
         }
 
-        window.onload = loadData;
+        window.onload = load;
     </script>
 </body>
 </html>
