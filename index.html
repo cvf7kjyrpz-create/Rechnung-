@@ -18,15 +18,15 @@
             --text-muted: #8e8e93;
         }
 
-        /* --- SCREEN STYLES (App Ansicht) --- */
+        /* --- SCREEN STYLES --- */
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             background-color: var(--bg-body);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
             color: var(--text-main);
-            overflow: hidden; /* Fixiert die App */
-            position: fixed;  /* Verhindert Wackeln */
+            overflow: hidden; 
+            position: fixed;
         }
 
         .app-scroller {
@@ -37,7 +37,7 @@
             box-sizing: border-box;
         }
 
-        /* UI Design */
+        /* UI Elements */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-top: env(safe-area-inset-top); }
         h1 { font-size: 1.5rem; font-weight: 600; margin: 0; }
         .settings-icon { font-size: 1.2rem; padding: 10px; cursor: pointer; opacity: 0.7; }
@@ -81,63 +81,67 @@
         .modal-head { display: flex; justify-content: space-between; margin-bottom: 15px; }
         .close { background: none; border: none; color: #888; font-size: 1.5rem; }
 
-        /* --- PRINT STYLES (REPARATUR) --- */
+        /* --- PRINT STYLES (Clean Version) --- */
         #print-layer { display: none; }
 
         @media print {
-            /* 1. Die App-Fixierung aufheben (WICHTIG!) */
+            /* 1. SEITENRÄNDER AUF 0 SETZEN */
+            @page {
+                margin: 0mm; /* Entfernt Kopf/Fußzeilen im Browser */
+                size: A4;
+            }
+
+            /* 2. ALLES RESETTEN */
             html, body {
-                position: static !important;
-                overflow: visible !important;
-                height: auto !important;
-                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 background: white !important;
                 color: black !important;
-                margin: 0 !important;
+                width: 100%;
+                height: 100%;
+                overflow: visible !important;
+                position: static !important;
+                -webkit-print-color-adjust: exact;
             }
 
-            /* 2. App-Oberfläche verstecken */
+            /* UI Verstecken */
             .app-scroller, .modal { display: none !important; }
 
-            /* 3. Druck-Layer sichtbar machen */
+            /* 3. PAPIER-LAYOUT */
             #print-layer {
                 display: block !important;
-                position: absolute;
-                top: 0; left: 0;
+                position: relative;
                 width: 100%;
-                margin: 0;
-                padding: 15mm 20mm;
+                height: 100%;
+                /* Wir simulieren den Rand hier mit Padding, damit der Drucker-Rand 0 bleiben kann */
+                padding: 15mm 20mm; 
                 box-sizing: border-box;
                 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                color: black;
             }
 
-            /* Seitenränder Reset */
-            @page { margin: 0; size: A4; }
-
-            /* Styling der Rechnungselemente */
+            /* Rechnung Style */
             .p-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-            .p-shop { font-size: 14pt; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+            .p-shop { font-size: 14pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
             .p-sub { font-size: 9pt; color: #666; }
             .p-meta { text-align: right; font-size: 9pt; line-height: 1.4; }
             
             .p-sender { font-size: 7pt; color: #777; text-decoration: underline; margin-bottom: 15px; }
-            .p-addr { font-size: 10pt; line-height: 1.4; min-height: 35mm; margin-bottom: 15px; color: black; }
+            .p-addr { font-size: 10pt; line-height: 1.4; min-height: 35mm; margin-bottom: 15px; }
             .p-title { font-size: 16pt; font-weight: bold; margin-bottom: 10px; }
             .p-intro { font-size: 10pt; margin-bottom: 15px; }
 
             table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 20px; }
-            th { text-align: left; border-bottom: 1px solid #000; padding: 5px 0; font-size: 8pt; text-transform: uppercase; color: black; }
+            th { text-align: left; border-bottom: 1px solid #000; padding: 5px 0; font-size: 8pt; text-transform: uppercase; color: black;}
             td { padding: 5px 0; border-bottom: 1px solid #eee; color: black; }
             .r { text-align: right; }
             .total td { border-top: 1px solid #000; font-weight: bold; font-size: 11pt; padding-top: 10px; border-bottom: none; }
             
-            .p-note { margin-top: 20px; font-size: 9pt; background: #f5f5f5 !important; padding: 10px; border-left: 2px solid #000; color: black; -webkit-print-color-adjust: exact; }
+            .p-note { margin-top: 20px; font-size: 9pt; background: #f5f5f5 !important; padding: 10px; border-left: 2px solid #000; color: black; }
             
-            /* Footer ganz unten fixieren */
+            /* Footer */
             .p-footer { 
                 position: fixed; 
-                bottom: 15mm; 
+                bottom: 10mm; 
                 left: 0; 
                 right: 0; 
                 text-align: center; 
