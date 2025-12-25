@@ -2,333 +2,303 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Rechnung Dark Pro</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Rechnung App</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Rechnung">
+    
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/0f172a/ffffff?text=RE">
+
     <style>
         :root {
-            /* --- DARK MODE FARBPALETTE --- */
-            --bg-body: #0f172a;       /* Tiefes Dunkelblau */
-            --bg-card: #1e293b;       /* Panel Dunkelblau */
-            --text-main: #f8fafc;     /* Fast Weiß */
-            --text-muted: #94a3b8;    /* Grau für Labels */
-            --accent: #6366f1;        /* Indigo Blau für Akzente */
-            --accent-hover: #4f46e5;
-            --input-bg: #020617;      /* Sehr dunkler Input Hintergrund */
-            --border: #334155;        /* Rahmenfarbe */
+            /* Dark Mode Palette */
+            --bg-body: #000000;       /* Echtes Schwarz für OLED Screens */
+            --bg-card: #1c1c1e;       /* iOS Dunkelgrau */
+            --text-main: #ffffff;
+            --text-muted: #8e8e93;    /* iOS Grau */
+            --accent: #0a84ff;        /* iOS Blau */
+            --border: #38383a;
+            --input-bg: #2c2c2e;
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
+            padding: 20px 15px 40px 15px; /* Platz unten für Scrollen */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- DASHBOARD (EINGABE) --- */
-        .dashboard {
-            width: 100%;
-            max-width: 550px;
-            background: var(--bg-card);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border);
+        /* --- MOBILE DASHBOARD --- */
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 50px;
         }
 
-        h1 { 
-            margin: 0 0 30px 0; 
-            font-size: 1.5rem; 
-            font-weight: 300; 
-            color: var(--accent); 
-            text-align: center;
-            letter-spacing: 1px;
-        }
-        
-        .group-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
+        h1 {
+            font-size: 1.8rem;
             font-weight: 700;
+            margin-bottom: 20px;
+            margin-top: 10px;
+            text-align: center;
+            background: linear-gradient(90deg, #0a84ff, #5e5ce6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
             color: var(--text-muted);
             margin-top: 30px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+            padding-left: 5px;
+            font-weight: 600;
             letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .group-label::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--border);
         }
 
-        /* Inputs */
+        /* iOS Style Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .input-row {
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+        }
+        .input-row:last-child { border-bottom: none; }
+
         input, textarea {
-            background: var(--input-bg);
-            border: 1px solid var(--border);
+            background: transparent;
+            border: none;
             color: var(--text-main);
-            border-radius: 8px;
-            padding: 12px;
             width: 100%;
+            padding: 16px;
+            font-size: 16px; /* Verhindert Auto-Zoom auf iPhone */
             font-family: inherit;
             box-sizing: border-box;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            transition: all 0.2s;
+            display: block;
         }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-        }
+        input::placeholder, textarea::placeholder { color: #555; }
+        input:focus, textarea:focus { outline: none; background: #3a3a3c; }
 
         /* Buttons */
         .btn {
+            background: var(--bg-card);
+            color: var(--accent);
             border: none;
-            border-radius: 8px;
-            padding: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.95rem;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            border-radius: 12px;
+            padding: 16px;
             width: 100%;
-            transition: all 0.2s;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        
-        .btn-import { 
-            background: var(--accent); 
-            color: white; 
-        }
-        .btn-import:hover { 
-            background: var(--accent-hover); 
+        .btn:active { opacity: 0.7; transform: scale(0.98); }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);
+            margin-top: 30px;
+            padding: 18px;
         }
 
-        .btn-print { 
-            background: #10b981; /* Sattes Grün */
-            color: white; 
-            margin-top: 40px; 
-            font-size: 1.1rem;
-        }
-        .btn-print:hover { 
-            background: #059669; 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        .status-msg {
+            text-align: center;
+            color: #30d158; /* iOS Grün */
+            font-size: 0.9rem;
+            margin-top: 10px;
+            min-height: 20px;
+            font-weight: 500;
         }
 
-        .row { display: flex; gap: 15px; }
-        .col { flex: 1; }
-        .status-msg { font-size: 0.8rem; text-align: center; height: 20px; margin-top: 5px; color: #10b981; }
+        /* Flex Grid für Datum/Nummer */
+        .flex-row { display: flex; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; margin-top: 5px;}
+        .flex-row > div { flex: 1; background: var(--bg-card); }
+        .flex-row input { text-align: center; }
 
-        /* --- DRUCK VORLAGE (Unsichtbar im Browser) --- */
-        #print-template { display: none; }
+        /* --- DRUCK CSS (Versteckt, nur beim Drucken aktiv) --- */
+        #print-area { display: none; }
 
-        /* --- PRINT STYLES (Das Papier) --- */
         @media print {
             body { 
                 background: white; 
-                display: block; 
-                padding: 0; 
                 margin: 0; 
-                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                color: black;
+                padding: 0; 
+                color: black; 
+                -webkit-print-color-adjust: exact; 
             }
-            .dashboard { display: none; }
+            .app-container { display: none; }
             
-            #print-template {
+            #print-area {
                 display: block;
                 width: 100%;
-                padding: 15mm 20mm; /* Standard Ränder */
+                padding: 15mm 20mm;
                 box-sizing: border-box;
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             }
 
-            /* Header & Layout */
-            .inv-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-            .inv-shop-name { font-size: 1.2rem; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; color: #222; }
-            .inv-shop-sub { font-size: 0.85rem; color: #666; }
+            /* Kompaktes Rechnungsdesign */
+            .inv-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+            .inv-shop { font-size: 14pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+            .inv-slogan { font-size: 9pt; color: #555; }
+            .inv-meta { text-align: right; font-size: 9pt; line-height: 1.4; }
             
-            .inv-meta { text-align: right; font-size: 0.85rem; line-height: 1.4; color: #333; }
-
-            .sender-line { font-size: 0.7rem; color: #777; text-decoration: underline; margin-bottom: 15px; }
+            .sender-line { font-size: 7pt; color: #777; text-decoration: underline; margin-bottom: 10px; }
+            .inv-address { font-size: 10pt; line-height: 1.4; min-height: 30mm; margin-bottom: 15px; }
             
-            .inv-address { 
-                font-size: 0.95rem; 
-                line-height: 1.4; 
-                min-height: 35mm; 
-                margin-bottom: 20px; 
-            }
+            .inv-title { font-size: 16pt; font-weight: bold; margin-bottom: 10px; }
+            .inv-intro { font-size: 10pt; margin-bottom: 10px; }
 
-            .inv-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; color: #000; }
-            .inv-intro { font-size: 0.9rem; margin-bottom: 15px; }
-
-            /* Kompakte Tabelle für viele Artikel */
-            table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 20px; }
-            th { text-align: left; border-bottom: 1px solid #000; padding: 5px 2px; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; }
-            td { padding: 4px 2px; border-bottom: 1px solid #eee; } /* Kleines Padding = Mehr Platz */
-            .num { text-align: right; }
+            table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 20px; }
+            th { text-align: left; border-bottom: 1px solid #000; padding: 4px 0; font-weight: bold; font-size: 8pt; text-transform: uppercase; }
+            td { padding: 4px 0; border-bottom: 1px solid #eee; }
+            .r { text-align: right; }
             
-            .total-row td { 
-                border-top: 1px solid #000; 
-                border-bottom: none; 
-                font-weight: bold; 
-                font-size: 1rem; 
-                padding-top: 10px; 
-            }
-
-            .inv-note { 
-                margin-top: 20px; 
-                font-size: 0.85rem; 
-                background: #f8f8f8; 
-                padding: 10px; 
-                border-left: 3px solid #333;
-            }
-            
-            .inv-footer { 
-                position: fixed; 
-                bottom: 10mm; 
-                left: 20mm; 
-                right: 20mm; 
-                text-align: center; 
-                font-size: 0.75rem; 
-                color: #666; 
-                border-top: 1px solid #eee; 
-                padding-top: 5px; 
-            }
+            .total-row td { border-top: 1px solid #000; font-weight: bold; font-size: 11pt; padding-top: 10px; border-bottom: none; }
+            .inv-note { margin-top: 15px; font-size: 9pt; background: #f5f5f5; padding: 8px; border-left: 2px solid #333; }
+            .inv-footer { position: fixed; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 7pt; color: #666; }
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard">
-        <h1>RECHNUNG PRO</h1>
+    <div class="app-container">
+        <h1>Rechnung App</h1>
 
-        <div class="group-label">01 // Deine Firmendaten (Auto-Save)</div>
-        <div class="row">
-            <div class="col"><input type="text" id="shopName" placeholder="Dein Shop Name" oninput="saveAndRender()"></div>
-            <div class="col"><input type="text" id="shopSlogan" placeholder="Dein Slogan" oninput="saveAndRender()"></div>
+        <div class="section-title">Deine Firma</div>
+        <div class="card">
+            <div class="input-row"><input type="text" id="shopName" placeholder="Shop Name" oninput="saveData()"></div>
+            <div class="input-row"><input type="text" id="shopSlogan" placeholder="Slogan (Optional)" oninput="saveData()"></div>
+            <div class="input-row"><input type="text" id="shopSender" placeholder="Absenderzeile (klein)" oninput="saveData()"></div>
+            <div class="input-row"><textarea id="shopFooter" rows="2" placeholder="Footer Infos (IBAN...)" oninput="saveData()"></textarea></div>
         </div>
-        <input type="text" id="shopSender" placeholder="Absenderzeile (klein über Adresse)" oninput="saveAndRender()">
-        <textarea id="shopFooter" rows="2" placeholder="Footer Infos (IBAN, UStID, Email...)" oninput="saveAndRender()"></textarea>
 
-        <div class="group-label">02 // Artikel</div>
-        <button class="btn btn-import" onclick="pasteFromClipboard()">
-            📋 Verkauf aus Lager-App einfügen
+        <div class="section-title">Verkauf Importieren</div>
+        <button class="btn" onclick="pasteFromClipboard()">
+            📋 Aus Zwischenablage einfügen
         </button>
-        <div id="statusMsg" class="status-msg"></div>
+        <div id="status" class="status-msg"></div>
 
-        <div class="group-label">03 // Kunde & Details</div>
-        <textarea id="addrInput" rows="4" placeholder="Adresse vom Label hier einfügen..." oninput="render()"></textarea>
-        
-        <div class="row">
-            <div class="col">
-                <input type="text" id="invNum" value="RE-2024-001" oninput="render()">
-            </div>
-            <div class="col">
-                <input type="text" id="invDateInput" oninput="render()">
+        <div class="section-title">Kunde & Details</div>
+        <div class="card">
+            <div class="input-row">
+                <textarea id="addrInput" rows="4" placeholder="Adresse hier einfügen..." oninput="render()"></textarea>
             </div>
         </div>
 
-        <div class="group-label">04 // Anmerkung</div>
-        <textarea id="noteInput" rows="2" placeholder="Z.B. Danke für Ihren Einkauf..." oninput="render()"></textarea>
+        <div class="flex-row">
+            <div><input type="text" id="invNum" value="RE-2024-001" oninput="render()"></div>
+            <div><input type="text" id="invDateInput" oninput="render()"></div>
+        </div>
 
-        <button class="btn btn-print" onclick="window.print()">
-            🖨️ PDF Erstellen / Drucken
+        <div class="section-title">Anmerkung</div>
+        <div class="card">
+            <div class="input-row">
+                <textarea id="noteInput" rows="2" placeholder="Z.B. Danke für Ihren Einkauf..." oninput="render()"></textarea>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="window.print()">
+            PDF Erstellen
         </button>
+        <p style="text-align:center; color:#555; font-size:0.8rem; margin-top:10px;">
+            Im Druckdialog "Teilen" wählen, um als Datei zu speichern.
+        </p>
     </div>
 
-
-    <div id="print-template">
+    <div id="print-area">
         <div class="inv-header">
             <div>
-                <div class="inv-shop-name" id="outShopName">SHOP NAME</div>
-                <div class="inv-shop-sub" id="outShopSlogan"></div>
+                <div class="inv-shop" id="outShopName">SHOP</div>
+                <div class="inv-slogan" id="outShopSlogan"></div>
             </div>
             <div class="inv-meta">
                 Rechnung Nr.: <span id="outInvNum"></span><br>
-                Rechnungsdatum: <span id="outDate"></span><br>
+                Datum: <span id="outDate"></span><br>
                 Lieferdatum: <span id="outDelivDate"></span>
             </div>
         </div>
 
-        <div class="sender-line" id="outSender">Absenderzeile</div>
-        
+        <div class="sender-line" id="outSender">Absender</div>
         <div class="inv-address" id="outAddress"></div>
-
         <div class="inv-title">Rechnung</div>
-        <div class="inv-intro">Vielen Dank für Ihre Bestellung. Folgende Positionen stellen wir in Rechnung:</div>
+        <div class="inv-intro">Vielen Dank für Ihre Bestellung.</div>
 
         <table>
             <thead>
                 <tr>
-                    <th width="5%">Pos.</th>
-                    <th>Artikelbeschreibung</th>
-                    <th class="num" width="10%">Menge</th>
-                    <th class="num" width="15%">Einzel</th>
-                    <th class="num" width="15%">Gesamt</th>
+                    <th width="5%">#</th>
+                    <th>Artikel</th>
+                    <th class="r" width="10%">Menge</th>
+                    <th class="r" width="15%">Einzel</th>
+                    <th class="r" width="15%">Gesamt</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                </tbody>
+            <tbody id="tableBody"></tbody>
             <tfoot>
                 <tr class="total-row">
-                    <td colspan="4" class="num">Rechnungsbetrag</td>
-                    <td class="num" id="outTotal">0,00 €</td>
+                    <td colspan="4" class="r">Gesamtbetrag:</td>
+                    <td class="r" id="outTotal">0,00 €</td>
                 </tr>
             </tfoot>
         </table>
 
         <div id="outNote" class="inv-note" style="display:none"></div>
-
         <div class="inv-footer" id="outFooter"></div>
     </div>
 
     <script>
-        // --- SETUP ---
+        // Initialsierung
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('invDateInput').value = today;
 
-        // --- LOCAL STORAGE & RENDER ---
-        window.onload = function() {
-            // Lade gespeicherte Daten
-            const keys = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
-            keys.forEach(k => {
-                if(localStorage.getItem(k)) document.getElementById(k).value = localStorage.getItem(k);
+        // --- SPEICHERN & LADEN ---
+        function loadData() {
+            const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
+            fields.forEach(id => {
+                if(localStorage.getItem(id)) document.getElementById(id).value = localStorage.getItem(id);
             });
-            saveAndRender();
+            render();
         }
 
-        function saveAndRender() {
-            // Speichere Daten
-            const keys = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
-            keys.forEach(k => {
-                localStorage.setItem(k, document.getElementById(k).value);
+        function saveData() {
+            const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'];
+            fields.forEach(id => {
+                localStorage.setItem(id, document.getElementById(id).value);
             });
-            
-            // Fülle die versteckte Druckvorlage
-            document.getElementById('outShopName').innerText = document.getElementById('shopName').value || "DEIN FIRMENNAME";
+            render();
+        }
+
+        // --- RENDER FÜR DRUCK ---
+        function render() {
+            // Firmendaten
+            document.getElementById('outShopName').innerText = document.getElementById('shopName').value || "DEIN SHOP";
             document.getElementById('outShopSlogan').innerText = document.getElementById('shopSlogan').value;
             document.getElementById('outSender').innerText = document.getElementById('shopSender').value || "Firma • Straße • Ort";
             document.getElementById('outFooter').innerHTML = (document.getElementById('shopFooter').value || "").replace(/\n/g, '<br>');
 
-            render();
-        }
-
-        function render() {
-            // Datum & Nummer
+            // Rechnungsdaten
             const date = document.getElementById('invDateInput').value;
             document.getElementById('outDate').innerText = date;
-            document.getElementById('outDelivDate').innerText = date; // Lieferdatum = Rechnungsdatum
+            document.getElementById('outDelivDate').innerText = date;
             document.getElementById('outInvNum').innerText = document.getElementById('invNum').value;
 
             // Adresse
             const addr = document.getElementById('addrInput').value;
             document.getElementById('outAddress').innerHTML = addr ? addr.replace(/\n/g, '<br>') : "";
 
-            // Anmerkung
+            // Note
             const note = document.getElementById('noteInput').value;
             const el = document.getElementById('outNote');
             if(note.trim()) {
@@ -339,22 +309,18 @@
             }
         }
 
-        // --- IMPORT LOGIC ---
+        // --- IMPORT LOGIK ---
         async function pasteFromClipboard() {
-            const status = document.getElementById('statusMsg');
+            const status = document.getElementById('status');
             try {
+                // Versuche API Zugriff (iOS fragt vielleicht um Erlaubnis)
                 const text = await navigator.clipboard.readText();
                 processData(text);
-                status.innerText = "✅ Verkauf erfolgreich eingefügt!";
-                setTimeout(() => status.innerText = "", 3000);
+                status.innerText = "✅ Eingefügt!";
+                setTimeout(() => status.innerText = "", 2000);
             } catch (err) {
-                // Fallback, falls Browser blockt
-                const fallback = prompt("Bitte drücke STRG+V hier:");
-                if(fallback) {
-                    processData(fallback);
-                    status.innerText = "✅ Manuell eingefügt!";
-                    setTimeout(() => status.innerText = "", 3000);
-                }
+                // Fallback für strikte Browser
+                alert("Bitte klicke in das Adressfeld oder irgendwo hin und drücke 'Einfügen' auf deiner Tastatur, falls der Button blockiert wird.");
             }
         }
 
@@ -368,7 +334,6 @@
 
             lines.forEach(line => {
                 if(!line.trim()) return;
-                // Regex: Sucht nach "2x Artikel 9.99"
                 const match = line.match(/^(\d+)x\s+(.+)\s+(\d+[.,]\d{2})$/);
                 
                 if (match) {
@@ -382,15 +347,18 @@
                     tr.innerHTML = `
                         <td>${pos++}</td>
                         <td>${name}</td>
-                        <td class="num">${qty}</td>
-                        <td class="num">${price.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
-                        <td class="num">${sum.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
+                        <td class="r">${qty}</td>
+                        <td class="r">${price.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
+                        <td class="r">${sum.toLocaleString('de-DE', {minimumFractionDigits: 2})} €</td>
                     `;
                     tbody.appendChild(tr);
                 }
             });
             document.getElementById('outTotal').innerText = total.toLocaleString('de-DE', {minimumFractionDigits: 2}) + ' €';
         }
+
+        // Start
+        window.onload = loadData;
     </script>
 </body>
 </html>
