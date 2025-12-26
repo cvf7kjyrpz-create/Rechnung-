@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V10</title>
+    <title>Rechnung V11</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -49,11 +49,13 @@
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-print { flex: 0 0 44px; font-size: 1.1rem; border-color: #444; }
+        
+        /* Input Styles */
         .input-dark {
             background: var(--bg-panel); border: 1px solid var(--border);
             border-radius: 8px; color: #fff; padding: 8px;
             font-size: 0.9rem; width: 100%; box-sizing: border-box; resize: none;
-            margin-bottom: 6px; display: block;
+            margin-bottom: 8px; display: block;
         }
         .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; display: block; padding-left: 2px;}
 
@@ -72,7 +74,8 @@
         .paper-scaler {
             transform-origin: top center;
             width: 210mm; 
-            height: 297mm;
+            /* Min-Height ensures layout works but allows expansion if needed, though A4 is fixed for print */
+            height: 297mm; 
             background: white;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
             transform: scale(0.44); 
@@ -85,7 +88,9 @@
             box-sizing: border-box;
             color: black;
             font-size: 10pt;
-            position: relative;
+            /* FIX: Flex layout to handle footer positioning correctly */
+            display: flex;
+            flex-direction: column;
         }
 
         /* --- RECHNUNG PDF --- */
@@ -96,7 +101,7 @@
         .p-addr { font-size: 10.5pt; line-height: 1.4; min-height: 25mm; margin-bottom: 20px; white-space: pre-wrap; color: #000; }
         .p-title { font-size: 20pt; font-weight: 700; margin-bottom: 15px; }
 
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         th { text-align: left; border-bottom: 2px solid #000; padding: 6px 0; font-size: 8.5pt; text-transform: uppercase; }
         td { padding: 8px 0; border-bottom: 1px solid #eee; }
         .r { text-align: right; }
@@ -104,7 +109,14 @@
         
         .p-freetext { margin-top: 15px; font-size: 9.5pt; white-space: pre-wrap; line-height: 1.4; }
         .p-note { background: #f4f4f4; padding: 8px; font-size: 8.5pt; margin-top: 20px; border-radius: 4px; color: #444; }
-        .p-footer { position: absolute; bottom: 15mm; left: 20mm; right: 20mm; text-align: center; font-size: 7.5pt; color: #888; border-top: 1px solid #ddd; padding-top: 8px; }
+        
+        /* FIX: Footer using margin-top: auto pushes it to bottom but prevents overlap */
+        .p-footer { 
+            margin-top: auto; 
+            text-align: center; font-size: 7.5pt; color: #888; 
+            border-top: 1px solid #ddd; padding-top: 8px; 
+            padding-bottom: 0;
+        }
 
         /* MODAL */
         .modal {
@@ -112,7 +124,7 @@
             display: none; justify-content: center; align-items: center;
         }
         .modal.open { display: flex; }
-        .modal-box { background: #1c1c1e; width: 85%; max-width: 300px; border-radius: 12px; padding: 18px; }
+        .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,1); }
 
         @media print {
             @page { margin: 0; size: A4; }
@@ -120,7 +132,6 @@
             .cockpit, .modal { display: none !important; }
             .preview-area { display: block; background: white; padding: 0; overflow: visible; }
             .paper-scaler { transform: none !important; margin: 0 !important; width: 100%; height: auto; box-shadow: none; }
-            .p-footer { position: fixed; bottom: 10mm; }
         }
     </style>
 </head>
@@ -129,7 +140,7 @@
     <div class="cockpit">
         <div class="cockpit-header">
             <span class="app-title">RechnungsApp</span>
-            <span onclick="toggleModal()" style="cursor:pointer; opacity:0.4;">⚙️</span>
+            <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
         <div class="action-row">
@@ -138,9 +149,7 @@
         </div>
 
         <span class="lbl">Kunde</span>
-        <textarea id="addrInput" class="input-dark" rows="3" oninput="updateView()"></textarea>
-        <span class="lbl">Freitext (unter Artikel)</span>
-        <textarea id="freeInput" class="input-dark" rows="2" oninput="updateView()"></textarea>
+        <textarea id="addrInput" class="input-dark" rows="4" placeholder="Name&#10;Straße&#10;Ort" oninput="updateView()"></textarea>
     </div>
 
     <div class="preview-area">
@@ -168,7 +177,7 @@
                         <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="15%">Einzel</th><th class="r" width="15%">Gesamt</th></tr>
                     </thead>
                     <tbody id="tbody">
-                        <tr><td colspan="5" style="text-align:center; color:#999; padding:20px;">Warte auf Daten...</td></tr>
+                        <tr><td colspan="5" style="text-align:center; color:#999; padding:20px;">Bitte "Einfügen" drücken...</td></tr>
                     </tbody>
                     <tfoot>
                         <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
@@ -184,12 +193,20 @@
 
     <div class="modal" id="modal">
         <div class="modal-box">
-            <h2 style="margin-top:0; font-size:1rem; color:white;">Firmendaten</h2>
+            <h2 style="margin-top:0; font-size:1.1rem; color:white; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:15px;">Einstellungen</h2>
+            
+            <span class="lbl">Shop Daten</span>
             <input class="input-dark" id="shopName" placeholder="Shop Name" oninput="save()">
-            <input class="input-dark" id="shopSlogan" placeholder="Slogan" oninput="save()">
-            <input class="input-dark" id="shopSender" placeholder="Absenderzeile" oninput="save()">
-            <textarea class="input-dark" id="shopFooter" rows="3" placeholder="Footer Infos..." oninput="save()"></textarea>
-            <button style="background:white; color:black; width:100%; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="toggleModal()">Speichern</button>
+            <input class="input-dark" id="shopSlogan" placeholder="Slogan (optional)" oninput="save()">
+            <input class="input-dark" id="shopSender" placeholder="Absenderzeile (klein)" oninput="save()">
+            
+            <span class="lbl">Freitext (Standard)</span>
+            <textarea class="input-dark" id="freeInput" rows="3" placeholder="Vielen Dank für Ihren Einkauf..." oninput="saveAndRender()"></textarea>
+
+            <span class="lbl">Footer / Bankverbindung</span>
+            <textarea class="input-dark" id="shopFooter" rows="3" placeholder="IBAN, Steuernummer etc." oninput="save()"></textarea>
+            
+            <button style="background:var(--paper); color:black; width:100%; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;" onclick="toggleModal()">Schließen</button>
         </div>
     </div>
 
@@ -197,16 +214,26 @@
         const today = new Date().toLocaleDateString('de-DE');
         document.getElementById('outDate').innerText = today;
 
+        // Felder, die gespeichert werden sollen
+        const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter', 'freeInput'];
+
         function load() {
-            ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'].forEach(f => {
-                if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f);
+            fields.forEach(f => {
+                const val = localStorage.getItem(f);
+                if(val) document.getElementById(f).value = val;
             });
             updateFirmData();
+            updateView(); // Damit Freitext auch direkt angezeigt wird
         }
 
         function save() {
-            ['shopName', 'shopSlogan', 'shopSender', 'shopFooter'].forEach(f => localStorage.setItem(f, document.getElementById(f).value));
+            fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
             updateFirmData();
+        }
+
+        function saveAndRender() {
+            save();
+            updateView();
         }
 
         function updateFirmData() {
@@ -217,38 +244,57 @@
         }
 
         function toggleModal() { document.getElementById('modal').classList.toggle('open'); }
+        
         function updateView() {
             document.getElementById('outAddr').innerText = document.getElementById('addrInput').value;
             document.getElementById('outFreeText').innerText = document.getElementById('freeInput').value;
         }
 
         async function pasteClip() {
-            const text = await navigator.clipboard.readText();
-            if(text.trim().startsWith('{')) {
-                const data = JSON.parse(text);
-                if(data.invoiceNr) { document.getElementById('outNum').innerText = data.invoiceNr; document.title = "Rechnung_" + data.invoiceNr; }
-                if(data.date) {
-                     document.getElementById('outDate').innerText = data.date;
-                     document.getElementById('outDelivery').innerText = "Lieferdatum: " + data.date;
-                }
-                const tb = document.getElementById('tbody'); tb.innerHTML = '';
-                let total = 0; let pos = 1;
-                data.items.forEach(item => {
-                    const price = parseFloat(item.priceTotal); 
-                    total += price;
-                    const displayName = item.artnr ? `${item.artnr} - ${item.name}` : item.name;
+            try {
+                const text = await navigator.clipboard.readText();
+                if(text.trim().startsWith('{')) {
+                    const data = JSON.parse(text);
+                    if(data.invoiceNr) { document.getElementById('outNum').innerText = data.invoiceNr; document.title = "Rechnung_" + data.invoiceNr; }
+                    if(data.date) {
+                        document.getElementById('outDate').innerText = data.date;
+                        document.getElementById('outDelivery').innerText = "Lieferdatum: " + data.date;
+                    }
+                    const tb = document.getElementById('tbody'); tb.innerHTML = '';
+                    let total = 0; let pos = 1;
+                    
+                    data.items.forEach(item => {
+                        const price = parseFloat(item.priceTotal); 
+                        total += price;
+                        
+                        // LOGIK: ARTIKELNUMMER VOR NAME
+                        let displayName = item.name;
+                        if(item.artnr) {
+                            displayName = `<b>${item.artnr}</b> - ${item.name}`;
+                        }
 
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${pos++}</td><td>${displayName}</td><td class=\"r\">${item.qty}</td><td class=\"r\">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class=\"r\">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
-                    tb.appendChild(tr);
-                });
-                
-                document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
-                
-                if(data.platform) {
-                    document.getElementById('outNote').style.display = 'block';
-                    document.getElementById('outNote').innerText = "Verkauf über " + data.platform;
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${pos++}</td>
+                            <td>${displayName}</td>
+                            <td class="r">${item.qty}</td>
+                            <td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                            <td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                        `;
+                        tb.appendChild(tr);
+                    });
+                    
+                    document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+                    
+                    if(data.platform) {
+                        document.getElementById('outNote').style.display = 'block';
+                        document.getElementById('outNote').innerText = "Verkauf über " + data.platform;
+                    }
+                } else {
+                    alert("Keine gültigen Rechnungsdaten in der Zwischenablage!");
                 }
+            } catch (err) {
+                alert("Fehler beim Einfügen: " + err);
             }
         }
         window.onload = load;
