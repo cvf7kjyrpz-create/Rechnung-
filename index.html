@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V11</title>
+    <title>Rechnung V14</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,6 +15,7 @@
             --paper: #ffffff;
             --text-muted: #666;
             --border: #333;
+            --primary: #3b82f6;
         }
 
         html, body {
@@ -38,33 +39,36 @@
             padding-top: max(10px, env(safe-area-inset-top));
         }
 
-        .cockpit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .app-title { font-weight: 700; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+        .cockpit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .app-title { font-weight: 700; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; }
         
-        .action-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .action-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .btn {
-            border: 1px solid var(--border); border-radius: 8px; height: 38px;
+            border: 1px solid var(--border); border-radius: 8px; height: 40px;
             font-weight: 600; font-size: 0.85rem; cursor: pointer;
             background: var(--bg-panel); color: #fff; flex: 1;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-print { flex: 0 0 44px; font-size: 1.1rem; border-color: #444; }
+        .btn:active { background: #333; }
+        .btn-print { flex: 0 0 50px; font-size: 1.2rem; border-color: #444; }
         
-        /* Input Styles */
         .input-dark {
             background: var(--bg-panel); border: 1px solid var(--border);
-            border-radius: 8px; color: #fff; padding: 8px;
+            border-radius: 8px; color: #fff; padding: 0 10px;
             font-size: 0.9rem; width: 100%; box-sizing: border-box; resize: none;
-            margin-bottom: 8px; display: block;
+            margin-bottom: 8px; display: block; height: 36px;
         }
-        .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; display: block; padding-left: 2px;}
+        textarea.input-dark { height: auto; padding: 8px; }
+        .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: block; padding-left: 2px; font-weight: bold;}
+        
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         /* --- PREVIEW AREA --- */
         .preview-area {
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding: 10px;
+            padding: 20px;
             background: #000;
             display: flex;
             flex-direction: column;
@@ -74,12 +78,11 @@
         .paper-scaler {
             transform-origin: top center;
             width: 210mm; 
-            /* Min-Height ensures layout works but allows expansion if needed, though A4 is fixed for print */
-            height: 297mm; 
+            min-height: 297mm; 
             background: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
             transform: scale(0.44); 
-            margin-bottom: -160mm; 
+            margin-bottom: -150mm; 
         }
 
         .paper-content {
@@ -88,15 +91,18 @@
             box-sizing: border-box;
             color: black;
             font-size: 10pt;
-            /* FIX: Flex layout to handle footer positioning correctly */
             display: flex;
             flex-direction: column;
+            min-height: 297mm;
         }
 
         /* --- RECHNUNG PDF --- */
         .p-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1.5px solid #000; padding-bottom: 10px; }
         .p-shop { font-size: 16pt; font-weight: 800; text-transform: uppercase; }
-        .p-meta { text-align: right; font-size: 9pt; line-height: 1.5; }
+        
+        /* HIER IST DIE ÄNDERUNG FÜR DATUM STYLE */
+        .p-meta { text-align: right; font-size: 9pt; line-height: 1.5; color: #000; }
+        
         .p-sender { font-size: 7.5pt; color: #666; text-decoration: underline; margin-bottom: 12px; }
         .p-addr { font-size: 10.5pt; line-height: 1.4; min-height: 25mm; margin-bottom: 20px; white-space: pre-wrap; color: #000; }
         .p-title { font-size: 20pt; font-weight: 700; margin-bottom: 15px; }
@@ -110,7 +116,6 @@
         .p-freetext { margin-top: 15px; font-size: 9.5pt; white-space: pre-wrap; line-height: 1.4; }
         .p-note { background: #f4f4f4; padding: 8px; font-size: 8.5pt; margin-top: 20px; border-radius: 4px; color: #444; }
         
-        /* FIX: Footer using margin-top: auto pushes it to bottom but prevents overlap */
         .p-footer { 
             margin-top: auto; 
             text-align: center; font-size: 7.5pt; color: #888; 
@@ -139,7 +144,7 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp</span>
+            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V14</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
@@ -148,8 +153,19 @@
             <button class="btn btn-print" onclick="window.print()">🖨️</button>
         </div>
 
+        <div class="row-2">
+            <div>
+                <span class="lbl">Versand (€)</span>
+                <input type="number" id="inpShipping" class="input-dark" value="0" step="0.01" oninput="renderTable()">
+            </div>
+            <div>
+                <span class="lbl">Datum</span>
+                <input type="text" id="inpDate" class="input-dark" readonly style="color:#aaa">
+            </div>
+        </div>
+
         <span class="lbl">Kunde</span>
-        <textarea id="addrInput" class="input-dark" rows="4" placeholder="Name&#10;Straße&#10;Ort" oninput="updateView()"></textarea>
+        <textarea id="addrInput" class="input-dark" rows="3" placeholder="Name&#10;Straße&#10;Ort" oninput="updateView()"></textarea>
     </div>
 
     <div class="preview-area">
@@ -163,7 +179,7 @@
                     <div class="p-meta">
                         Rechnung Nr: <strong id="outNum">-</strong><br>
                         Rechnungsdatum: <span id="outDate">-</span><br>
-                        <span id="outDelivery" style="font-size:8pt; color:#444;">Lieferdatum entspricht Rechnungsdatum</span>
+                        Lieferdatum: <span id="outDelivery">-</span>
                     </div>
                 </div>
 
@@ -211,10 +227,14 @@
     </div>
 
     <script>
-        const today = new Date().toLocaleDateString('de-DE');
-        document.getElementById('outDate').innerText = today;
+        let currentItems = [];
+        let currentPlatform = "";
 
-        // Felder, die gespeichert werden sollen
+        const today = new Date().toLocaleDateString('de-DE'); // Formatiert als DD.MM.YYYY
+        document.getElementById('outDate').innerText = today;
+        document.getElementById('outDelivery').innerText = today; 
+        document.getElementById('inpDate').value = today;
+
         const fields = ['shopName', 'shopSlogan', 'shopSender', 'shopFooter', 'freeInput'];
 
         function load() {
@@ -223,7 +243,7 @@
                 if(val) document.getElementById(f).value = val;
             });
             updateFirmData();
-            updateView(); // Damit Freitext auch direkt angezeigt wird
+            updateView(); 
         }
 
         function save() {
@@ -250,53 +270,105 @@
             document.getElementById('outFreeText').innerText = document.getElementById('freeInput').value;
         }
 
+        // Helfer für sauberes Datum (Tag.Monat.Jahr)
+        function formatMyDate(dateStr) {
+            if(!dateStr) return "";
+            // Wenn schon deutsches Format (Punkte enthalten), zurückgeben
+            if(dateStr.includes('.')) return dateStr;
+            // Wenn ISO (YYYY-MM-DD), umwandeln
+            const d = new Date(dateStr);
+            if(isNaN(d.getTime())) return dateStr; // Fallback
+            return d.toLocaleDateString('de-DE');
+        }
+
         async function pasteClip() {
             try {
                 const text = await navigator.clipboard.readText();
                 if(text.trim().startsWith('{')) {
                     const data = JSON.parse(text);
-                    if(data.invoiceNr) { document.getElementById('outNum').innerText = data.invoiceNr; document.title = "Rechnung_" + data.invoiceNr; }
+                    
+                    // Kopfdaten
+                    if(data.invoiceNr) { 
+                        document.getElementById('outNum').innerText = data.invoiceNr; 
+                        document.title = "Rechnung_" + data.invoiceNr; 
+                    }
                     if(data.date) {
-                        document.getElementById('outDate').innerText = data.date;
-                        document.getElementById('outDelivery').innerText = "Lieferdatum: " + data.date;
+                        const cleanDate = formatMyDate(data.date);
+                        document.getElementById('outDate').innerText = cleanDate;
+                        document.getElementById('outDelivery').innerText = cleanDate;
+                        document.getElementById('inpDate').value = cleanDate;
                     }
-                    const tb = document.getElementById('tbody'); tb.innerHTML = '';
-                    let total = 0; let pos = 1;
                     
-                    data.items.forEach(item => {
-                        const price = parseFloat(item.priceTotal); 
-                        total += price;
-                        
-                        // LOGIK: ARTIKELNUMMER VOR NAME
-                        let displayName = item.name;
-                        if(item.artnr) {
-                            displayName = `<b>${item.artnr}</b> - ${item.name}`;
-                        }
-
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${pos++}</td>
-                            <td>${displayName}</td>
-                            <td class="r">${item.qty}</td>
-                            <td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
-                            <td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
-                        `;
-                        tb.appendChild(tr);
-                    });
-                    
-                    document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
-                    
-                    if(data.platform) {
+                    currentPlatform = data.platform || "";
+                    if(currentPlatform) {
                         document.getElementById('outNote').style.display = 'block';
-                        document.getElementById('outNote').innerText = "Verkauf über " + data.platform;
+                        document.getElementById('outNote').innerText = "Verkauf über " + currentPlatform;
                     }
+
+                    if(data.shipping) {
+                        document.getElementById('inpShipping').value = parseFloat(data.shipping);
+                    } else {
+                        document.getElementById('inpShipping').value = 0;
+                    }
+
+                    currentItems = data.items || [];
+                    renderTable();
+                    
                 } else {
-                    alert("Keine gültigen Rechnungsdaten in der Zwischenablage!");
+                    alert("Keine gültigen Rechnungsdaten!");
                 }
             } catch (err) {
-                alert("Fehler beim Einfügen: " + err);
+                alert("Fehler: " + err);
             }
         }
+
+        function renderTable() {
+            const tb = document.getElementById('tbody');
+            tb.innerHTML = '';
+            
+            let total = 0; 
+            let pos = 1;
+            
+            currentItems.forEach(item => {
+                const price = parseFloat(item.priceTotal); 
+                total += price;
+                
+                let displayName = item.name;
+                if(item.artnr) displayName = `<b>${item.artnr}</b> - ${item.name}`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${pos++}</td>
+                    <td>${displayName}</td>
+                    <td class="r">${item.qty}</td>
+                    <td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                    <td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                `;
+                tb.appendChild(tr);
+            });
+
+            const shippingCost = parseFloat(document.getElementById('inpShipping').value) || 0;
+            
+            if(shippingCost > 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${pos++}</td>
+                    <td>Versand & Verpackung</td>
+                    <td class="r">1</td>
+                    <td class="r">${shippingCost.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                    <td class="r">${shippingCost.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                `;
+                tb.appendChild(tr);
+                total += shippingCost;
+            }
+
+            document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+            
+            if(currentItems.length === 0) {
+                 tb.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999; padding:20px;">Bitte "Einfügen" drücken...</td></tr>';
+            }
+        }
+
         window.onload = load;
     </script>
 </body>
