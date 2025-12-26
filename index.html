@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V8</title>
+    <title>Rechnung V9</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -38,92 +38,82 @@
             padding-top: max(10px, env(safe-area-inset-top));
         }
 
-        .cockpit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .cockpit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .app-title { font-weight: 700; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
         
         .action-row { display: flex; gap: 8px; margin-bottom: 8px; }
         .btn {
-            border: 1px solid var(--border); border-radius: 8px; height: 40px;
-            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            border: 1px solid var(--border); border-radius: 8px; height: 38px;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer;
             background: var(--bg-panel); color: #fff; flex: 1;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-print { flex: 0 0 50px; font-size: 1.2rem; }
-        .btn:active { background: #333; }
-
+        .btn-print { flex: 0 0 44px; font-size: 1.1rem; border-color: #444; }
         .input-dark {
             background: var(--bg-panel); border: 1px solid var(--border);
-            border-radius: 8px; color: #fff; padding: 10px;
-            font-size: 0.95rem; width: 100%; box-sizing: border-box; resize: none;
-            margin-bottom: 8px; display: block;
+            border-radius: 8px; color: #fff; padding: 8px;
+            font-size: 0.9rem; width: 100%; box-sizing: border-box; resize: none;
+            margin-bottom: 6px; display: block;
         }
+        .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; display: block; padding-left: 2px;}
 
-        /* --- PREVIEW AREA (Scrollbar!) --- */
+        /* --- PREVIEW AREA --- */
         .preview-area {
             flex: 1;
-            overflow-y: auto; /* Erlaubt vertikales Scrollen in der Vorschau */
+            overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding: 10px;
-            background: #000; /* Tiefschwarz hinter dem Papier */
+            background: #000;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Skalierung basierend auf der Gerätebreite */
         .paper-scaler {
             transform-origin: top center;
             width: 210mm; 
             height: 297mm;
             background: white;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            /* Standard Zoom für iPhones */
-            transform: scale(0.45); 
-            margin-bottom: -150mm; /* Gleicht den Raum aus, der durch Scale entsteht */
+            transform: scale(0.44); 
+            margin-bottom: -160mm; 
         }
-
-        /* Anpassung für verschiedene Displaygrößen */
-        @media (max-width: 400px) { .paper-scaler { transform: scale(0.42); margin-bottom: -165mm; } }
-        @media (min-width: 401px) { .paper-scaler { transform: scale(0.48); margin-bottom: -145mm; } }
 
         .paper-content {
             padding: 20mm;
             width: 100%; height: 100%;
             box-sizing: border-box;
             color: black;
-            font-size: 11pt;
+            font-size: 10pt;
             position: relative;
         }
 
-        /* --- RECHNUNG LAYOUT --- */
-        .p-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid #000; padding-bottom: 10px; }
-        .p-shop { font-size: 18pt; font-weight: 800; text-transform: uppercase; }
-        .p-meta { text-align: right; font-size: 10pt; }
-        .p-sender { font-size: 8pt; color: #777; text-decoration: underline; margin-bottom: 15px; }
-        .p-addr { font-size: 11pt; line-height: 1.4; min-height: 25mm; margin-bottom: 20px; white-space: pre-wrap; color: #000; }
-        .p-title { font-size: 22pt; font-weight: 700; margin-bottom: 20px; }
+        /* --- RECHNUNG PDF --- */
+        .p-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1.5px solid #000; padding-bottom: 10px; }
+        .p-shop { font-size: 16pt; font-weight: 800; text-transform: uppercase; }
+        .p-meta { text-align: right; font-size: 9pt; line-height: 1.5; }
+        .p-sender { font-size: 7.5pt; color: #666; text-decoration: underline; margin-bottom: 12px; }
+        .p-addr { font-size: 10.5pt; line-height: 1.4; min-height: 25mm; margin-bottom: 20px; white-space: pre-wrap; color: #000; }
+        .p-title { font-size: 20pt; font-weight: 700; margin-bottom: 15px; }
 
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 9pt; text-transform: uppercase; }
-        td { padding: 10px 0; border-bottom: 1px solid #eee; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 6px 0; font-size: 8.5pt; text-transform: uppercase; }
+        td { padding: 8px 0; border-bottom: 1px solid #eee; }
         .r { text-align: right; }
-        .total-row td { border-top: 2px solid #000; font-weight: 700; font-size: 14pt; padding-top: 15px; border-bottom: none; }
+        .total-row td { border-top: 2px solid #000; font-weight: 700; font-size: 12.5pt; padding-top: 12px; border-bottom: none; }
         
-        .p-freetext { margin-top: 15px; font-size: 10pt; white-space: pre-wrap; }
-        .p-note { background: #f0f0f0; padding: 10px; font-size: 9pt; margin-top: 25px; border-radius: 4px; }
-        .p-footer { position: absolute; bottom: 15mm; left: 20mm; right: 20mm; text-align: center; font-size: 8pt; color: #888; border-top: 1px solid #ccc; padding-top: 10px; }
+        .p-freetext { margin-top: 15px; font-size: 9.5pt; white-space: pre-wrap; line-height: 1.4; }
+        .p-note { background: #f4f4f4; padding: 8px; font-size: 8.5pt; margin-top: 20px; border-radius: 4px; color: #444; }
+        .p-footer { position: absolute; bottom: 15mm; left: 20mm; right: 20mm; text-align: center; font-size: 7.5pt; color: #888; border-top: 1px solid #ddd; padding-top: 8px; }
 
         /* MODAL */
         .modal {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9); z-index: 2000;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
             display: none; justify-content: center; align-items: center;
         }
         .modal.open { display: flex; }
-        .modal-box { background: #1c1c1e; width: 90%; max-width: 320px; border-radius: 15px; padding: 20px; }
-        .btn-save { background: white; color: black; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+        .modal-box { background: #1c1c1e; width: 85%; max-width: 300px; border-radius: 12px; padding: 18px; }
 
-        /* PRINT */
         @media print {
             @page { margin: 0; size: A4; }
             body { display: block; background: white; overflow: visible; }
@@ -139,16 +129,18 @@
     <div class="cockpit">
         <div class="cockpit-header">
             <span class="app-title">RechnungsApp</span>
-            <span onclick="toggleModal()" style="cursor:pointer; opacity:0.5;">⚙️</span>
+            <span onclick="toggleModal()" style="cursor:pointer; opacity:0.4;">⚙️</span>
         </div>
         
         <div class="action-row">
-            <button class="btn" onclick="pasteClip()">📋 Daten einfügen</button>
+            <button class="btn" onclick="pasteClip()">📋 Einfügen</button>
             <button class="btn btn-print" onclick="window.print()">🖨️</button>
         </div>
 
-        <textarea id="addrInput" class="input-dark" rows="3" placeholder="Kunden-Adresse..." oninput="updateView()"></textarea>
-        <textarea id="freeInput" class="input-dark" rows="2" placeholder="Freitext (optional)..." oninput="updateView()"></textarea>
+        <span class="lbl">Kunde</span>
+        <textarea id="addrInput" class="input-dark" rows="3" oninput="updateView()"></textarea>
+        <span class="lbl">Freitext (unter Artikel)</span>
+        <textarea id="freeInput" class="input-dark" rows="2" oninput="updateView()"></textarea>
     </div>
 
     <div class="preview-area">
@@ -157,11 +149,12 @@
                 <div class="p-header">
                     <div>
                         <div class="p-shop" id="outShop">SHOP NAME</div>
-                        <div id="outSlogan" style="font-size:10pt; color:#666;"></div>
+                        <div id="outSlogan" style="font-size:9pt; color:#666;"></div>
                     </div>
                     <div class="p-meta">
-                        Rechnung Nr: <strong id="outNum">RE-000</strong><br>
-                        Rechnungsdatum: <span id="outDate">-</span>
+                        Rechnung Nr: <strong id="outNum">-</strong><br>
+                        Rechnungsdatum: <span id="outDate">-</span><br>
+                        <span id="outDelivery" style="font-size:8pt; color:#444;">Lieferdatum entspricht Rechnungsdatum</span>
                     </div>
                 </div>
 
@@ -175,7 +168,7 @@
                         <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="15%">Einzel</th><th class="r" width="15%">Gesamt</th></tr>
                     </thead>
                     <tbody id="tbody">
-                        <tr><td colspan="5" style="text-align:center; color:#999; padding:30px;">Keine Daten</td></tr>
+                        <tr><td colspan="5" style="text-align:center; color:#999; padding:20px;">Warte auf Daten...</td></tr>
                     </tbody>
                     <tfoot>
                         <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
@@ -191,12 +184,12 @@
 
     <div class="modal" id="modal">
         <div class="modal-box">
-            <h2 style="margin-top:0; font-size:1.1rem;">Firmendaten</h2>
+            <h2 style="margin-top:0; font-size:1rem; color:white;">Firmendaten</h2>
             <input class="input-dark" id="shopName" placeholder="Shop Name" oninput="save()">
             <input class="input-dark" id="shopSlogan" placeholder="Slogan" oninput="save()">
             <input class="input-dark" id="shopSender" placeholder="Absenderzeile" oninput="save()">
             <textarea class="input-dark" id="shopFooter" rows="3" placeholder="Footer Infos..." oninput="save()"></textarea>
-            <button class="btn-save" onclick="toggleModal()">Speichern</button>
+            <button style="background:white; color:black; width:100%; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="toggleModal()">Speichern</button>
         </div>
     </div>
 
@@ -233,26 +226,29 @@
             const text = await navigator.clipboard.readText();
             if(text.trim().startsWith('{')) {
                 const data = JSON.parse(text);
-                if(data.invoiceNr) document.getElementById('outNum').innerText = data.invoiceNr;
+                if(data.invoiceNr) { document.getElementById('outNum').innerText = data.invoiceNr; document.title = "Rechnung_" + data.invoiceNr; }
                 if(data.date) {
-                    const p = data.date.split('-'); 
-                    if(p.length===3) document.getElementById('outDate').innerText = `${p[2]}.${p[1]}.${p[0]}`;
+                     document.getElementById('outDate').innerText = data.date;
+                     // FIX: LIEFERDATUM
+                     document.getElementById('outDelivery').innerText = "Lieferdatum: " + data.date;
                 }
                 const tb = document.getElementById('tbody'); tb.innerHTML = '';
                 let total = 0; let pos = 1;
                 data.items.forEach(item => {
-                    const sum = item.priceTotal; total += sum;
+                    // FIX: parseFloat um '070' zu verhindern
+                    const price = parseFloat(item.priceTotal); 
+                    total += price;
+                    
+                    // FIX: ARTIKELNUMMER VOR NAME
+                    const displayName = item.artnr ? `${item.artnr} - ${item.name}` : item.name;
+
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${pos++}</td><td>${item.name}</td><td class="r">${item.qty}</td><td class="r">${(sum/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${sum.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
+                    tr.innerHTML = `<td>${pos++}</td><td>${displayName}</td><td class="r">${item.qty}</td><td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
                     tb.appendChild(tr);
                 });
-                if(data.shipping > 0) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${pos++}</td><td>Versand</td><td class="r">1</td><td class="r">${data.shipping.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${data.shipping.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
-                    tb.appendChild(tr);
-                    total += data.shipping;
-                }
+                
                 document.getElementById('outTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+                
                 if(data.platform) {
                     document.getElementById('outNote').style.display = 'block';
                     document.getElementById('outNote').innerText = "Verkauf über " + data.platform;
