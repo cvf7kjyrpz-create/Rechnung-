@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V9</title>
+    <title>Rechnung V10</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -229,21 +229,17 @@
                 if(data.invoiceNr) { document.getElementById('outNum').innerText = data.invoiceNr; document.title = "Rechnung_" + data.invoiceNr; }
                 if(data.date) {
                      document.getElementById('outDate').innerText = data.date;
-                     // FIX: LIEFERDATUM
                      document.getElementById('outDelivery').innerText = "Lieferdatum: " + data.date;
                 }
                 const tb = document.getElementById('tbody'); tb.innerHTML = '';
                 let total = 0; let pos = 1;
                 data.items.forEach(item => {
-                    // FIX: parseFloat um '070' zu verhindern
                     const price = parseFloat(item.priceTotal); 
                     total += price;
-                    
-                    // FIX: ARTIKELNUMMER VOR NAME
                     const displayName = item.artnr ? `${item.artnr} - ${item.name}` : item.name;
 
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${pos++}</td><td>${displayName}</td><td class="r">${item.qty}</td><td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
+                    tr.innerHTML = `<td>${pos++}</td><td>${displayName}</td><td class=\"r\">${item.qty}</td><td class=\"r\">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class=\"r\">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
                     tb.appendChild(tr);
                 });
                 
