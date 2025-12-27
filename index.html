@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V15</title>
+    <title>Rechnung V16</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -63,7 +63,7 @@
         
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        /* --- PREVIEW AREA --- */
+        /* --- PREVIEW AREA (SCREEN) --- */
         .preview-area {
             flex: 1;
             overflow-y: auto;
@@ -87,16 +87,18 @@
 
         .paper-content {
             padding: 20mm;
-            width: 100%; height: 100%;
+            width: 100%; 
+            /* Hier stand vorher nur min-height 297mm. 
+               Das ist für den Bildschirm okay, wird aber für den Druck unten überschrieben. */
+            min-height: 297mm; 
             box-sizing: border-box;
             color: black;
             font-size: 10pt;
             display: flex;
             flex-direction: column;
-            min-height: 297mm;
         }
 
-        /* --- RECHNUNG PDF --- */
+        /* --- RECHNUNG PDF STYLE --- */
         .p-header { display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 1.5px solid #000; padding-bottom: 10px; }
         .p-shop { font-size: 16pt; font-weight: 800; text-transform: uppercase; }
         
@@ -106,21 +108,21 @@
         .p-addr { font-size: 10.5pt; line-height: 1.4; min-height: 25mm; margin-bottom: 20px; white-space: pre-wrap; color: #000; }
         .p-title { font-size: 20pt; font-weight: 700; margin-bottom: 10px; }
 
-        /* --- TABELLE KOMPAKTER GEMACHT --- */
+        /* KOMPAKTE TABELLE */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         
         th { 
             text-align: left; 
             border-bottom: 1.5px solid #000; 
-            padding: 4px 0; /* Weniger Padding Header */
-            font-size: 7.5pt; /* Kleinerer Header */
+            padding: 4px 0; 
+            font-size: 7.5pt; 
             text-transform: uppercase; 
         }
         
         td { 
-            padding: 4px 0; /* Weniger Padding Zellen */
+            padding: 4px 0; 
             border-bottom: 1px solid #eee; 
-            font-size: 8.5pt; /* Kleinere Schrift Artikel */
+            font-size: 8.5pt; 
         }
         
         .r { text-align: right; }
@@ -128,15 +130,14 @@
         .total-row td { 
             border-top: 1.5px solid #000; 
             font-weight: 700; 
-            font-size: 11pt; /* Gesamtsumme etwas kleiner */
+            font-size: 11pt; 
             padding-top: 8px; 
             border-bottom: none; 
         }
         
-        /* FREITEXT KOMPAKTER */
         .p-freetext { 
             margin-top: 10px; 
-            font-size: 8.5pt; /* Kleinere Schrift Freitext */
+            font-size: 8.5pt; 
             white-space: pre-wrap; 
             line-height: 1.3; 
         }
@@ -158,12 +159,35 @@
         .modal.open { display: flex; }
         .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,1); }
 
+        /* --- DRUCK OPTIMIERUNG --- */
         @media print {
             @page { margin: 0; size: A4; }
-            body { display: block; background: white; overflow: visible; }
+            html, body { height: 100%; margin: 0; background: white; overflow: hidden; }
+            
             .cockpit, .modal { display: none !important; }
-            .preview-area { display: block; background: white; padding: 0; overflow: visible; }
-            .paper-scaler { transform: none !important; margin: 0 !important; width: 100%; height: auto; box-shadow: none; }
+            .preview-area { display: block; background: white; padding: 0; overflow: visible; height: 100%; }
+            
+            .paper-scaler { 
+                transform: none !important; 
+                margin: 0 !important; 
+                width: 100%; 
+                height: 100%; 
+                box-shadow: none; 
+                min-height: 0; /* Override */
+            }
+
+            .paper-content {
+                width: 100%;
+                /* WICHTIG: Im Druck etwas weniger als 297mm erzwingen, 
+                   damit der Drucker nicht wegen 1 Pixel eine neue Seite macht */
+                min-height: 290mm; 
+                height: 100%;
+                padding: 15mm 20mm; /* Leicht reduziertes Padding oben/unten für Sicherheit */
+            }
+            
+            .p-footer {
+                padding-bottom: 5mm; /* Etwas Abstand zum physischen Blattrand */
+            }
         }
     </style>
 </head>
@@ -171,7 +195,7 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V15</span></span>
+            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V16</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
