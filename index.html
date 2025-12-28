@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V19</title>
+    <title>Rechnung V20</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -86,6 +86,7 @@
         }
 
         .paper-content {
+            /* Screen Ansicht */
             padding: 20mm;
             width: 100%; 
             min-height: 297mm; 
@@ -94,13 +95,11 @@
             font-size: 10pt;
             display: flex;
             flex-direction: column;
+            justify-content: space-between; /* Verteilt Inhalt oben und Footer unten */
         }
 
-        /* Wrap den oberen Teil, damit Footer unten landet */
         .content-wrap {
-            flex: 1; 
-            display: flex;
-            flex-direction: column;
+            width: 100%;
         }
 
         /* --- RECHNUNG PDF STYLE --- */
@@ -123,11 +122,11 @@
         .p-note { background: #f4f4f4; padding: 6px; font-size: 8pt; margin-top: 15px; border-radius: 4px; color: #444; }
         
         .p-footer { 
-            margin-top: auto; /* Drückt Footer nach unten */
             text-align: center; font-size: 7.5pt; color: #888; 
             border-top: 1px solid #ddd; padding-top: 8px; 
             padding-bottom: 0;
             width: 100%;
+            margin-top: 20px;
         }
 
         /* MODAL */
@@ -138,51 +137,64 @@
         .modal.open { display: flex; }
         .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,1); }
 
-        /* --- DRUCK OPTIMIERUNG --- */
+        /* --- DRUCK OPTIMIERUNG (DER FIX) --- */
         @media print {
-            @page { margin: 0; size: A4; }
+            /* 1. RESET ALLER BROWSER RÄNDER */
+            @page { 
+                margin: 0; 
+                size: A4; 
+            }
             
-            html, body { 
-                margin: 0; padding: 0;
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
                 width: 100%;
-                height: auto; 
-                background: white; 
-                overflow: visible;
+                height: 100%;
+                background: white;
             }
-            
+
             .cockpit, .modal { display: none !important; }
-            
-            .preview-area { 
-                display: block; 
-                background: white; 
-                padding: 0; 
-                width: 100%; 
-                height: auto;
+
+            .preview-area {
+                display: block;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                background: white;
             }
-            
-            .paper-scaler { 
-                transform: none !important; 
-                margin: 0 !important; 
-                box-shadow: none; 
-                width: 100%; 
-                height: auto;
+
+            .paper-scaler {
+                transform: none !important;
+                box-shadow: none;
+                margin: 0 !important;
+                width: 100%;
+                height: 100%;
             }
 
             .paper-content {
                 width: 100%;
-                /* DIE WICHTIGE ÄNDERUNG: */
-                /* Statt 296mm oder 297mm nehmen wir nur 285mm. */
-                /* Das lässt unten ca 1.2cm Sicherheitspuffer für den Drucker-Rand. */
-                /* So wird keine 2. Seite erzwungen. */
-                height: 285mm; 
+                height: 100%; /* Füllt das Blatt exakt aus */
+                /* Wir erzeugen den Rand nun selbst innen */
                 padding: 15mm 20mm; 
+                box-sizing: border-box;
+                
+                /* Layout: Inhalt oben, Footer unten */
                 display: flex;
                 flex-direction: column;
-                page-break-after: avoid;
+                justify-content: space-between;
+            }
+            
+            .content-wrap {
+                /* Der Inhalt darf wachsen, aber den Footer nicht verdrängen */
+                flex-grow: 1; 
             }
 
-            .content-wrap { flex: 1; }
-            .p-footer { margin-top: auto; padding-bottom: 0; }
+            .p-footer {
+                /* Sicherheitsabstand zum physischen Papierrand unten */
+                padding-bottom: 5mm; 
+                margin-top: 0; /* Margin wird durch space-between geregelt */
+            }
         }
     </style>
 </head>
@@ -190,7 +202,7 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V19</span></span>
+            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V20</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
