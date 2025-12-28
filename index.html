@@ -3,131 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V27 (Screenshot)</title>
+    <title>Rechnung V28</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
         :root {
-            --bg-app: #121212;
+            --bg-app: #f0f2f5;
             --bg-panel: #1c1c1e;
-            --paper: #ffffff;
             --text-muted: #666;
-            --border: #333;
+            --border: #ddd;
             --primary: #3b82f6;
+        }
+
+        /* DUNKELMODUS FÜR DAS COCKPIT */
+        .dark-ui {
+            background: #121212; color: white;
         }
 
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            background: var(--bg-app);
-            color: white;
+            background: white; /* Rechnung ist immer auf Weiß */
+            color: black;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
-        /* --- COCKPIT (Bedienfeld oben) --- */
+        /* --- COCKPIT (Bedienfeld) --- */
         .cockpit {
             flex: 0 0 auto;
-            background: var(--bg-app);
+            background: #1c1c1e; /* Immer dunkel für Kontrast */
+            color: white;
             padding: 10px 15px;
-            border-bottom: 1px solid var(--border);
             z-index: 100;
             padding-top: max(10px, env(safe-area-inset-top));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Wenn Screenshot Modus aktiv ist, schieben wir das Menü weg */
+        body.screenshot-mode .cockpit {
+            transform: translateY(-150%);
+            position: absolute;
+        }
+        
+        body.screenshot-mode {
+            background: white;
+            overflow: hidden; /* Scrollbalken weg im Screenshot Mode */
+        }
+        
+        /* Hinweis im Screenshot Modus */
+        #screenshotHint {
+            display: none;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7); color: white; padding: 15px 25px; border-radius: 30px;
+            font-size: 0.9rem; pointer-events: none; opacity: 0; transition: opacity 0.5s;
+            z-index: 999; text-align: center;
         }
 
         .cockpit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .app-title { font-weight: 700; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; }
+        .app-title { font-weight: 700; font-size: 0.9rem; color: #aaa; text-transform: uppercase; }
         
         .action-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .btn {
-            border: 1px solid var(--border); border-radius: 8px; height: 40px;
+            border: 1px solid #333; border-radius: 8px; height: 40px;
             font-weight: 600; font-size: 0.85rem; cursor: pointer;
-            background: var(--bg-panel); color: #fff; flex: 1;
+            background: #2c2c2e; color: #fff; flex: 1;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn:active { background: #333; }
+        .btn:active { background: #444; }
+        .btn-photo { background: #007aff; border-color: #005ecb; }
         
         .input-dark {
-            background: var(--bg-panel); border: 1px solid var(--border);
+            background: #2c2c2e; border: 1px solid #333;
             border-radius: 8px; color: #fff; padding: 0 10px;
             font-size: 0.9rem; width: 100%; box-sizing: border-box; resize: none;
             margin-bottom: 8px; display: block; height: 36px;
         }
         textarea.input-dark { height: auto; padding: 8px; }
-        .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: block; padding-left: 2px; font-weight: bold;}
+        .lbl { font-size: 0.65rem; color: #aaa; text-transform: uppercase; margin-bottom: 4px; display: block; padding-left: 2px; font-weight: bold;}
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        /* --- SCREENSHOT BEREICH --- */
+        /* --- HAUPTANSICHT (Rechnung) --- */
         .preview-area {
             flex: 1;
-            overflow: hidden; /* Kein Scrollen, wir skalieren das Blatt */
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Blatt zentrieren */
-            position: relative;
-        }
-
-        /* Der Rahmen, der das Blatt skaliert, damit es aufs Handy passt */
-        .paper-scaler {
-            width: 210mm;
-            height: 297mm;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
             background: white;
-            /* Skalierung: Passt das A4 Blatt auf Handybreite an */
-            transform: scale(0.42); 
-            transform-origin: center center;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Das eigentliche Blatt Papier (A4) */
         .paper-content {
             width: 100%;
-            height: 100%;
+            max-width: 600px; /* Damit es auf Tablets nicht riesig wird */
+            min-height: 80vh; /* Mindesthöhe für Footer unten */
             box-sizing: border-box;
-            color: black;
-            font-size: 11pt; /* Etwas größer für bessere Lesbarkeit im Screenshot */
-            position: relative; 
-            padding: 20mm; /* Rand oben/links/rechts */
-            background: white;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 30px;
         }
 
         /* --- PDF DESIGN --- */
         .p-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-        .p-shop { font-size: 18pt; font-weight: 800; text-transform: uppercase; }
+        .p-shop { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; }
         
-        .p-meta { text-align: right; font-size: 10pt; line-height: 1.5; color: #000; }
+        .p-meta { text-align: right; font-size: 0.85rem; line-height: 1.5; color: #000; }
         
-        .p-sender { font-size: 8pt; color: #666; text-decoration: underline; margin-bottom: 15px; }
-        .p-addr { font-size: 12pt; line-height: 1.4; min-height: 30mm; margin-bottom: 30px; white-space: pre-wrap; color: #000; }
-        .p-title { font-size: 24pt; font-weight: 700; margin-bottom: 20px; }
+        .p-sender { font-size: 0.75rem; color: #666; text-decoration: underline; margin-bottom: 15px; }
+        .p-addr { font-size: 1rem; line-height: 1.4; min-height: 80px; margin-bottom: 30px; white-space: pre-wrap; color: #000; }
+        .p-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 20px; }
 
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 6px 0; font-size: 9pt; text-transform: uppercase; }
-        td { padding: 8px 0; border-bottom: 1px solid #ccc; font-size: 10pt; }
+        th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
         .r { text-align: right; }
-        .total-row td { border-top: 2px solid #000; font-weight: 700; font-size: 13pt; padding-top: 10px; border-bottom: none; }
+        .total-row td { border-top: 2px solid #000; font-weight: 700; font-size: 1.1rem; padding-top: 12px; border-bottom: none; }
         
-        .p-freetext { margin-top: 20px; font-size: 10pt; white-space: pre-wrap; line-height: 1.4; }
-        .p-note { background: #eee; padding: 10px; font-size: 9pt; margin-top: 20px; border-radius: 6px; color: #333; }
+        .p-freetext { margin-top: 20px; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.4; }
+        .p-note { background: #f5f5f7; padding: 10px; font-size: 0.8rem; margin-top: 20px; border-radius: 6px; color: #333; }
         
-        /* FOOTER FÜR SCREENSHOT */
+        /* FOOTER */
+        .spacer { flex: 1; } /* Drückt Footer nach unten */
         .p-footer { 
-            position: absolute;
-            bottom: 15mm; /* Fest unten */
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #777;
-            font-size: 9pt;
-        }
-        
-        .footer-line {
-            width: 85%; margin: 0 auto 10px auto; border-top: 1px solid #ccc;
+            text-align: center; color: #888; font-size: 0.75rem; margin-top: 40px; 
+            border-top: 1px solid #eee; padding-top: 15px;
         }
 
         /* MODAL */
@@ -136,28 +141,21 @@
             display: none; justify-content: center; align-items: center;
         }
         .modal.open { display: flex; }
-        .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,1); }
-        
-        /* Druckbefehl für den Notfall (druckt das Bild sauberer) */
-        @media print {
-            .cockpit, .modal { display: none; }
-            .preview-area { background: white; display: block; }
-            .paper-scaler { transform: none; box-shadow: none; border: none; margin: 0; }
-            @page { margin: 0; size: A4; }
-        }
+        .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,1); color: white;}
+
     </style>
 </head>
 <body>
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V27 (Screen)</span></span>
+            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V28</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
         <div class="action-row">
             <button class="btn" onclick="pasteClip()">📋 Einfügen</button>
-            <button class="btn" style="background:#222; border-color:#555;" onclick="alert('Einfach Screenshot machen!')">📸 Screenshot Mode</button>
+            <button class="btn btn-photo" onclick="enterScreenshotMode()">📸 Screenshot Modus</button>
         </div>
 
         <div class="row-2">
@@ -175,48 +173,49 @@
         <textarea id="addrInput" class="input-dark" rows="3" placeholder="Name&#10;Straße&#10;Ort" oninput="updateView()"></textarea>
     </div>
 
-    <div class="preview-area">
-        <div class="paper-scaler">
-            <div class="paper-content">
-                
-                <div class="p-header">
-                    <div>
-                        <div class="p-shop" id="outShop">SHOP NAME</div>
-                        <div id="outSlogan" style="font-size:11pt; color:#666; margin-top:4px;"></div>
-                    </div>
-                    <div class="p-meta">
-                        Rechnung Nr: <strong id="outNum">-</strong><br>
-                        Rechnungsdatum: <span id="outDate">-</span><br>
-                        Lieferdatum: <span id="outDelivery">-</span>
-                    </div>
+    <div id="screenshotHint">Tippen zum Beenden</div>
+
+    <div class="preview-area" onclick="exitScreenshotMode()">
+        <div class="paper-content">
+            
+            <div class="p-header">
+                <div>
+                    <div class="p-shop" id="outShop">SHOP NAME</div>
+                    <div id="outSlogan" style="font-size:0.9rem; color:#666; margin-top:4px;"></div>
                 </div>
-
-                <div class="p-sender" id="outSender">Absenderzeile</div>
-                <div class="p-addr" id="outAddr"></div>
-
-                <div class="p-title">Rechnung</div>
-
-                <table>
-                    <thead>
-                        <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="15%">Einzel</th><th class="r" width="15%">Gesamt</th></tr>
-                    </thead>
-                    <tbody id="tbody">
-                        <tr><td colspan="5" style="text-align:center; color:#999; padding:40px;">Daten einfügen...</td></tr>
-                    </tbody>
-                    <tfoot>
-                        <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
-                    </tfoot>
-                </table>
-
-                <div id="outFreeText" class="p-freetext"></div>
-                <div id="outNote" class="p-note" style="display:none"></div>
-
-                <div class="p-footer">
-                    <div class="footer-line"></div>
-                    <div id="outFooter"></div>
+                <div class="p-meta">
+                    Rechnung Nr: <strong id="outNum">-</strong><br>
+                    Rechnungsdatum: <span id="outDate">-</span><br>
+                    Lieferdatum: <span id="outDelivery">-</span>
                 </div>
-
             </div>
+
+            <div class="p-sender" id="outSender">Absenderzeile</div>
+            <div class="p-addr" id="outAddr"></div>
+
+            <div class="p-title">Rechnung</div>
+
+            <table>
+                <thead>
+                    <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="20%">Einzel</th><th class="r" width="20%">Gesamt</th></tr>
+                </thead>
+                <tbody id="tbody">
+                    <tr><td colspan="5" style="text-align:center; color:#999; padding:40px;">Daten einfügen...</td></tr>
+                </tbody>
+                <tfoot>
+                    <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
+                </tfoot>
+            </table>
+
+            <div id="outFreeText" class="p-freetext"></div>
+            <div id="outNote" class="p-note" style="display:none"></div>
+
+            <div class="spacer"></div>
+
+            <div class="p-footer">
+                <div id="outFooter"></div>
+            </div>
+
         </div>
     </div>
 
@@ -235,13 +234,13 @@
             <span class="lbl">Footer / Bankverbindung</span>
             <textarea class="input-dark" id="shopFooter" rows="3" placeholder="IBAN, Steuernummer etc." oninput="save()"></textarea>
             
-            <button style="background:var(--paper); color:black; width:100%; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;" onclick="toggleModal()">Schließen</button>
+            <button style="background:#f0f0f0; color:black; width:100%; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;" onclick="toggleModal()">Schließen</button>
         </div>
     </div>
 
     <script>
         let currentItems = [];
-        let currentPlatform = "";
+        let isScreenshotMode = false;
 
         const today = new Date().toLocaleDateString('de-DE'); 
         document.getElementById('outDate').innerText = today;
@@ -291,6 +290,29 @@
             return d.toLocaleDateString('de-DE');
         }
 
+        // --- SCREENSHOT MODUS LOGIK ---
+        function enterScreenshotMode() {
+            if(isScreenshotMode) return;
+            isScreenshotMode = true;
+            document.body.classList.add('screenshot-mode');
+            
+            // Hinweis anzeigen und ausblenden
+            const hint = document.getElementById('screenshotHint');
+            hint.style.display = 'block';
+            setTimeout(() => hint.style.opacity = '1', 10);
+            
+            setTimeout(() => {
+                hint.style.opacity = '0';
+                setTimeout(() => hint.style.display = 'none', 500);
+            }, 2000);
+        }
+
+        function exitScreenshotMode() {
+            if(!isScreenshotMode) return;
+            isScreenshotMode = false;
+            document.body.classList.remove('screenshot-mode');
+        }
+
         async function pasteClip() {
             try {
                 const text = await navigator.clipboard.readText();
@@ -308,7 +330,7 @@
                         document.getElementById('inpDate').value = cleanDate;
                     }
                     
-                    currentPlatform = data.platform || "";
+                    const currentPlatform = data.platform || "";
                     if(currentPlatform) {
                         document.getElementById('outNote').style.display = 'block';
                         document.getElementById('outNote').innerText = "Verkauf über " + currentPlatform;
