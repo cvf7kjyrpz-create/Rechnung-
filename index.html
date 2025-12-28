@@ -3,136 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V28</title>
+    <title>Rechnung V29</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
         :root {
-            --bg-app: #f0f2f5;
-            --bg-panel: #1c1c1e;
+            --bg-desk: #2c2c2e; /* Dunkler Schreibtisch-Hintergrund */
+            --paper: #ffffff;
+            --text-main: #000000;
             --text-muted: #666;
-            --border: #ddd;
             --primary: #3b82f6;
-        }
-
-        /* DUNKELMODUS FÜR DAS COCKPIT */
-        .dark-ui {
-            background: #121212; color: white;
         }
 
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            background: white; /* Rechnung ist immer auf Weiß */
-            color: black;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+            background: var(--bg-desk);
+            color: white;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Scrollen nur im Preview Bereich */
         }
 
         /* --- COCKPIT (Bedienfeld) --- */
         .cockpit {
             flex: 0 0 auto;
-            background: #1c1c1e; /* Immer dunkel für Kontrast */
-            color: white;
+            background: #151516;
             padding: 10px 15px;
+            border-bottom: 1px solid #333;
             z-index: 100;
             padding-top: max(10px, env(safe-area-inset-top));
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
-        
-        /* Wenn Screenshot Modus aktiv ist, schieben wir das Menü weg */
-        body.screenshot-mode .cockpit {
-            transform: translateY(-150%);
-            position: absolute;
-        }
-        
-        body.screenshot-mode {
-            background: white;
-            overflow: hidden; /* Scrollbalken weg im Screenshot Mode */
-        }
-        
-        /* Hinweis im Screenshot Modus */
-        #screenshotHint {
-            display: none;
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.7); color: white; padding: 15px 25px; border-radius: 30px;
-            font-size: 0.9rem; pointer-events: none; opacity: 0; transition: opacity 0.5s;
-            z-index: 999; text-align: center;
+            transition: margin-top 0.4s ease;
         }
 
         .cockpit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .app-title { font-weight: 700; font-size: 0.9rem; color: #aaa; text-transform: uppercase; }
+        .app-title { font-weight: 800; font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         
         .action-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .btn {
-            border: 1px solid #333; border-radius: 8px; height: 40px;
+            border: 1px solid #444; border-radius: 8px; height: 40px;
             font-weight: 600; font-size: 0.85rem; cursor: pointer;
-            background: #2c2c2e; color: #fff; flex: 1;
+            background: #252527; color: #fff; flex: 1;
             display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
         }
-        .btn:active { background: #444; }
-        .btn-photo { background: #007aff; border-color: #005ecb; }
+        .btn:active { transform: scale(0.98); }
+        .btn-photo { background: #0a84ff; border-color: #0070d6; }
         
         .input-dark {
-            background: #2c2c2e; border: 1px solid #333;
+            background: #252527; border: 1px solid #444;
             border-radius: 8px; color: #fff; padding: 0 10px;
             font-size: 0.9rem; width: 100%; box-sizing: border-box; resize: none;
             margin-bottom: 8px; display: block; height: 36px;
         }
         textarea.input-dark { height: auto; padding: 8px; }
-        .lbl { font-size: 0.65rem; color: #aaa; text-transform: uppercase; margin-bottom: 4px; display: block; padding-left: 2px; font-weight: bold;}
+        .lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-bottom: 4px; display: block; padding-left: 2px; font-weight: bold;}
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        /* --- HAUPTANSICHT (Rechnung) --- */
-        .preview-area {
+        /* --- SCHREIBTISCH / PAPIER BEREICH --- */
+        .desk-area {
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            /* Zentriert das Blatt vertikal, wenn Platz ist */
+            align-items: flex-start; 
+        }
+
+        /* Das Blatt Papier */
+        .paper-sheet {
             background: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .paper-content {
+            color: black;
             width: 100%;
-            max-width: 600px; /* Damit es auf Tablets nicht riesig wird */
-            min-height: 80vh; /* Mindesthöhe für Footer unten */
+            max-width: 100%; /* Auf Handy volle Breite nutzen */
+            
+            /* DER TRICK: Aspect Ratio für A4 (210 / 297 = 0.707) */
+            /* Damit erzwingen wir IMMER A4 Proportionen, egal wie breit das Handy ist */
+            aspect-ratio: 210/297;
+            min-height: 141vw; /* Fallback für ältere Browser (100vw * 1.41) */
+            
             box-sizing: border-box;
+            padding: 5% 7%; /* Relatives Padding, damit es immer gut aussieht */
+            
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Schatten für 3D Effekt */
+            
             display: flex;
             flex-direction: column;
-            padding-bottom: 30px;
+            position: relative;
+            transition: transform 0.3s ease;
         }
 
-        /* --- PDF DESIGN --- */
-        .p-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-        .p-shop { font-size: 1.5rem; font-weight: 800; text-transform: uppercase; }
+        /* --- SCREENSHOT MODUS STYLES --- */
+        body.mode-capture .cockpit {
+            margin-top: -400px; /* Menü nach oben wegfahren */
+        }
         
-        .p-meta { text-align: right; font-size: 0.85rem; line-height: 1.5; color: #000; }
-        
-        .p-sender { font-size: 0.75rem; color: #666; text-decoration: underline; margin-bottom: 15px; }
-        .p-addr { font-size: 1rem; line-height: 1.4; min-height: 80px; margin-bottom: 30px; white-space: pre-wrap; color: #000; }
-        .p-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 20px; }
+        body.mode-capture .desk-area {
+            background: white; /* Hintergrund weiß machen */
+            padding: 0; /* Kein Rand mehr */
+            align-items: flex-start;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 0.8rem; text-transform: uppercase; }
-        td { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .r { text-align: right; }
-        .total-row td { border-top: 2px solid #000; font-weight: 700; font-size: 1.1rem; padding-top: 12px; border-bottom: none; }
+        body.mode-capture .paper-sheet {
+            box-shadow: none; /* Schatten weg */
+            width: 100%;
+            border-radius: 0;
+            min-height: 100vh; /* Mindestens Bildschirmhöhe */
+        }
+
+        /* Hinweis Overlay */
+        #captureHint {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 12px;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 999;
+            text-align: center; font-weight: bold;
+        }
+
+        /* --- RECHNUNGS DESIGN (Responsive) --- */
+        .r-header { display: flex; justify-content: space-between; margin-bottom: 4%; border-bottom: 2px solid black; padding-bottom: 2%; }
+        .r-brand h1 { font-size: 5vw; margin: 0; text-transform: uppercase; font-weight: 800; line-height: 1; }
+        .r-brand p { font-size: 2.5vw; color: #666; margin: 2px 0 0 0; }
         
-        .p-freetext { margin-top: 20px; font-size: 0.9rem; white-space: pre-wrap; line-height: 1.4; }
-        .p-note { background: #f5f5f7; padding: 10px; font-size: 0.8rem; margin-top: 20px; border-radius: 6px; color: #333; }
+        .r-meta { text-align: right; font-size: 2.8vw; line-height: 1.4; }
         
-        /* FOOTER */
-        .spacer { flex: 1; } /* Drückt Footer nach unten */
-        .p-footer { 
-            text-align: center; color: #888; font-size: 0.75rem; margin-top: 40px; 
-            border-top: 1px solid #eee; padding-top: 15px;
+        .r-sender { font-size: 2.2vw; color: #555; text-decoration: underline; margin-bottom: 3%; }
+        .r-addr { font-size: 3.5vw; line-height: 1.3; min-height: 15vw; margin-bottom: 6%; white-space: pre-wrap; }
+        
+        .r-title { font-size: 6vw; font-weight: 700; margin-bottom: 4%; }
+
+        /* Tabelle */
+        .r-table { width: 100%; border-collapse: collapse; margin-bottom: 4%; }
+        .r-table th { text-align: left; border-bottom: 2px solid #000; padding: 1% 0; font-size: 2.5vw; text-transform: uppercase; }
+        .r-table td { padding: 2% 0; border-bottom: 1px solid #ccc; font-size: 3vw; }
+        .r-right { text-align: right; }
+        
+        .r-total td { border-top: 2px solid #000; font-weight: 700; font-size: 4vw; padding-top: 3%; border-bottom: none; }
+        
+        .r-text { margin-top: 4%; font-size: 3vw; line-height: 1.4; white-space: pre-wrap; }
+        .r-note { margin-top: 4%; background: #f3f3f3; padding: 2%; font-size: 2.5vw; border-radius: 4px; color: #444; }
+
+        /* Footer am Boden des Blattes */
+        .r-spacer { flex: 1; } /* Drückt Footer runter */
+        .r-footer { 
+            text-align: center; 
+            font-size: 2.2vw; 
+            color: #888; 
+            border-top: 1px solid #ddd; 
+            padding-top: 2%; 
+            margin-top: 5%;
         }
 
         /* MODAL */
@@ -149,13 +172,13 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V28</span></span>
+            <span class="app-title">Rechnung <span style="color:#3b82f6">V29</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
         <div class="action-row">
             <button class="btn" onclick="pasteClip()">📋 Einfügen</button>
-            <button class="btn btn-photo" onclick="enterScreenshotMode()">📸 Screenshot Modus</button>
+            <button class="btn btn-photo" onclick="toggleScreenshotMode()">📸 Screenshot</button>
         </div>
 
         <div class="row-2">
@@ -173,46 +196,55 @@
         <textarea id="addrInput" class="input-dark" rows="3" placeholder="Name&#10;Straße&#10;Ort" oninput="updateView()"></textarea>
     </div>
 
-    <div id="screenshotHint">Tippen zum Beenden</div>
+    <div id="captureHint">Screenshot machen!<br><br>Zum Beenden tippen.</div>
 
-    <div class="preview-area" onclick="exitScreenshotMode()">
-        <div class="paper-content">
+    <div class="desk-area" onclick="exitScreenshotMode()">
+        <div class="paper-sheet" id="thePaper">
             
-            <div class="p-header">
-                <div>
-                    <div class="p-shop" id="outShop">SHOP NAME</div>
-                    <div id="outSlogan" style="font-size:0.9rem; color:#666; margin-top:4px;"></div>
+            <div class="r-header">
+                <div class="r-brand">
+                    <h1 id="outShop">SHOP</h1>
+                    <p id="outSlogan">Slogan</p>
                 </div>
-                <div class="p-meta">
-                    Rechnung Nr: <strong id="outNum">-</strong><br>
-                    Rechnungsdatum: <span id="outDate">-</span><br>
-                    Lieferdatum: <span id="outDelivery">-</span>
+                <div class="r-meta">
+                    Nr: <strong id="outNum">-</strong><br>
+                    Datum: <span id="outDate">-</span><br>
+                    Lieferung: <span id="outDelivery">-</span>
                 </div>
             </div>
 
-            <div class="p-sender" id="outSender">Absenderzeile</div>
-            <div class="p-addr" id="outAddr"></div>
+            <div class="r-sender" id="outSender">Absenderzeile</div>
+            <div class="r-addr" id="outAddr"></div>
 
-            <div class="p-title">Rechnung</div>
+            <div class="r-title">Rechnung</div>
 
-            <table>
+            <table class="r-table">
                 <thead>
-                    <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="20%">Einzel</th><th class="r" width="20%">Gesamt</th></tr>
+                    <tr>
+                        <th width="5%">#</th>
+                        <th>Artikel</th>
+                        <th class="r-right" width="12%">Mge</th>
+                        <th class="r-right" width="20%">Einzel</th>
+                        <th class="r-right" width="20%">Gesamt</th>
+                    </tr>
                 </thead>
                 <tbody id="tbody">
                     <tr><td colspan="5" style="text-align:center; color:#999; padding:40px;">Daten einfügen...</td></tr>
                 </tbody>
                 <tfoot>
-                    <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
+                    <tr class="r-total">
+                        <td colspan="4" class="r-right">Gesamtbetrag</td>
+                        <td class="r-right" id="outTotal">0,00 €</td>
+                    </tr>
                 </tfoot>
             </table>
 
-            <div id="outFreeText" class="p-freetext"></div>
-            <div id="outNote" class="p-note" style="display:none"></div>
+            <div id="outFreeText" class="r-text"></div>
+            <div id="outNote" class="r-note" style="display:none"></div>
 
-            <div class="spacer"></div>
+            <div class="r-spacer"></div>
 
-            <div class="p-footer">
+            <div class="r-footer">
                 <div id="outFooter"></div>
             </div>
 
@@ -240,7 +272,7 @@
 
     <script>
         let currentItems = [];
-        let isScreenshotMode = false;
+        let screenshotActive = false;
 
         const today = new Date().toLocaleDateString('de-DE'); 
         document.getElementById('outDate').innerText = today;
@@ -290,27 +322,23 @@
             return d.toLocaleDateString('de-DE');
         }
 
-        // --- SCREENSHOT MODUS LOGIK ---
-        function enterScreenshotMode() {
-            if(isScreenshotMode) return;
-            isScreenshotMode = true;
-            document.body.classList.add('screenshot-mode');
+        // SCREENSHOT LOGIK
+        function toggleScreenshotMode() {
+            if(screenshotActive) return;
+            screenshotActive = true;
+            document.body.classList.add('mode-capture');
             
-            // Hinweis anzeigen und ausblenden
-            const hint = document.getElementById('screenshotHint');
-            hint.style.display = 'block';
-            setTimeout(() => hint.style.opacity = '1', 10);
-            
-            setTimeout(() => {
-                hint.style.opacity = '0';
-                setTimeout(() => hint.style.display = 'none', 500);
-            }, 2000);
+            const hint = document.getElementById('captureHint');
+            hint.style.opacity = '1';
+            setTimeout(() => { hint.style.opacity = '0'; }, 2000);
         }
 
         function exitScreenshotMode() {
-            if(!isScreenshotMode) return;
-            isScreenshotMode = false;
-            document.body.classList.remove('screenshot-mode');
+            if(!screenshotActive) return;
+            // Nur beenden wenn man auf den Hintergrund klickt (nicht ins Papier beim Scrollen)
+            // Hier vereinfacht: Klick überall beendet es, damit man rauskommt
+            screenshotActive = false;
+            document.body.classList.remove('mode-capture');
         }
 
         async function pasteClip() {
@@ -371,9 +399,9 @@
                 tr.innerHTML = `
                     <td>${pos++}</td>
                     <td>${displayName}</td>
-                    <td class="r">${item.qty}</td>
-                    <td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
-                    <td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                    <td class="r-right">${item.qty}</td>
+                    <td class="r-right">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                    <td class="r-right">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
                 `;
                 tb.appendChild(tr);
             });
@@ -385,9 +413,9 @@
                 tr.innerHTML = `
                     <td>${pos++}</td>
                     <td>Versand & Verpackung</td>
-                    <td class="r">1</td>
-                    <td class="r">${shippingCost.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
-                    <td class="r">${shippingCost.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                    <td class="r-right">1</td>
+                    <td class="r-right">${shippingCost.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
+                    <td class="r-right">${shippingCost.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
                 `;
                 tb.appendChild(tr);
                 total += shippingCost;
