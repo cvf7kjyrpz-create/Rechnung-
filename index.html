@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V23</title>
+    <title>Rechnung V21</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -86,17 +86,16 @@
         }
 
         .paper-content {
-            /* Screen Ansicht */
+            /* Hier definieren wir den Rahmen */
             width: 100%; 
             min-height: 297mm; 
             box-sizing: border-box;
             background: white;
             color: black;
             font-size: 10pt;
-            position: relative; /* Wichtig für Absolute Positionierung */
+            position: relative; /* WICHTIG: Bezugspunkt für absolute Positionierung */
             padding: 20mm;
-            /* Platz unten reservieren für Footer in der Vorschau */
-            padding-bottom: 40mm; 
+            padding-bottom: 40mm; /* Platz unten freihalten, damit Text nicht über Footer läuft */
         }
 
         /* --- RECHNUNG PDF STYLE --- */
@@ -119,7 +118,7 @@
         .p-note { background: #f4f4f4; padding: 6px; font-size: 8pt; margin-top: 15px; border-radius: 4px; color: #444; }
         
         .p-footer { 
-            /* Fixe Positionierung */
+            /* Absolute Positionierung am Boden des .paper-content */
             position: absolute;
             bottom: 15mm;
             left: 20mm;
@@ -140,49 +139,38 @@
         .modal.open { display: flex; }
         .modal-box { background: #1c1c1e; width: 85%; max-width: 320px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,1); }
 
-        /* --- DRUCK: DIE FESTE VERSION (HARD CODED A4) --- */
+        /* --- DRUCK EINSTELLUNGEN (HARD FIX) --- */
         @media print {
-            @page { 
-                margin: 0; 
-                size: A4; 
-            }
+            /* 1. Alles leeren */
+            @page { margin: 0; size: A4; }
+            body { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; }
             
-            html, body {
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100%;
-                height: 100%;
-                background: white;
-            }
-
             .cockpit, .modal { display: none !important; }
-
+            
+            /* 2. Container auf volle Seite zwingen */
             .preview-area, .paper-scaler {
                 display: block !important;
+                position: relative !important;
                 width: 100% !important;
                 height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 transform: none !important;
-                box-shadow: none !important;
                 overflow: visible !important;
             }
 
+            /* 3. Das Papier */
             .paper-content {
-                /* Exakte A4 Maße minus 1mm Sicherheit */
-                width: 210mm;
-                height: 296mm; 
-                
+                width: 210mm; /* Exakt A4 Breite */
+                height: 296mm; /* Exakt A4 Höhe (-1mm Toleranz) */
                 margin: 0;
                 padding: 20mm;
-                padding-bottom: 40mm; /* Schutzbereich für Footer */
-                
-                position: relative; /* Anker für Footer */
+                padding-bottom: 40mm; /* Platz für Footer reservieren */
+                position: relative; /* WICHTIG für den Footer */
                 background: white;
-                box-sizing: border-box;
-                display: block; /* Kein Flex mehr nötig */
             }
 
+            /* 4. Der Footer: Festgenagelt */
             .p-footer {
                 position: absolute !important;
                 bottom: 15mm !important;
@@ -190,6 +178,7 @@
                 right: 20mm !important;
                 display: block !important;
                 visibility: visible !important;
+                z-index: 999;
             }
         }
     </style>
@@ -198,7 +187,7 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V23</span></span>
+            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V21</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
