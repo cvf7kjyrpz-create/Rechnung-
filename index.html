@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V18</title>
+    <title>Rechnung V19</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -93,12 +93,12 @@
             color: black;
             font-size: 10pt;
             display: flex;
-            flex-direction: column; /* WICHTIG: Flexbox für Layout */
+            flex-direction: column;
         }
 
         /* Wrap den oberen Teil, damit Footer unten landet */
         .content-wrap {
-            flex: 1; /* Nimmt den ganzen Platz ein und drückt Footer runter */
+            flex: 1; 
             display: flex;
             flex-direction: column;
         }
@@ -123,7 +123,7 @@
         .p-note { background: #f4f4f4; padding: 6px; font-size: 8pt; margin-top: 15px; border-radius: 4px; color: #444; }
         
         .p-footer { 
-            margin-top: auto; /* Magie: Drückt Footer ganz nach unten im Flex-Container */
+            margin-top: auto; /* Drückt Footer nach unten */
             text-align: center; font-size: 7.5pt; color: #888; 
             border-top: 1px solid #ddd; padding-top: 8px; 
             padding-bottom: 0;
@@ -144,9 +144,10 @@
             
             html, body { 
                 margin: 0; padding: 0;
-                width: 210mm;
-                height: 297mm; /* Volle A4 Höhe erzwingen */
+                width: 100%;
+                height: auto; 
                 background: white; 
+                overflow: visible;
             }
             
             .cockpit, .modal { display: none !important; }
@@ -155,35 +156,33 @@
                 display: block; 
                 background: white; 
                 padding: 0; 
-                width: 100%; height: 100%;
+                width: 100%; 
+                height: auto;
             }
             
             .paper-scaler { 
                 transform: none !important; 
                 margin: 0 !important; 
                 box-shadow: none; 
-                width: 100%; height: 100%;
+                width: 100%; 
+                height: auto;
             }
 
             .paper-content {
                 width: 100%;
-                /* Wir setzen es auf 296mm (1mm Puffer), damit keine 2. Seite entsteht */
-                height: 296mm; 
+                /* DIE WICHTIGE ÄNDERUNG: */
+                /* Statt 296mm oder 297mm nehmen wir nur 285mm. */
+                /* Das lässt unten ca 1.2cm Sicherheitspuffer für den Drucker-Rand. */
+                /* So wird keine 2. Seite erzwungen. */
+                height: 285mm; 
                 padding: 15mm 20mm; 
                 display: flex;
                 flex-direction: column;
+                page-break-after: avoid;
             }
 
-            /* Im Druck muss der Wrapper wachsen, um den Footer runterzudrücken */
-            .content-wrap {
-                flex: 1;
-            }
-
-            .p-footer {
-                margin-top: auto; 
-                position: static; /* Kein Absolute mehr! */
-                padding-bottom: 0;
-            }
+            .content-wrap { flex: 1; }
+            .p-footer { margin-top: auto; padding-bottom: 0; }
         }
     </style>
 </head>
@@ -191,7 +190,7 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V18</span></span>
+            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V19</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
