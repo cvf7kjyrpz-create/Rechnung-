@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <title>Rechnung V17</title>
+    <title>Rechnung V18</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -93,8 +93,14 @@
             color: black;
             font-size: 10pt;
             display: flex;
+            flex-direction: column; /* WICHTIG: Flexbox für Layout */
+        }
+
+        /* Wrap den oberen Teil, damit Footer unten landet */
+        .content-wrap {
+            flex: 1; /* Nimmt den ganzen Platz ein und drückt Footer runter */
+            display: flex;
             flex-direction: column;
-            position: relative; /* Wichtig für Footer Positionierung */
         }
 
         /* --- RECHNUNG PDF STYLE --- */
@@ -117,7 +123,7 @@
         .p-note { background: #f4f4f4; padding: 6px; font-size: 8pt; margin-top: 15px; border-radius: 4px; color: #444; }
         
         .p-footer { 
-            margin-top: auto; 
+            margin-top: auto; /* Magie: Drückt Footer ganz nach unten im Flex-Container */
             text-align: center; font-size: 7.5pt; color: #888; 
             border-top: 1px solid #ddd; padding-top: 8px; 
             padding-bottom: 0;
@@ -135,37 +141,48 @@
         /* --- DRUCK OPTIMIERUNG --- */
         @media print {
             @page { margin: 0; size: A4; }
-            html, body { height: 100%; margin: 0; background: white; overflow: hidden; }
+            
+            html, body { 
+                margin: 0; padding: 0;
+                width: 210mm;
+                height: 297mm; /* Volle A4 Höhe erzwingen */
+                background: white; 
+            }
             
             .cockpit, .modal { display: none !important; }
-            .preview-area { display: block; background: white; padding: 0; overflow: visible; height: 100%; }
+            
+            .preview-area { 
+                display: block; 
+                background: white; 
+                padding: 0; 
+                width: 100%; height: 100%;
+            }
             
             .paper-scaler { 
                 transform: none !important; 
                 margin: 0 !important; 
-                width: 100%; 
-                height: 100%; 
                 box-shadow: none; 
-                min-height: 0;
+                width: 100%; height: 100%;
             }
 
             .paper-content {
                 width: 100%;
-                height: 296mm; /* Fixe A4 Höhe für den Rahmen */
+                /* Wir setzen es auf 296mm (1mm Puffer), damit keine 2. Seite entsteht */
+                height: 296mm; 
                 padding: 15mm 20mm; 
-                display: block; /* Flexbox entfernen für mehr Kontrolle */
-                position: relative; 
+                display: flex;
+                flex-direction: column;
             }
-            
-            /* Footer absolut positionieren, damit er nicht wegrutscht */
+
+            /* Im Druck muss der Wrapper wachsen, um den Footer runterzudrücken */
+            .content-wrap {
+                flex: 1;
+            }
+
             .p-footer {
-                position: absolute;
-                bottom: 15mm;
-                left: 20mm; 
-                width: calc(100% - 40mm); /* Breite minus Padding links/rechts */
-                margin-top: 0;
-                border-top: 1px solid #ddd;
-                padding-top: 8px;
+                margin-top: auto; 
+                position: static; /* Kein Absolute mehr! */
+                padding-bottom: 0;
             }
         }
     </style>
@@ -174,7 +191,7 @@
 
     <div class="cockpit">
         <div class="cockpit-header">
-            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V17</span></span>
+            <span class="app-title">RechnungsApp <span style="color:#3b82f6">V18</span></span>
             <button onclick="toggleModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
         
@@ -201,38 +218,39 @@
     <div class="preview-area">
         <div class="paper-scaler">
             <div class="paper-content">
-                <div class="p-header">
-                    <div>
-                        <div class="p-shop" id="outShop">SHOP NAME</div>
-                        <div id="outSlogan" style="font-size:9pt; color:#666;"></div>
+                <div class="content-wrap">
+                    <div class="p-header">
+                        <div>
+                            <div class="p-shop" id="outShop">SHOP NAME</div>
+                            <div id="outSlogan" style="font-size:9pt; color:#666;"></div>
+                        </div>
+                        <div class="p-meta">
+                            Rechnung Nr: <strong id="outNum">-</strong><br>
+                            Rechnungsdatum: <span id="outDate">-</span><br>
+                            Lieferdatum: <span id="outDelivery">-</span>
+                        </div>
                     </div>
-                    <div class="p-meta">
-                        Rechnung Nr: <strong id="outNum">-</strong><br>
-                        Rechnungsdatum: <span id="outDate">-</span><br>
-                        Lieferdatum: <span id="outDelivery">-</span>
-                    </div>
+
+                    <div class="p-sender" id="outSender">Absenderzeile</div>
+                    <div class="p-addr" id="outAddr"></div>
+
+                    <div class="p-title">Rechnung</div>
+
+                    <table>
+                        <thead>
+                            <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="15%">Einzel</th><th class="r" width="15%">Gesamt</th></tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <tr><td colspan="5" style="text-align:center; color:#999; padding:20px;">Bitte "Einfügen" drücken...</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
+                        </tfoot>
+                    </table>
+
+                    <div id="outFreeText" class="p-freetext"></div>
+                    <div id="outNote" class="p-note" style="display:none"></div>
                 </div>
-
-                <div class="p-sender" id="outSender">Absenderzeile</div>
-                <div class="p-addr" id="outAddr"></div>
-
-                <div class="p-title">Rechnung</div>
-
-                <table>
-                    <thead>
-                        <tr><th width="5%">#</th><th>Beschreibung</th><th class="r" width="10%">Menge</th><th class="r" width="15%">Einzel</th><th class="r" width="15%">Gesamt</th></tr>
-                    </thead>
-                    <tbody id="tbody">
-                        <tr><td colspan="5" style="text-align:center; color:#999; padding:20px;">Bitte "Einfügen" drücken...</td></tr>
-                    </tbody>
-                    <tfoot>
-                        <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="outTotal">0,00 €</td></tr>
-                    </tfoot>
-                </table>
-
-                <div id="outFreeText" class="p-freetext"></div>
-                <div id="outNote" class="p-note" style="display:none"></div>
-                
                 <div class="p-footer" id="outFooter"></div>
             </div>
         </div>
