@@ -3,124 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung V32</title>
+    <title>Rechnung V33</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
-        /* --- MODERN CLEAN UI --- */
+        /* --- DARK MINIMALIST UI --- */
         body {
-            background: #f2f2f7; /* Helles Grau, Apple-Style */
-            color: #1c1c1e;
+            background: #121212;
+            color: #e0e0e0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0; padding: 0;
             display: flex; flex-direction: column;
             align-items: center;
-            padding-bottom: 80px;
+            font-size: 14px; /* Basis-Schriftgröße verkleinert */
         }
 
         /* --- COCKPIT --- */
         .cockpit {
             width: 100%;
-            background: #fff;
-            padding: 20px;
+            background: #1e1e1e;
+            padding: 12px 15px; /* Weniger Padding */
             box-sizing: border-box;
-            border-bottom: 1px solid #ddd;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-bottom: 1px solid #333;
             position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .header-row {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
         }
-        .app-lbl { font-weight: 800; font-size: 1rem; letter-spacing: 0.5px; }
+        .app-lbl { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; color: #888; }
 
-        /* BUTTONS */
-        .btn-black {
-            background: #000; color: #fff; border: none;
-            width: 100%; padding: 15px; border-radius: 10px;
-            font-size: 0.95rem; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        /* KOMPAKTE BUTTONS */
+        .btn-action {
+            background: #007aff; color: #fff; border: none;
+            width: 100%; padding: 10px; border-radius: 6px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            margin-bottom: 8px; /* Weniger Abstand */
+            transition: background 0.2s;
         }
-        .btn-black:active { transform: scale(0.98); background: #222; }
+        .btn-action:active { background: #0062cc; transform: scale(0.98); }
 
-        .btn-outline {
-            background: #fff; color: #000; border: 2px solid #000;
-            width: 100%; padding: 12px; border-radius: 10px;
-            font-size: 0.9rem; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+        .btn-secondary {
+            background: #333; color: #ccc; border: 1px solid #444;
+            padding: 8px; font-size: 0.8rem;
         }
-        .btn-outline:active { background: #f0f0f0; }
+        .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; color: #ccc; }
 
-        /* INPUTS */
+        /* INPUTS (Dark & Compact) */
         .step-label {
-            font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: bold;
-            margin-bottom: 8px; display: block; letter-spacing: 0.5px;
+            font-size: 0.7rem; text-transform: uppercase; color: #666; font-weight: bold;
+            margin-bottom: 4px; display: block; margin-top: 8px;
         }
 
         .addr-box {
-            background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;
-            padding: 10px; margin-bottom: 10px;
+            background: #252525; border: 1px solid #333; border-radius: 6px;
+            padding: 8px; margin-bottom: 8px;
         }
         textarea.inp-addr {
             width: 100%; border: none; background: transparent; 
-            font-family: inherit; font-size: 1rem; resize: none; outline: none;
-            min-height: 80px; color: #000;
+            font-family: inherit; font-size: 0.9rem; resize: none; outline: none;
+            min-height: 60px; color: #eee; line-height: 1.3;
         }
+        textarea::placeholder { color: #555; }
 
-        .meta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .meta-row { display: flex; gap: 8px; margin-top: 8px; }
         .inp-small {
-            background: #f9f9f9; border: 1px solid #eee; padding: 10px; border-radius: 8px;
-            width: 100%; box-sizing: border-box; font-family: inherit;
+            background: #252525; border: 1px solid #333; padding: 6px 10px; border-radius: 6px;
+            width: 100%; box-sizing: border-box; font-family: inherit; color: #fff; font-size: 0.85rem;
         }
 
         /* --- ERGEBNIS --- */
         #resultArea {
-            padding: 20px; width: 100%; display: flex; justify-content: center; box-sizing: border-box; flex-direction: column; align-items: center;
+            padding: 15px; width: 100%; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
         }
         #finalImage {
-            max-width: 100%; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            display: none;
+            max-width: 100%; border-radius: 2px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: none; border: 1px solid #333;
         }
-        .status-msg { color: #888; font-size: 0.9rem; margin-top: 20px; text-align: center; }
+        .status-msg { color: #666; font-size: 0.8rem; margin-top: 20px; text-align: center; }
 
-        /* --- HIDDEN A4 TEMPLATE --- */
+        /* --- HIDDEN A4 TEMPLATE (Bleibt Weiß für Druck) --- */
         #invoiceTemplate {
             position: fixed; left: -9999px; top: 0;
-            width: 794px; height: 1123px; /* A4 @ 96 DPI */
+            width: 794px; height: 1123px; /* A4 */
             background: white; color: black;
             box-sizing: border-box; padding: 50px 60px;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex; flex-direction: column;
         }
 
-        .tpl-header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
-        .tpl-shop { font-size: 28px; font-weight: 800; text-transform: uppercase; }
-        .tpl-slogan { font-size: 14px; color: #555; margin-top: 5px; }
-        .tpl-meta { text-align: right; font-size: 14px; line-height: 1.5; }
-        
-        .tpl-sender { font-size: 11px; text-decoration: underline; color: #666; margin-bottom: 10px; }
-        .tpl-addr { font-size: 18px; line-height: 1.4; white-space: pre-wrap; margin-bottom: 40px; height: 110px; }
-        .tpl-title { font-size: 32px; font-weight: 700; margin-bottom: 20px; }
+        .tpl-header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; }
+        .tpl-shop { font-size: 26px; font-weight: 800; text-transform: uppercase; }
+        .tpl-meta { text-align: right; font-size: 13px; line-height: 1.4; }
+        .tpl-sender { font-size: 10px; text-decoration: underline; color: #666; margin-bottom: 8px; }
+        .tpl-addr { font-size: 16px; line-height: 1.3; white-space: pre-wrap; margin-bottom: 35px; height: 100px; }
+        .tpl-title { font-size: 28px; font-weight: 700; margin-bottom: 15px; }
 
-        .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .tpl-table th { text-align: left; border-bottom: 2px solid #000; padding: 10px 0; font-size: 12px; text-transform: uppercase; }
-        .tpl-table td { padding: 12px 0; border-bottom: 1px solid #ddd; font-size: 14px; }
+        .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+        .tpl-table th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 11px; text-transform: uppercase; }
+        .tpl-table td { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 13px; }
         .r { text-align: right; }
-        .tpl-total td { border-top: 2px solid #000; font-size: 18px; font-weight: bold; padding-top: 15px; border-bottom: none; }
+        .tpl-total td { border-top: 2px solid #000; font-size: 16px; font-weight: bold; padding-top: 12px; border-bottom: none; }
         
-        .tpl-text { margin-top: 20px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
-        .tpl-note { margin-top: 20px; background: #f0f0f0; padding: 15px; font-size: 13px; color: #333; border-radius: 4px; }
+        .tpl-text { margin-top: 15px; font-size: 13px; line-height: 1.4; white-space: pre-wrap; }
+        .tpl-note { margin-top: 15px; background: #f0f0f0; padding: 12px; font-size: 12px; color: #333; border-radius: 4px; }
         
         .spacer { flex: 1; }
-        .tpl-footer { text-align: center; font-size: 11px; color: #777; border-top: 1px solid #ccc; padding-top: 15px; margin-top: 10px; }
+        .tpl-footer { text-align: center; font-size: 10px; color: #777; border-top: 1px solid #ccc; padding-top: 12px; margin-top: 10px; }
 
-        /* MODAL */
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;}
-        .modal-box { background:#fff; padding:25px; border-radius:16px; width:85%; max-width:320px; }
-        .m-inp { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; background:#f9f9f9; }
-        .m-lbl { font-size:0.75rem; font-weight:bold; color:#666; margin-bottom:5px; display:block; text-transform:uppercase; }
+        /* MODAL (Dark) */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;}
+        .modal-box { background:#222; padding:20px; border-radius:10px; width:85%; max-width:300px; border: 1px solid #444; color: #eee; }
+        .m-inp { width:100%; padding:8px; margin-bottom:10px; border:1px solid #444; border-radius:6px; box-sizing:border-box; background:#333; color: white; font-size: 0.85rem;}
+        .m-lbl { font-size:0.7rem; font-weight:bold; color:#888; margin-bottom:4px; display:block; text-transform:uppercase; }
 
     </style>
 </head>
@@ -128,21 +125,21 @@
 
     <div class="cockpit">
         <div class="header-row">
-            <span class="app-lbl">RECHNUNG V32</span>
-            <button onclick="document.getElementById('settingsModal').style.display='flex'" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
+            <span class="app-lbl">RECHNUNG V33</span>
+            <button onclick="document.getElementById('settingsModal').style.display='flex'" class="btn-icon">⚙️</button>
         </div>
 
-        <span class="step-label">Schritt 1: Verkaufsdaten</span>
-        <button class="btn-black" onclick="importSalesData()">
-            📦 Daten aus LagerApp einfügen
+        <span class="step-label">1. Lagerdaten</span>
+        <button class="btn-action" onclick="importSalesData()">
+            📦 Einfügen
         </button>
 
-        <span class="step-label" style="margin-top:20px;">Schritt 2: Käufer-Adresse</span>
+        <span class="step-label">2. Adresse</span>
         <div class="addr-box">
-            <textarea id="addrInput" class="inp-addr" placeholder="Name&#10;Straße&#10;Stadt" oninput="regeneratePreview()"></textarea>
+            <textarea id="addrInput" class="inp-addr" placeholder="Adresse einfügen..." oninput="regeneratePreview()"></textarea>
         </div>
-        <button class="btn-outline" onclick="pasteAddress()">
-            📋 Adresse einfügen & Aktualisieren
+        <button class="btn-action btn-secondary" onclick="pasteAddress()">
+            📋 Adresse aus Clipboard
         </button>
 
         <div class="meta-row">
@@ -153,8 +150,7 @@
 
     <div id="resultArea">
         <div id="statusMsg" class="status-msg">
-            👇 Hier erscheint deine Rechnung als Bild.<br>
-            Lange draufdrücken zum Speichern.
+            Bild erscheint hier...
         </div>
         <img id="finalImage" alt="Rechnung">
     </div>
@@ -163,12 +159,11 @@
         <div class="tpl-header">
             <div>
                 <div class="tpl-shop" id="tShop">SHOP</div>
-                <div class="tpl-slogan" id="tSlogan"></div>
+                <div style="font-size:13px; color:#555; margin-top:4px;" id="tSlogan"></div>
             </div>
             <div class="tpl-meta">
-                Rechnung Nr: <b id="tNr">-</b><br>
-                Datum: <span id="tDate">-</span><br>
-                Lieferdatum: <span id="tDel">-</span>
+                Nr: <b id="tNr">-</b><br>
+                Datum: <span id="tDate">-</span>
             </div>
         </div>
 
@@ -181,8 +176,8 @@
             <thead>
                 <tr>
                     <th width="5%">#</th>
-                    <th>Beschreibung</th>
-                    <th class="r" width="10%">Mge</th>
+                    <th>Artikel</th>
+                    <th class="r" width="10%">Anz.</th>
                     <th class="r" width="20%">Einzel</th>
                     <th class="r" width="20%">Gesamt</th>
                 </tr>
@@ -190,7 +185,7 @@
             <tbody id="tBody"></tbody>
             <tfoot>
                 <tr class="tpl-total">
-                    <td colspan="4" class="r">Gesamtbetrag</td>
+                    <td colspan="4" class="r">Betrag</td>
                     <td class="r" id="tTotal">0,00 €</td>
                 </tr>
             </tfoot>
@@ -206,97 +201,77 @@
 
     <div id="settingsModal" class="modal">
         <div class="modal-box">
-            <h3 style="margin-top:0;">Einstellungen</h3>
+            <h3 style="margin-top:0; font-size:1rem;">Einstellungen</h3>
             <span class="m-lbl">Shop Name</span><input class="m-inp" id="cfgShop" oninput="saveCfg()">
             <span class="m-lbl">Slogan</span><input class="m-inp" id="cfgSlogan" oninput="saveCfg()">
-            <span class="m-lbl">Absenderzeile</span><input class="m-inp" id="cfgSender" oninput="saveCfg()">
-            <span class="m-lbl">Footer (IBAN etc.)</span><textarea class="m-inp" id="cfgFooter" rows="3" oninput="saveCfg()"></textarea>
+            <span class="m-lbl">Absender</span><input class="m-inp" id="cfgSender" oninput="saveCfg()">
+            <span class="m-lbl">Footer</span><textarea class="m-inp" id="cfgFooter" rows="3" oninput="saveCfg()"></textarea>
             <span class="m-lbl">Freitext</span><textarea class="m-inp" id="cfgFree" rows="2" oninput="saveCfg()"></textarea>
-            <button class="btn-black" onclick="document.getElementById('settingsModal').style.display='none'; regeneratePreview()">Fertig</button>
+            <button class="btn-action" onclick="document.getElementById('settingsModal').style.display='none'; regeneratePreview()">Fertig</button>
         </div>
     </div>
 
     <script>
         let currentData = { items: [] };
 
-        // INIT DATE
+        // INIT
         document.getElementById('inpDate').value = new Date().toLocaleDateString('de-DE');
 
-        // CONFIG LOAD
         const fields = ['cfgShop', 'cfgSlogan', 'cfgSender', 'cfgFooter', 'cfgFree'];
         fields.forEach(f => {
             const val = localStorage.getItem(f);
             if(val) document.getElementById(f).value = val;
         });
-        if(!document.getElementById('cfgShop').value) document.getElementById('cfgShop').value = "DEIN SHOP";
-        if(!document.getElementById('cfgFree').value) document.getElementById('cfgFree').value = "Vielen Dank für Ihren Einkauf.";
+        if(!document.getElementById('cfgShop').value) document.getElementById('cfgShop').value = "Mein Shop";
+        if(!document.getElementById('cfgFree').value) document.getElementById('cfgFree').value = "Danke für den Einkauf.";
 
         function saveCfg() {
             fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         }
 
-        // --- SCHRITT 1: LAGER DATEN ---
         async function importSalesData() {
             try {
                 const text = await navigator.clipboard.readText();
-                if(!text.trim().startsWith('{')) {
-                    alert('Das sieht nicht nach Lager-Daten aus (Kein JSON).');
-                    return;
-                }
+                if(!text.trim().startsWith('{')) { alert('Keine Lager-Daten erkannt.'); return; }
                 const json = JSON.parse(text);
                 currentData = json;
 
-                // Felder füllen
                 if(json.invoiceNr) document.getElementById('tNr').innerText = json.invoiceNr;
                 
-                let dateStr = json.date;
-                if(dateStr && !dateStr.includes('.')) dateStr = new Date(dateStr).toLocaleDateString('de-DE');
-                if(!dateStr) dateStr = new Date().toLocaleDateString('de-DE');
-                document.getElementById('tDate').innerText = dateStr;
-                document.getElementById('tDel').innerText = dateStr;
-                document.getElementById('inpDate').value = dateStr;
+                let d = json.date;
+                if(d && !d.includes('.')) d = new Date(d).toLocaleDateString('de-DE');
+                if(!d) d = new Date().toLocaleDateString('de-DE');
+                document.getElementById('tDate').innerText = d;
+                document.getElementById('inpDate').value = d;
 
                 if(json.platform) {
                     document.getElementById('tNote').style.display = 'block';
-                    document.getElementById('tNote').innerText = "Verkauf über " + json.platform;
+                    document.getElementById('tNote').innerText = "Via " + json.platform;
                 } else {
                     document.getElementById('tNote').style.display = 'none';
                 }
 
                 if(json.shipping) document.getElementById('inpShip').value = json.shipping;
-
-                // Sofort generieren (auch wenn Adresse noch leer ist)
                 regeneratePreview();
-                
-            } catch (err) {
-                alert('Fehler beim Import: ' + err);
-            }
+            } catch (err) { alert('Fehler: ' + err); }
         }
 
-        // --- SCHRITT 2: ADRESSE ---
         async function pasteAddress() {
             try {
                 const text = await navigator.clipboard.readText();
                 document.getElementById('addrInput').value = text;
-                regeneratePreview(); // Sofort Bild aktualisieren
-            } catch (err) {
-                alert('Konnte Adresse nicht einfügen: ' + err);
-            }
+                regeneratePreview(); 
+            } catch (err) { alert('Clipboard Fehler: ' + err); }
         }
 
-        // --- RENDERING ---
         function regeneratePreview() {
-            // 1. Vorlage befüllen
             document.getElementById('tShop').innerText = document.getElementById('cfgShop').value;
             document.getElementById('tSlogan').innerText = document.getElementById('cfgSlogan').value;
             document.getElementById('tSender').innerText = document.getElementById('cfgSender').value;
             document.getElementById('tFooter').innerHTML = document.getElementById('cfgFooter').value.replace(/\n/g, '<br>');
             document.getElementById('tFree').innerText = document.getElementById('cfgFree').value;
-
-            // Adresse
             document.getElementById('tAddr').innerText = document.getElementById('addrInput').value;
 
-            // Items Tabelle
             const tbody = document.getElementById('tBody');
             tbody.innerHTML = '';
             let total = 0;
@@ -307,30 +282,18 @@
                 total += price;
                 let desc = item.name;
                 if(item.artnr) desc = `<b>${item.artnr}</b> ${desc}`;
-
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${pos++}</td>
-                    <td>${desc}</td>
-                    <td class="r">${item.qty}</td>
-                    <td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
-                    <td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
-                `;
+                tr.innerHTML = `<td>${pos++}</td><td>${desc}</td><td class="r">${item.qty}</td><td class="r">${(price/item.qty).toFixed(2).replace('.',',')} €</td><td class="r">${price.toFixed(2).replace('.',',')} €</td>`;
                 tbody.appendChild(tr);
             });
 
-            // Versand manuell oder aus JSON
             const ship = parseFloat(document.getElementById('inpShip').value) || 0;
             if(ship > 0) {
                 total += ship;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${pos}</td><td>Versand & Verpackung</td><td class="r">1</td><td class="r">${ship.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${ship.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
-                tbody.appendChild(tr);
+                tbody.innerHTML += `<tr><td>${pos}</td><td>Versand</td><td class="r">1</td><td class="r">${ship.toFixed(2).replace('.',',')} €</td><td class="r">${ship.toFixed(2).replace('.',',')} €</td></tr>`;
             }
 
-            document.getElementById('tTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
-
-            // 2. Bild erzeugen
+            document.getElementById('tTotal').innerText = total.toFixed(2).replace('.',',') + ' €';
             generateImage();
         }
 
@@ -339,17 +302,14 @@
             const img = document.getElementById('finalImage');
             const msg = document.getElementById('statusMsg');
 
-            msg.innerText = "⏳ Bild wird generiert...";
-            img.style.opacity = '0.5';
+            msg.innerText = "...";
+            img.style.opacity = '0.3';
 
             html2canvas(el, { scale: 2 }).then(canvas => {
                 img.src = canvas.toDataURL("image/jpeg", 0.9);
                 img.style.display = 'block';
                 img.style.opacity = '1';
                 msg.style.display = 'none';
-                
-                // Optional: Automatisch zum Bild scrollen, falls es nicht sichtbar ist
-                // img.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
         }
     </script>
