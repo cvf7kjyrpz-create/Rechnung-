@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung V36</title>
+    <title>Rechnung V37</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
@@ -34,7 +34,7 @@
         }
         .app-lbl { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; color: #888; }
 
-        /* BUTTONS (Einheitlich Dunkelgrau) */
+        /* BUTTONS */
         .btn-action {
             background: #333; 
             color: #eee;
@@ -98,46 +98,43 @@
             display: flex; flex-direction: column;
         }
 
-        /* Header Layout */
         .tpl-header { 
             display: flex; justify-content: space-between; align-items: flex-start;
             margin-bottom: 40px; 
         }
         .tpl-shop { font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
         .tpl-slogan { font-size: 13px; color: #555; }
+        .tpl-meta { text-align: right; font-size: 13px; line-height: 1.6; color: #000; }
 
-        /* Meta Daten oben rechts */
-        .tpl-meta { 
-            text-align: right; font-size: 13px; line-height: 1.6; color: #000;
-        }
-
-        /* Adressblock */
-        .tpl-address-block {
-            margin-bottom: 40px;
-            margin-top: 10px;
-        }
-        .tpl-sender { 
-            font-size: 10px; text-decoration: underline; color: #666; 
-            margin-bottom: 10px; 
-        }
-        /* HIER IST DIE ÄNDERUNG: */
+        .tpl-address-block { margin-bottom: 40px; margin-top: 10px; }
+        .tpl-sender { font-size: 10px; text-decoration: underline; color: #666; margin-bottom: 10px; }
         .tpl-addr { 
-            font-size: 14px; /* Kleiner als vorher (war 16-18px) */
-            font-weight: normal; /* Ganz normaler Text */
-            line-height: 1.5; 
-            white-space: pre-wrap; 
-            height: 100px; 
-            display: block;
-            color: #000;
+            font-size: 14px; font-weight: normal; line-height: 1.5; 
+            white-space: pre-wrap; height: 100px; display: block; color: #000;
         }
 
         .tpl-title { font-size: 32px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
 
-        /* Tabelle */
+        /* TABELLE STYLE */
         .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-        .tpl-table th { text-align: left; border-bottom: 1px solid #000; padding: 8px 0; font-size: 11px; text-transform: uppercase; color: #444; }
+        
+        /* Überschriften: Standard Links, aber .r explizit Rechts */
+        .tpl-table th { 
+            text-align: left; 
+            border-bottom: 1px solid #000; 
+            padding: 8px 0; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            color: #444; 
+        }
+        /* DER FIX: Überschriften mit Klasse 'r' müssen rechtsbündig sein */
+        .tpl-table th.r { text-align: right; }
+
         .tpl-table td { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 13px; }
+        
+        /* Zellen Rechtsbündig */
         .r { text-align: right; }
+
         .tpl-total td { border-top: 2px solid #000; font-size: 16px; font-weight: bold; padding-top: 12px; border-bottom: none; }
         
         .tpl-text { margin-top: 15px; font-size: 13px; line-height: 1.4; white-space: pre-wrap; }
@@ -158,7 +155,7 @@
 
     <div class="cockpit">
         <div class="header-row">
-            <span class="app-lbl">RECHNUNG V36</span>
+            <span class="app-lbl">RECHNUNG V37</span>
             <button onclick="document.getElementById('settingsModal').style.display='flex'" class="btn-icon">⚙️</button>
         </div>
 
@@ -306,6 +303,7 @@
         }
 
         function regeneratePreview() {
+            // Config
             document.getElementById('tShop').innerText = document.getElementById('cfgShop').value;
             document.getElementById('tSlogan').innerText = document.getElementById('cfgSlogan').value;
             document.getElementById('tSender').innerText = document.getElementById('cfgSender').value;
@@ -313,6 +311,7 @@
             document.getElementById('tFree').innerText = document.getElementById('cfgFree').value;
             document.getElementById('tAddr').innerText = document.getElementById('addrInput').value;
 
+            // Tabelle
             const tbody = document.getElementById('tBody');
             tbody.innerHTML = '';
             let total = 0;
@@ -328,6 +327,7 @@
                 tbody.appendChild(tr);
             });
 
+            // Versand
             const ship = parseFloat(document.getElementById('inpShip').value) || 0;
             if(ship > 0) {
                 total += ship;
