@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung V33</title>
+    <title>Rechnung V34</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
@@ -15,14 +15,14 @@
             margin: 0; padding: 0;
             display: flex; flex-direction: column;
             align-items: center;
-            font-size: 14px; /* Basis-Schriftgröße verkleinert */
+            font-size: 14px;
         }
 
         /* --- COCKPIT --- */
         .cockpit {
             width: 100%;
             background: #1e1e1e;
-            padding: 12px 15px; /* Weniger Padding */
+            padding: 12px 15px;
             box-sizing: border-box;
             border-bottom: 1px solid #333;
             position: sticky; top: 0; z-index: 100;
@@ -34,21 +34,29 @@
         }
         .app-lbl { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; color: #888; }
 
-        /* KOMPAKTE BUTTONS */
+        /* EINHEITLICHE DUNKLE BUTTONS */
         .btn-action {
-            background: #007aff; color: #fff; border: none;
+            background: #333; /* Dunkelgrau statt Blau */
+            color: #eee;
+            border: 1px solid #444; /* Feiner Rand */
             width: 100%; padding: 10px; border-radius: 6px;
             font-size: 0.85rem; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 6px;
-            margin-bottom: 8px; /* Weniger Abstand */
-            transition: background 0.2s;
+            margin-bottom: 8px;
+            transition: all 0.2s;
         }
-        .btn-action:active { background: #0062cc; transform: scale(0.98); }
+        .btn-action:active {
+            background: #252525; /* Noch dunkler beim Klick */
+            border-color: #555;
+            transform: scale(0.98);
+            color: #fff;
+        }
 
-        .btn-secondary {
-            background: #333; color: #ccc; border: 1px solid #444;
+        /* Hilfsklasse für etwas kompaktere Buttons (z.B. der zweite) */
+        .btn-compact {
             padding: 8px; font-size: 0.8rem;
         }
+
         .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; color: #ccc; }
 
         /* INPUTS (Dark & Compact) */
@@ -125,7 +133,7 @@
 
     <div class="cockpit">
         <div class="header-row">
-            <span class="app-lbl">RECHNUNG V33</span>
+            <span class="app-lbl">RECHNUNG V34</span>
             <button onclick="document.getElementById('settingsModal').style.display='flex'" class="btn-icon">⚙️</button>
         </div>
 
@@ -138,7 +146,7 @@
         <div class="addr-box">
             <textarea id="addrInput" class="inp-addr" placeholder="Adresse einfügen..." oninput="regeneratePreview()"></textarea>
         </div>
-        <button class="btn-action btn-secondary" onclick="pasteAddress()">
+        <button class="btn-action btn-compact" onclick="pasteAddress()">
             📋 Adresse aus Clipboard
         </button>
 
