@@ -3,216 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung V30 (Bild)</title>
+    <title>Rechnung V32</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
+        /* --- MODERN CLEAN UI --- */
         body {
-            background: #111;
-            color: white;
-            font-family: -apple-system, sans-serif;
+            background: #f2f2f7; /* Helles Grau, Apple-Style */
+            color: #1c1c1e;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0; padding: 0;
             display: flex; flex-direction: column;
             align-items: center;
+            padding-bottom: 80px;
         }
 
-        /* --- STEUERUNG --- */
-        .controls {
+        /* --- COCKPIT --- */
+        .cockpit {
             width: 100%;
-            padding: 15px;
-            background: #1c1c1e;
-            box-sizing: border-box;
-            border-bottom: 1px solid #333;
-            z-index: 10;
-        }
-
-        .btn-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .btn {
-            background: #333; color: white; border: 1px solid #444;
-            padding: 12px; border-radius: 8px; font-weight: bold; flex: 1; cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .btn-primary { background: #0a84ff; border-color: #0070d6; }
-        .btn:active { transform: scale(0.98); }
-
-        .info-text { text-align: center; color: #888; font-size: 0.8rem; margin-top: 5px; }
-
-        /* --- ERGEBNIS BEREICH --- */
-        #resultArea {
+            background: #fff;
             padding: 20px;
-            width: 100%;
             box-sizing: border-box;
-            display: flex;
-            justify-content: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
         }
 
-        /* Das fertige Bild */
+        .header-row {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+        }
+        .app-lbl { font-weight: 800; font-size: 1rem; letter-spacing: 0.5px; }
+
+        /* BUTTONS */
+        .btn-black {
+            background: #000; color: #fff; border: none;
+            width: 100%; padding: 15px; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .btn-black:active { transform: scale(0.98); background: #222; }
+
+        .btn-outline {
+            background: #fff; color: #000; border: 2px solid #000;
+            width: 100%; padding: 12px; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-outline:active { background: #f0f0f0; }
+
+        /* INPUTS */
+        .step-label {
+            font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: bold;
+            margin-bottom: 8px; display: block; letter-spacing: 0.5px;
+        }
+
+        .addr-box {
+            background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;
+            padding: 10px; margin-bottom: 10px;
+        }
+        textarea.inp-addr {
+            width: 100%; border: none; background: transparent; 
+            font-family: inherit; font-size: 1rem; resize: none; outline: none;
+            min-height: 80px; color: #000;
+        }
+
+        .meta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .inp-small {
+            background: #f9f9f9; border: 1px solid #eee; padding: 10px; border-radius: 8px;
+            width: 100%; box-sizing: border-box; font-family: inherit;
+        }
+
+        /* --- ERGEBNIS --- */
+        #resultArea {
+            padding: 20px; width: 100%; display: flex; justify-content: center; box-sizing: border-box; flex-direction: column; align-items: center;
+        }
         #finalImage {
-            max-width: 100%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            border-radius: 4px;
-            display: none; /* Erst unsichtbar */
+            max-width: 100%; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: none;
         }
+        .status-msg { color: #888; font-size: 0.9rem; margin-top: 20px; text-align: center; }
 
-        /* --- DIE VERSTECKTE RECHNUNG (Vorlage) --- */
-        /* Wir rendern das hier in hoher Qualität off-screen */
+        /* --- HIDDEN A4 TEMPLATE --- */
         #invoiceTemplate {
-            position: fixed; 
-            left: -9999px; top: 0; /* Aus dem Sichtbereich schieben */
-            width: 794px; /* A4 Breite in Pixel bei 96dpi (skaliert gut) */
-            height: 1123px; /* A4 Höhe */
-            background: white;
-            color: black;
-            padding: 50px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Footer nach unten */
+            position: fixed; left: -9999px; top: 0;
+            width: 794px; height: 1123px; /* A4 @ 96 DPI */
+            background: white; color: black;
+            box-sizing: border-box; padding: 50px 60px;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            display: flex; flex-direction: column;
         }
 
-        /* Invoice Styling Intern */
-        .inv-header { border-bottom: 2px solid black; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
-        .inv-shop { font-size: 32px; font-weight: 800; text-transform: uppercase; }
-        .inv-meta { text-align: right; font-size: 14px; line-height: 1.5; }
+        .tpl-header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
+        .tpl-shop { font-size: 28px; font-weight: 800; text-transform: uppercase; }
+        .tpl-slogan { font-size: 14px; color: #555; margin-top: 5px; }
+        .tpl-meta { text-align: right; font-size: 14px; line-height: 1.5; }
         
-        .inv-addr { font-size: 18px; height: 120px; margin-bottom: 20px; white-space: pre-wrap; margin-left: 10px; }
-        .inv-title { font-size: 36px; font-weight: 700; margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .tpl-sender { font-size: 11px; text-decoration: underline; color: #666; margin-bottom: 10px; }
+        .tpl-addr { font-size: 18px; line-height: 1.4; white-space: pre-wrap; margin-bottom: 40px; height: 110px; }
+        .tpl-title { font-size: 32px; font-weight: 700; margin-bottom: 20px; }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th { text-align: left; background: #eee; padding: 10px; border-bottom: 2px solid #000; font-size: 14px; text-transform: uppercase; }
-        td { padding: 12px 10px; border-bottom: 1px solid #ddd; font-size: 16px; }
+        .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .tpl-table th { text-align: left; border-bottom: 2px solid #000; padding: 10px 0; font-size: 12px; text-transform: uppercase; }
+        .tpl-table td { padding: 12px 0; border-bottom: 1px solid #ddd; font-size: 14px; }
         .r { text-align: right; }
-        .bold { font-weight: bold; }
-        .total-row td { border-top: 2px solid black; font-size: 20px; font-weight: bold; background: #f9f9f9; }
+        .tpl-total td { border-top: 2px solid #000; font-size: 18px; font-weight: bold; padding-top: 15px; border-bottom: none; }
+        
+        .tpl-text { margin-top: 20px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+        .tpl-note { margin-top: 20px; background: #f0f0f0; padding: 15px; font-size: 13px; color: #333; border-radius: 4px; }
+        
+        .spacer { flex: 1; }
+        .tpl-footer { text-align: center; font-size: 11px; color: #777; border-top: 1px solid #ccc; padding-top: 15px; margin-top: 10px; }
 
-        .inv-footer { text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ccc; padding-top: 15px; }
+        /* MODAL */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;}
+        .modal-box { background:#fff; padding:25px; border-radius:16px; width:85%; max-width:320px; }
+        .m-inp { width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; background:#f9f9f9; }
+        .m-lbl { font-size:0.75rem; font-weight:bold; color:#666; margin-bottom:5px; display:block; text-transform:uppercase; }
 
-        /* MODAL EINSTELLUNGEN */
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; align-items:center; justify-content:center;}
-        .modal-box { background:#1c1c1e; padding:20px; border-radius:10px; width:80%; max-width:300px; }
-        input, textarea { width:100%; background:#333; border:1px solid #444; color:white; padding:8px; margin-bottom:10px; border-radius:5px; box-sizing:border-box;}
     </style>
 </head>
 <body>
 
     <div class="cockpit">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <span style="font-weight:bold; color:#aaa;">Rechnung V30</span>
-            <button onclick="document.getElementById('settingsModal').style.display='flex'" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">⚙️</button>
+        <div class="header-row">
+            <span class="app-lbl">RECHNUNG V32</span>
+            <button onclick="document.getElementById('settingsModal').style.display='flex'" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">⚙️</button>
         </div>
 
-        <div class="btn-row">
-            <button class="btn" onclick="pasteClip()">📋 Einfügen</button>
-            <button class="btn btn-primary" onclick="generateImage()">🖼️ Rechnung erzeugen</button>
+        <span class="step-label">Schritt 1: Verkaufsdaten</span>
+        <button class="btn-black" onclick="importSalesData()">
+            📦 Daten aus LagerApp einfügen
+        </button>
+
+        <span class="step-label" style="margin-top:20px;">Schritt 2: Käufer-Adresse</span>
+        <div class="addr-box">
+            <textarea id="addrInput" class="inp-addr" placeholder="Name&#10;Straße&#10;Stadt" oninput="regeneratePreview()"></textarea>
         </div>
-        
-        <div class="btn-row">
-            <input type="number" id="inpShip" placeholder="Versand €" value="0" style="margin:0; width:80px;" onchange="renderHTML()">
-            <div style="color:#666; font-size:0.8rem; display:flex; align-items:center; margin-left:10px;">
-                Einfügen -> Versand prüfen -> Erzeugen
-            </div>
+        <button class="btn-outline" onclick="pasteAddress()">
+            📋 Adresse einfügen & Aktualisieren
+        </button>
+
+        <div class="meta-row">
+            <input type="number" id="inpShip" class="inp-small" placeholder="Versand €" value="0" oninput="regeneratePreview()">
+            <input type="text" id="inpDate" class="inp-small" readonly placeholder="Datum">
         </div>
     </div>
 
     <div id="resultArea">
-        <div id="placeholder" style="color:#444; margin-top:50px;">Hier erscheint das Bild...</div>
+        <div id="statusMsg" class="status-msg">
+            👇 Hier erscheint deine Rechnung als Bild.<br>
+            Lange draufdrücken zum Speichern.
+        </div>
         <img id="finalImage" alt="Rechnung">
     </div>
 
     <div id="invoiceTemplate">
-        <div>
-            <div class="inv-header">
-                <div>
-                    <div class="inv-shop" id="tShop">MEIN SHOP</div>
-                    <div style="font-size:14px; color:#666; margin-top:5px;" id="tSlogan">Bester Service</div>
-                </div>
-                <div class="inv-meta">
-                    Rechnung Nr: <b id="tNr">1001</b><br>
-                    Datum: <span id="tDate">01.01.2024</span><br>
-                    Lieferdatum: <span id="tDel">01.01.2024</span>
-                </div>
+        <div class="tpl-header">
+            <div>
+                <div class="tpl-shop" id="tShop">SHOP</div>
+                <div class="tpl-slogan" id="tSlogan"></div>
             </div>
-
-            <div style="font-size:12px; text-decoration:underline; color:#666; margin-bottom:10px; margin-left:10px;" id="tSender">Absenderzeile</div>
-            <div class="inv-addr" id="tAddr">Max Mustermann<br>Musterstraße 1<br>12345 Musterstadt</div>
-
-            <div class="inv-title">Rechnung</div>
-
-            <table>
-                <thead>
-                    <tr><th width="5%">#</th><th>Artikel</th><th class="r">Menge</th><th class="r">Einzel</th><th class="r">Gesamt</th></tr>
-                </thead>
-                <tbody id="tBody">
-                    </tbody>
-                <tfoot>
-                    <tr class="total-row"><td colspan="4" class="r">Gesamtbetrag</td><td class="r" id="tTotal">0,00 €</td></tr>
-                </tfoot>
-            </table>
-
-            <div style="margin-top:20px; white-space:pre-wrap;" id="tFree">Vielen Dank für Ihren Einkauf.</div>
-            <div style="margin-top:20px; background:#f0f0f0; padding:15px; border-radius:5px; font-size:14px; display:none;" id="tNote"></div>
+            <div class="tpl-meta">
+                Rechnung Nr: <b id="tNr">-</b><br>
+                Datum: <span id="tDate">-</span><br>
+                Lieferdatum: <span id="tDel">-</span>
+            </div>
         </div>
 
-        <div class="inv-footer" id="tFooter">
-            IBAN: DE12 3456 7890<br>Steuernummer: 123/456/789
-        </div>
+        <div class="tpl-sender" id="tSender">Absender</div>
+        <div class="tpl-addr" id="tAddr"></div>
+
+        <div class="tpl-title">Rechnung</div>
+
+        <table class="tpl-table">
+            <thead>
+                <tr>
+                    <th width="5%">#</th>
+                    <th>Beschreibung</th>
+                    <th class="r" width="10%">Mge</th>
+                    <th class="r" width="20%">Einzel</th>
+                    <th class="r" width="20%">Gesamt</th>
+                </tr>
+            </thead>
+            <tbody id="tBody"></tbody>
+            <tfoot>
+                <tr class="tpl-total">
+                    <td colspan="4" class="r">Gesamtbetrag</td>
+                    <td class="r" id="tTotal">0,00 €</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="tpl-text" id="tFree"></div>
+        <div class="tpl-note" id="tNote" style="display:none"></div>
+        
+        <div class="spacer"></div>
+
+        <div class="tpl-footer" id="tFooter">Footer</div>
     </div>
 
     <div id="settingsModal" class="modal">
         <div class="modal-box">
-            <h3>Einstellungen</h3>
-            <label>Shop Name</label><input id="cfgShop" oninput="saveCfg()">
-            <label>Slogan</label><input id="cfgSlogan" oninput="saveCfg()">
-            <label>Absenderzeile</label><input id="cfgSender" oninput="saveCfg()">
-            <label>Footer (IBAN etc.)</label><textarea id="cfgFooter" rows="3" oninput="saveCfg()"></textarea>
-            <label>Freitext</label><textarea id="cfgFree" rows="2" oninput="saveCfg()"></textarea>
-            <button class="btn" onclick="document.getElementById('settingsModal').style.display='none'">Fertig</button>
+            <h3 style="margin-top:0;">Einstellungen</h3>
+            <span class="m-lbl">Shop Name</span><input class="m-inp" id="cfgShop" oninput="saveCfg()">
+            <span class="m-lbl">Slogan</span><input class="m-inp" id="cfgSlogan" oninput="saveCfg()">
+            <span class="m-lbl">Absenderzeile</span><input class="m-inp" id="cfgSender" oninput="saveCfg()">
+            <span class="m-lbl">Footer (IBAN etc.)</span><textarea class="m-inp" id="cfgFooter" rows="3" oninput="saveCfg()"></textarea>
+            <span class="m-lbl">Freitext</span><textarea class="m-inp" id="cfgFree" rows="2" oninput="saveCfg()"></textarea>
+            <button class="btn-black" onclick="document.getElementById('settingsModal').style.display='none'; regeneratePreview()">Fertig</button>
         </div>
     </div>
 
     <script>
         let currentData = { items: [] };
 
-        function init() {
-            document.getElementById('cfgShop').value = localStorage.getItem('cfgShop') || 'Mein Shop';
-            document.getElementById('cfgSlogan').value = localStorage.getItem('cfgSlogan') || '';
-            document.getElementById('cfgSender').value = localStorage.getItem('cfgSender') || '';
-            document.getElementById('cfgFooter').value = localStorage.getItem('cfgFooter') || '';
-            document.getElementById('cfgFree').value = localStorage.getItem('cfgFree') || 'Vielen Dank!';
-            renderHTML();
-        }
+        // INIT DATE
+        document.getElementById('inpDate').value = new Date().toLocaleDateString('de-DE');
+
+        // CONFIG LOAD
+        const fields = ['cfgShop', 'cfgSlogan', 'cfgSender', 'cfgFooter', 'cfgFree'];
+        fields.forEach(f => {
+            const val = localStorage.getItem(f);
+            if(val) document.getElementById(f).value = val;
+        });
+        if(!document.getElementById('cfgShop').value) document.getElementById('cfgShop').value = "DEIN SHOP";
+        if(!document.getElementById('cfgFree').value) document.getElementById('cfgFree').value = "Vielen Dank für Ihren Einkauf.";
 
         function saveCfg() {
-            localStorage.setItem('cfgShop', document.getElementById('cfgShop').value);
-            localStorage.setItem('cfgSlogan', document.getElementById('cfgSlogan').value);
-            localStorage.setItem('cfgSender', document.getElementById('cfgSender').value);
-            localStorage.setItem('cfgFooter', document.getElementById('cfgFooter').value);
-            localStorage.setItem('cfgFree', document.getElementById('cfgFree').value);
-            renderHTML();
+            fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         }
 
-        function formatMyDate(dateStr) {
-            if(!dateStr) return new Date().toLocaleDateString('de-DE');
-            if(dateStr.includes('.')) return dateStr;
-            const d = new Date(dateStr);
-            return isNaN(d) ? dateStr : d.toLocaleDateString('de-DE');
-        }
-
-        async function pasteClip() {
+        // --- SCHRITT 1: LAGER DATEN ---
+        async function importSalesData() {
             try {
                 const text = await navigator.clipboard.readText();
+                if(!text.trim().startsWith('{')) {
+                    alert('Das sieht nicht nach Lager-Daten aus (Kein JSON).');
+                    return;
+                }
                 const json = JSON.parse(text);
-                
-                // Address handling (simple split for demo if needed, or manual input later)
-                // For now we assume user pastes JSON
                 currentData = json;
+
+                // Felder füllen
+                if(json.invoiceNr) document.getElementById('tNr').innerText = json.invoiceNr;
                 
-                document.getElementById('tNr').innerText = json.invoiceNr || '-';
-                const d = formatMyDate(json.date);
-                document.getElementById('tDate').innerText = d;
-                document.getElementById('tDel').innerText = d;
-                
+                let dateStr = json.date;
+                if(dateStr && !dateStr.includes('.')) dateStr = new Date(dateStr).toLocaleDateString('de-DE');
+                if(!dateStr) dateStr = new Date().toLocaleDateString('de-DE');
+                document.getElementById('tDate').innerText = dateStr;
+                document.getElementById('tDel').innerText = dateStr;
+                document.getElementById('inpDate').value = dateStr;
+
                 if(json.platform) {
                     document.getElementById('tNote').style.display = 'block';
                     document.getElementById('tNote').innerText = "Verkauf über " + json.platform;
@@ -222,25 +265,38 @@
 
                 if(json.shipping) document.getElementById('inpShip').value = json.shipping;
 
-                // Adresse nicht im JSON? Dann Dummy oder Prompt
-                // Hier vereinfacht: Wir nehmen an, der User tippt die Adresse nicht ein, sondern wir haben nur JSON Items.
-                // In der Praxis könntest du noch ein Adressfeld im Cockpit hinzufügen, das in 'tAddr' schreibt.
-                // Ich lasse den Dummy-Text "Max Mustermann" stehen, den du ändern kannst, wenn du im Cockpit noch ein Feld willst.
+                // Sofort generieren (auch wenn Adresse noch leer ist)
+                regeneratePreview();
                 
-                renderHTML();
-
-            } catch(e) { alert('Keine gültigen Daten in der Zwischenablage!'); }
+            } catch (err) {
+                alert('Fehler beim Import: ' + err);
+            }
         }
 
-        function renderHTML() {
-            // Config laden
+        // --- SCHRITT 2: ADRESSE ---
+        async function pasteAddress() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('addrInput').value = text;
+                regeneratePreview(); // Sofort Bild aktualisieren
+            } catch (err) {
+                alert('Konnte Adresse nicht einfügen: ' + err);
+            }
+        }
+
+        // --- RENDERING ---
+        function regeneratePreview() {
+            // 1. Vorlage befüllen
             document.getElementById('tShop').innerText = document.getElementById('cfgShop').value;
             document.getElementById('tSlogan').innerText = document.getElementById('cfgSlogan').value;
             document.getElementById('tSender').innerText = document.getElementById('cfgSender').value;
             document.getElementById('tFooter').innerHTML = document.getElementById('cfgFooter').value.replace(/\n/g, '<br>');
             document.getElementById('tFree').innerText = document.getElementById('cfgFree').value;
 
-            // Items Tabelle bauen
+            // Adresse
+            document.getElementById('tAddr').innerText = document.getElementById('addrInput').value;
+
+            // Items Tabelle
             const tbody = document.getElementById('tBody');
             tbody.innerHTML = '';
             let total = 0;
@@ -249,10 +305,13 @@
             (currentData.items || []).forEach(item => {
                 const price = parseFloat(item.priceTotal);
                 total += price;
+                let desc = item.name;
+                if(item.artnr) desc = `<b>${item.artnr}</b> ${desc}`;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${pos++}</td>
-                    <td><b>${item.artnr || ''}</b> ${item.name}</td>
+                    <td>${desc}</td>
                     <td class="r">${item.qty}</td>
                     <td class="r">${(price/item.qty).toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
                     <td class="r">${price.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>
@@ -260,35 +319,39 @@
                 tbody.appendChild(tr);
             });
 
-            // Versand
+            // Versand manuell oder aus JSON
             const ship = parseFloat(document.getElementById('inpShip').value) || 0;
             if(ship > 0) {
                 total += ship;
-                tbody.innerHTML += `<tr><td>${pos}</td><td>Versand</td><td class="r">1</td><td class="r">${ship.toFixed(2).replace('.',',')} €</td><td class="r">${ship.toFixed(2).replace('.',',')} €</td></tr>`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${pos}</td><td>Versand & Verpackung</td><td class="r">1</td><td class="r">${ship.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td><td class="r">${ship.toLocaleString('de-DE',{minimumFractionDigits:2})} €</td>`;
+                tbody.appendChild(tr);
             }
 
             document.getElementById('tTotal').innerText = total.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €';
+
+            // 2. Bild erzeugen
+            generateImage();
         }
 
         function generateImage() {
             const el = document.getElementById('invoiceTemplate');
-            const placeholder = document.getElementById('placeholder');
             const img = document.getElementById('finalImage');
-            
-            placeholder.innerText = "Bild wird erstellt...";
-            img.style.display = 'none';
+            const msg = document.getElementById('statusMsg');
 
-            // HTML2Canvas rendert das Element
+            msg.innerText = "⏳ Bild wird generiert...";
+            img.style.opacity = '0.5';
+
             html2canvas(el, { scale: 2 }).then(canvas => {
                 img.src = canvas.toDataURL("image/jpeg", 0.9);
                 img.style.display = 'block';
-                placeholder.style.display = 'none';
-                // Automatischer Scroll zum Bild
-                img.scrollIntoView({behavior: "smooth"});
+                img.style.opacity = '1';
+                msg.style.display = 'none';
+                
+                // Optional: Automatisch zum Bild scrollen, falls es nicht sichtbar ist
+                // img.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
         }
-
-        init();
     </script>
 </body>
 </html>
