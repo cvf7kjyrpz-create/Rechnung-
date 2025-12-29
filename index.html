@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung V34</title>
+    <title>Rechnung V36</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
@@ -34,11 +34,11 @@
         }
         .app-lbl { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; color: #888; }
 
-        /* EINHEITLICHE DUNKLE BUTTONS */
+        /* BUTTONS (Einheitlich Dunkelgrau) */
         .btn-action {
-            background: #333; /* Dunkelgrau statt Blau */
+            background: #333; 
             color: #eee;
-            border: 1px solid #444; /* Feiner Rand */
+            border: 1px solid #444; 
             width: 100%; padding: 10px; border-radius: 6px;
             font-size: 0.85rem; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -46,20 +46,16 @@
             transition: all 0.2s;
         }
         .btn-action:active {
-            background: #252525; /* Noch dunkler beim Klick */
+            background: #252525; 
             border-color: #555;
             transform: scale(0.98);
             color: #fff;
         }
 
-        /* Hilfsklasse für etwas kompaktere Buttons (z.B. der zweite) */
-        .btn-compact {
-            padding: 8px; font-size: 0.8rem;
-        }
-
+        .btn-compact { padding: 8px; font-size: 0.8rem; }
         .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; color: #ccc; }
 
-        /* INPUTS (Dark & Compact) */
+        /* INPUTS */
         .step-label {
             font-size: 0.7rem; text-transform: uppercase; color: #666; font-weight: bold;
             margin-bottom: 4px; display: block; margin-top: 8px;
@@ -92,7 +88,7 @@
         }
         .status-msg { color: #666; font-size: 0.8rem; margin-top: 20px; text-align: center; }
 
-        /* --- HIDDEN A4 TEMPLATE (Bleibt Weiß für Druck) --- */
+        /* --- VORLAGE (A4 Weiß) --- */
         #invoiceTemplate {
             position: fixed; left: -9999px; top: 0;
             width: 794px; height: 1123px; /* A4 */
@@ -102,15 +98,44 @@
             display: flex; flex-direction: column;
         }
 
-        .tpl-header { border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; }
-        .tpl-shop { font-size: 26px; font-weight: 800; text-transform: uppercase; }
-        .tpl-meta { text-align: right; font-size: 13px; line-height: 1.4; }
-        .tpl-sender { font-size: 10px; text-decoration: underline; color: #666; margin-bottom: 8px; }
-        .tpl-addr { font-size: 16px; line-height: 1.3; white-space: pre-wrap; margin-bottom: 35px; height: 100px; }
-        .tpl-title { font-size: 28px; font-weight: 700; margin-bottom: 15px; }
+        /* Header Layout */
+        .tpl-header { 
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 40px; 
+        }
+        .tpl-shop { font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+        .tpl-slogan { font-size: 13px; color: #555; }
 
+        /* Meta Daten oben rechts */
+        .tpl-meta { 
+            text-align: right; font-size: 13px; line-height: 1.6; color: #000;
+        }
+
+        /* Adressblock */
+        .tpl-address-block {
+            margin-bottom: 40px;
+            margin-top: 10px;
+        }
+        .tpl-sender { 
+            font-size: 10px; text-decoration: underline; color: #666; 
+            margin-bottom: 10px; 
+        }
+        /* HIER IST DIE ÄNDERUNG: */
+        .tpl-addr { 
+            font-size: 14px; /* Kleiner als vorher (war 16-18px) */
+            font-weight: normal; /* Ganz normaler Text */
+            line-height: 1.5; 
+            white-space: pre-wrap; 
+            height: 100px; 
+            display: block;
+            color: #000;
+        }
+
+        .tpl-title { font-size: 32px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
+
+        /* Tabelle */
         .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-        .tpl-table th { text-align: left; border-bottom: 2px solid #000; padding: 8px 0; font-size: 11px; text-transform: uppercase; }
+        .tpl-table th { text-align: left; border-bottom: 1px solid #000; padding: 8px 0; font-size: 11px; text-transform: uppercase; color: #444; }
         .tpl-table td { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 13px; }
         .r { text-align: right; }
         .tpl-total td { border-top: 2px solid #000; font-size: 16px; font-weight: bold; padding-top: 12px; border-bottom: none; }
@@ -121,7 +146,7 @@
         .spacer { flex: 1; }
         .tpl-footer { text-align: center; font-size: 10px; color: #777; border-top: 1px solid #ccc; padding-top: 12px; margin-top: 10px; }
 
-        /* MODAL (Dark) */
+        /* MODAL */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;}
         .modal-box { background:#222; padding:20px; border-radius:10px; width:85%; max-width:300px; border: 1px solid #444; color: #eee; }
         .m-inp { width:100%; padding:8px; margin-bottom:10px; border:1px solid #444; border-radius:6px; box-sizing:border-box; background:#333; color: white; font-size: 0.85rem;}
@@ -133,7 +158,7 @@
 
     <div class="cockpit">
         <div class="header-row">
-            <span class="app-lbl">RECHNUNG V34</span>
+            <span class="app-lbl">RECHNUNG V36</span>
             <button onclick="document.getElementById('settingsModal').style.display='flex'" class="btn-icon">⚙️</button>
         </div>
 
@@ -166,17 +191,21 @@
     <div id="invoiceTemplate">
         <div class="tpl-header">
             <div>
-                <div class="tpl-shop" id="tShop">SHOP</div>
-                <div style="font-size:13px; color:#555; margin-top:4px;" id="tSlogan"></div>
+                <div class="tpl-shop" id="tShop">SHOP NAME</div>
+                <div class="tpl-slogan" id="tSlogan"></div>
             </div>
+            
             <div class="tpl-meta">
-                Nr: <b id="tNr">-</b><br>
-                Datum: <span id="tDate">-</span>
+                Rechnungsnr.: <span id="tNr">-</span><br>
+                Rechnungsdatum: <span id="tDate">-</span><br>
+                Lieferdatum: <span id="tDel">-</span>
             </div>
         </div>
 
-        <div class="tpl-sender" id="tSender">Absender</div>
-        <div class="tpl-addr" id="tAddr"></div>
+        <div class="tpl-address-block">
+            <div class="tpl-sender" id="tSender">Absenderzeile</div>
+            <div class="tpl-addr" id="tAddr"></div>
+        </div>
 
         <div class="tpl-title">Rechnung</div>
 
@@ -185,7 +214,7 @@
                 <tr>
                     <th width="5%">#</th>
                     <th>Artikel</th>
-                    <th class="r" width="10%">Anz.</th>
+                    <th class="r" width="10%">Mge.</th>
                     <th class="r" width="20%">Einzel</th>
                     <th class="r" width="20%">Gesamt</th>
                 </tr>
@@ -193,7 +222,7 @@
             <tbody id="tBody"></tbody>
             <tfoot>
                 <tr class="tpl-total">
-                    <td colspan="4" class="r">Betrag</td>
+                    <td colspan="4" class="r">Gesamtbetrag</td>
                     <td class="r" id="tTotal">0,00 €</td>
                 </tr>
             </tfoot>
@@ -212,7 +241,7 @@
             <h3 style="margin-top:0; font-size:1rem;">Einstellungen</h3>
             <span class="m-lbl">Shop Name</span><input class="m-inp" id="cfgShop" oninput="saveCfg()">
             <span class="m-lbl">Slogan</span><input class="m-inp" id="cfgSlogan" oninput="saveCfg()">
-            <span class="m-lbl">Absender</span><input class="m-inp" id="cfgSender" oninput="saveCfg()">
+            <span class="m-lbl">Absenderzeile</span><input class="m-inp" id="cfgSender" oninput="saveCfg()">
             <span class="m-lbl">Footer</span><textarea class="m-inp" id="cfgFooter" rows="3" oninput="saveCfg()"></textarea>
             <span class="m-lbl">Freitext</span><textarea class="m-inp" id="cfgFree" rows="2" oninput="saveCfg()"></textarea>
             <button class="btn-action" onclick="document.getElementById('settingsModal').style.display='none'; regeneratePreview()">Fertig</button>
@@ -231,7 +260,7 @@
             if(val) document.getElementById(f).value = val;
         });
         if(!document.getElementById('cfgShop').value) document.getElementById('cfgShop').value = "Mein Shop";
-        if(!document.getElementById('cfgFree').value) document.getElementById('cfgFree').value = "Danke für den Einkauf.";
+        if(!document.getElementById('cfgFree').value) document.getElementById('cfgFree').value = "Vielen Dank für Ihren Einkauf.";
 
         function saveCfg() {
             fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
@@ -244,17 +273,21 @@
                 const json = JSON.parse(text);
                 currentData = json;
 
+                // Rechnungsnr
                 if(json.invoiceNr) document.getElementById('tNr').innerText = json.invoiceNr;
                 
+                // Datum logic
                 let d = json.date;
                 if(d && !d.includes('.')) d = new Date(d).toLocaleDateString('de-DE');
                 if(!d) d = new Date().toLocaleDateString('de-DE');
+                
                 document.getElementById('tDate').innerText = d;
+                document.getElementById('tDel').innerText = d; 
                 document.getElementById('inpDate').value = d;
 
                 if(json.platform) {
                     document.getElementById('tNote').style.display = 'block';
-                    document.getElementById('tNote').innerText = "Via " + json.platform;
+                    document.getElementById('tNote').innerText = "Verkauf über " + json.platform;
                 } else {
                     document.getElementById('tNote').style.display = 'none';
                 }
