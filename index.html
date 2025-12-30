@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung V37</title>
+    <title>Rechnung V39</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
-        /* --- DARK MINIMALIST UI --- */
+        /* --- DARK MINIMALIST UI (App Oberfläche) --- */
         body {
             background: #121212;
             color: #e0e0e0;
@@ -18,7 +18,7 @@
             font-size: 14px;
         }
 
-        /* --- COCKPIT --- */
+        /* --- COCKPIT (Bedienung) --- */
         .cockpit {
             width: 100%;
             background: #1e1e1e;
@@ -34,15 +34,15 @@
         }
         .app-lbl { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; color: #888; }
 
-        /* BUTTONS */
+        /* BUTTONS (Einheitlich Dunkelgrau) */
         .btn-action {
             background: #333; 
             color: #eee;
             border: 1px solid #444; 
-            width: 100%; padding: 10px; border-radius: 6px;
-            font-size: 0.85rem; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            margin-bottom: 8px;
+            width: 100%; padding: 12px; border-radius: 8px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-bottom: 10px;
             transition: all 0.2s;
         }
         .btn-action:active {
@@ -52,98 +52,111 @@
             color: #fff;
         }
 
-        .btn-compact { padding: 8px; font-size: 0.8rem; }
+        .btn-compact { padding: 10px; font-size: 0.85rem; }
         .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; color: #ccc; }
 
         /* INPUTS */
         .step-label {
             font-size: 0.7rem; text-transform: uppercase; color: #666; font-weight: bold;
-            margin-bottom: 4px; display: block; margin-top: 8px;
+            margin-bottom: 5px; display: block; margin-top: 10px;
         }
 
         .addr-box {
-            background: #252525; border: 1px solid #333; border-radius: 6px;
+            background: #252525; border: 1px solid #333; border-radius: 8px;
             padding: 8px; margin-bottom: 8px;
         }
         textarea.inp-addr {
             width: 100%; border: none; background: transparent; 
-            font-family: inherit; font-size: 0.9rem; resize: none; outline: none;
-            min-height: 60px; color: #eee; line-height: 1.3;
+            font-family: inherit; font-size: 0.95rem; resize: none; outline: none;
+            min-height: 70px; color: #eee; line-height: 1.4;
         }
         textarea::placeholder { color: #555; }
 
-        .meta-row { display: flex; gap: 8px; margin-top: 8px; }
+        .meta-row { display: flex; gap: 10px; margin-top: 10px; }
         .inp-small {
-            background: #252525; border: 1px solid #333; padding: 6px 10px; border-radius: 6px;
-            width: 100%; box-sizing: border-box; font-family: inherit; color: #fff; font-size: 0.85rem;
+            background: #252525; border: 1px solid #333; padding: 8px 10px; border-radius: 6px;
+            width: 100%; box-sizing: border-box; font-family: inherit; color: #fff; font-size: 0.9rem;
         }
 
-        /* --- ERGEBNIS --- */
+        /* --- ERGEBNIS BEREICH --- */
         #resultArea {
-            padding: 15px; width: 100%; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
+            padding: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
         }
         #finalImage {
-            max-width: 100%; border-radius: 2px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            max-width: 100%; border-radius: 4px; 
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
             display: none; border: 1px solid #333;
         }
         .status-msg { color: #666; font-size: 0.8rem; margin-top: 20px; text-align: center; }
 
-        /* --- VORLAGE (A4 Weiß) --- */
+        /* --- VORLAGE (A4 Weiß - Unsichtbar für User) --- */
         #invoiceTemplate {
             position: fixed; left: -9999px; top: 0;
-            width: 794px; height: 1123px; /* A4 */
+            width: 794px; height: 1123px; /* A4 Pixelmaße */
             background: white; color: black;
             box-sizing: border-box; padding: 50px 60px;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex; flex-direction: column;
         }
 
+        /* Header Layout */
         .tpl-header { 
             display: flex; justify-content: space-between; align-items: flex-start;
             margin-bottom: 40px; 
         }
         .tpl-shop { font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
         .tpl-slogan { font-size: 13px; color: #555; }
-        .tpl-meta { text-align: right; font-size: 13px; line-height: 1.6; color: #000; }
 
-        .tpl-address-block { margin-bottom: 40px; margin-top: 10px; }
-        .tpl-sender { font-size: 10px; text-decoration: underline; color: #666; margin-bottom: 10px; }
+        /* Meta Daten oben rechts */
+        .tpl-meta { 
+            text-align: right; font-size: 13px; line-height: 1.6; color: #000;
+        }
+
+        /* Adressblock (Links, normal groß) */
+        .tpl-address-block {
+            margin-bottom: 40px; margin-top: 10px;
+        }
+        .tpl-sender { 
+            font-size: 10px; text-decoration: underline; color: #666; 
+            margin-bottom: 10px; 
+        }
         .tpl-addr { 
-            font-size: 14px; font-weight: normal; line-height: 1.5; 
-            white-space: pre-wrap; height: 100px; display: block; color: #000;
+            font-size: 14px; /* Normale Schriftgröße */
+            font-weight: normal; 
+            line-height: 1.5; 
+            white-space: pre-wrap; 
+            height: 100px; 
+            display: block;
+            color: #000;
         }
 
-        .tpl-title { font-size: 32px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
+        /* Der Titel (Rechnung oder Rechnungskorrektur) */
+        .tpl-title { 
+            font-size: 32px; font-weight: 700; margin-bottom: 20px; 
+            border-bottom: 2px solid black; padding-bottom: 10px; 
+        }
 
-        /* TABELLE STYLE */
+        /* Tabelle */
         .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-        
-        /* Überschriften: Standard Links, aber .r explizit Rechts */
         .tpl-table th { 
-            text-align: left; 
-            border-bottom: 1px solid #000; 
-            padding: 8px 0; 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            color: #444; 
+            text-align: left; border-bottom: 1px solid #000; padding: 8px 0; 
+            font-size: 11px; text-transform: uppercase; color: #444; 
         }
-        /* DER FIX: Überschriften mit Klasse 'r' müssen rechtsbündig sein */
+        /* Rechtsbündige Überschriften */
         .tpl-table th.r { text-align: right; }
-
-        .tpl-table td { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 13px; }
         
-        /* Zellen Rechtsbündig */
+        .tpl-table td { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 13px; }
         .r { text-align: right; }
-
+        
         .tpl-total td { border-top: 2px solid #000; font-size: 16px; font-weight: bold; padding-top: 12px; border-bottom: none; }
         
         .tpl-text { margin-top: 15px; font-size: 13px; line-height: 1.4; white-space: pre-wrap; }
         .tpl-note { margin-top: 15px; background: #f0f0f0; padding: 12px; font-size: 12px; color: #333; border-radius: 4px; }
         
-        .spacer { flex: 1; }
+        .spacer { flex: 1; } /* Schiebt Footer nach unten */
         .tpl-footer { text-align: center; font-size: 10px; color: #777; border-top: 1px solid #ccc; padding-top: 12px; margin-top: 10px; }
 
-        /* MODAL */
+        /* MODAL (Einstellungen) */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;}
         .modal-box { background:#222; padding:20px; border-radius:10px; width:85%; max-width:300px; border: 1px solid #444; color: #eee; }
         .m-inp { width:100%; padding:8px; margin-bottom:10px; border:1px solid #444; border-radius:6px; box-sizing:border-box; background:#333; color: white; font-size: 0.85rem;}
@@ -155,21 +168,21 @@
 
     <div class="cockpit">
         <div class="header-row">
-            <span class="app-lbl">RECHNUNG V37</span>
+            <span class="app-lbl">RECHNUNG V39</span>
             <button onclick="document.getElementById('settingsModal').style.display='flex'" class="btn-icon">⚙️</button>
         </div>
 
-        <span class="step-label">1. Lagerdaten</span>
+        <span class="step-label">1. Daten importieren</span>
         <button class="btn-action" onclick="importSalesData()">
-            📦 Einfügen
+            📦 Einfügen (Auto-Storno)
         </button>
 
-        <span class="step-label">2. Adresse</span>
+        <span class="step-label">2. Kunde</span>
         <div class="addr-box">
-            <textarea id="addrInput" class="inp-addr" placeholder="Adresse einfügen..." oninput="regeneratePreview()"></textarea>
+            <textarea id="addrInput" class="inp-addr" placeholder="Name&#10;Straße&#10;Ort" oninput="regeneratePreview()"></textarea>
         </div>
         <button class="btn-action btn-compact" onclick="pasteAddress()">
-            📋 Adresse aus Clipboard
+            📋 Adresse einfügen
         </button>
 
         <div class="meta-row">
@@ -180,7 +193,7 @@
 
     <div id="resultArea">
         <div id="statusMsg" class="status-msg">
-            Bild erscheint hier...
+            Drücke oben auf "Einfügen"...
         </div>
         <img id="finalImage" alt="Rechnung">
     </div>
@@ -193,7 +206,7 @@
             </div>
             
             <div class="tpl-meta">
-                Rechnungsnr.: <span id="tNr">-</span><br>
+                <span id="lblNr">Rechnungsnr.:</span> <span id="tNr">-</span><br>
                 Rechnungsdatum: <span id="tDate">-</span><br>
                 Lieferdatum: <span id="tDel">-</span>
             </div>
@@ -204,7 +217,7 @@
             <div class="tpl-addr" id="tAddr"></div>
         </div>
 
-        <div class="tpl-title">Rechnung</div>
+        <div class="tpl-title" id="tTitle">Rechnung</div>
 
         <table class="tpl-table">
             <thead>
@@ -229,7 +242,6 @@
         <div class="tpl-note" id="tNote" style="display:none"></div>
         
         <div class="spacer"></div>
-
         <div class="tpl-footer" id="tFooter">Footer</div>
     </div>
 
@@ -248,9 +260,10 @@
     <script>
         let currentData = { items: [] };
 
-        // INIT
+        // Start-Datum setzen
         document.getElementById('inpDate').value = new Date().toLocaleDateString('de-DE');
 
+        // Einstellungen laden
         const fields = ['cfgShop', 'cfgSlogan', 'cfgSender', 'cfgFooter', 'cfgFree'];
         fields.forEach(f => {
             const val = localStorage.getItem(f);
@@ -263,17 +276,19 @@
             fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         }
 
+        // --- HAUPTFUNKTION: DATEN IMPORTIEREN ---
         async function importSalesData() {
             try {
                 const text = await navigator.clipboard.readText();
-                if(!text.trim().startsWith('{')) { alert('Keine Lager-Daten erkannt.'); return; }
+                // Prüfen ob JSON
+                if(!text.trim().startsWith('{')) { alert('Keine Lager-Daten erkannt (Kein JSON).'); return; }
                 const json = JSON.parse(text);
                 currentData = json;
 
-                // Rechnungsnr
+                // Rechnungsnummer
                 if(json.invoiceNr) document.getElementById('tNr').innerText = json.invoiceNr;
                 
-                // Datum logic
+                // Datum formatieren
                 let d = json.date;
                 if(d && !d.includes('.')) d = new Date(d).toLocaleDateString('de-DE');
                 if(!d) d = new Date().toLocaleDateString('de-DE');
@@ -282,16 +297,35 @@
                 document.getElementById('tDel').innerText = d; 
                 document.getElementById('inpDate').value = d;
 
-                if(json.platform) {
+                // --- INTELLIGENTE STORNO ERKENNUNG ---
+                if(json.type === 'storno') {
+                    // Es ist eine Korrektur!
+                    document.getElementById('tTitle').innerText = "Rechnungskorrektur";
+                    document.getElementById('lblNr').innerText = "Korrektur zu Nr.:";
+                    
+                    let noteText = "Stornierung / Rückerstattung";
+                    if(json.platform) noteText += " (" + json.platform + ")";
+                    document.getElementById('tNote').innerText = noteText;
                     document.getElementById('tNote').style.display = 'block';
-                    document.getElementById('tNote').innerText = "Verkauf über " + json.platform;
+
                 } else {
-                    document.getElementById('tNote').style.display = 'none';
+                    // Es ist eine normale Rechnung
+                    document.getElementById('tTitle').innerText = "Rechnung";
+                    document.getElementById('lblNr').innerText = "Rechnungsnr.:";
+                    
+                    if(json.platform) {
+                        document.getElementById('tNote').style.display = 'block';
+                        document.getElementById('tNote').innerText = "Verkauf über " + json.platform;
+                    } else {
+                        document.getElementById('tNote').style.display = 'none';
+                    }
                 }
 
                 if(json.shipping) document.getElementById('inpShip').value = json.shipping;
                 regeneratePreview();
-            } catch (err) { alert('Fehler: ' + err); }
+            } catch (err) { 
+                alert('Fehler beim Einfügen: ' + err); 
+            }
         }
 
         async function pasteAddress() {
@@ -302,8 +336,9 @@
             } catch (err) { alert('Clipboard Fehler: ' + err); }
         }
 
+        // --- BILD RENDERN ---
         function regeneratePreview() {
-            // Config
+            // Config einsetzen
             document.getElementById('tShop').innerText = document.getElementById('cfgShop').value;
             document.getElementById('tSlogan').innerText = document.getElementById('cfgSlogan').value;
             document.getElementById('tSender').innerText = document.getElementById('cfgSender').value;
@@ -311,7 +346,7 @@
             document.getElementById('tFree').innerText = document.getElementById('cfgFree').value;
             document.getElementById('tAddr').innerText = document.getElementById('addrInput').value;
 
-            // Tabelle
+            // Tabelle aufbauen
             const tbody = document.getElementById('tBody');
             tbody.innerHTML = '';
             let total = 0;
@@ -343,9 +378,10 @@
             const img = document.getElementById('finalImage');
             const msg = document.getElementById('statusMsg');
 
-            msg.innerText = "...";
+            msg.innerText = "⏳ Bild wird generiert...";
             img.style.opacity = '0.3';
 
+            // HTML2Canvas rendert den versteckten Bereich
             html2canvas(el, { scale: 2 }).then(canvas => {
                 img.src = canvas.toDataURL("image/jpeg", 0.9);
                 img.style.display = 'block';
