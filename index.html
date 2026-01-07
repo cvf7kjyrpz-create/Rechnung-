@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Rechnung V39</title>
+    <title>Rechnung V41 (Adress Import)</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
-        /* --- DARK MINIMALIST UI (App Oberfläche) --- */
+        /* --- DARK MINIMALIST UI --- */
         body {
             background: #121212;
             color: #e0e0e0;
@@ -16,9 +16,10 @@
             display: flex; flex-direction: column;
             align-items: center;
             font-size: 14px;
+            padding-bottom: 50px;
         }
 
-        /* --- COCKPIT (Bedienung) --- */
+        /* --- COCKPIT --- */
         .cockpit {
             width: 100%;
             background: #1e1e1e;
@@ -34,24 +35,57 @@
         }
         .app-lbl { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; color: #888; }
 
-        /* BUTTONS (Einheitlich Dunkelgrau) */
+        /* SEARCH BAR */
+        .search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .search-inp {
+            width: 100%;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 10px 10px 35px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+        .search-icon {
+            position: absolute; left: 10px; top: 10px; color: #666; font-size: 1rem;
+        }
+        #searchResultList {
+            display: none;
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            width: 100%;
+            z-index: 200;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .search-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .search-item:hover { background: #333; }
+        .si-main { font-weight: bold; color: #fff; font-size: 0.85rem; display: block; }
+        .si-sub { font-size: 0.75rem; color: #888; display: block; margin-top: 2px; }
+
+        /* BUTTONS */
         .btn-action {
-            background: #333; 
-            color: #eee;
-            border: 1px solid #444; 
+            background: #333; color: #eee; border: 1px solid #444; 
             width: 100%; padding: 12px; border-radius: 8px;
             font-size: 0.9rem; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            margin-bottom: 10px;
-            transition: all 0.2s;
+            margin-bottom: 10px; transition: all 0.2s;
         }
-        .btn-action:active {
-            background: #252525; 
-            border-color: #555;
-            transform: scale(0.98);
-            color: #fff;
-        }
-
+        .btn-action:active { background: #252525; transform: scale(0.98); color: #fff; }
         .btn-compact { padding: 10px; font-size: 0.85rem; }
         .btn-icon { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; color: #ccc; }
 
@@ -71,118 +105,89 @@
             min-height: 70px; color: #eee; line-height: 1.4;
         }
         textarea::placeholder { color: #555; }
-
+        
         .meta-row { display: flex; gap: 10px; margin-top: 10px; }
         .inp-small {
             background: #252525; border: 1px solid #333; padding: 8px 10px; border-radius: 6px;
             width: 100%; box-sizing: border-box; font-family: inherit; color: #fff; font-size: 0.9rem;
         }
 
-        /* --- ERGEBNIS BEREICH --- */
+        /* --- ERGEBNIS --- */
         #resultArea {
             padding: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
         }
         #finalImage {
-            max-width: 100%; border-radius: 4px; 
-            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+            max-width: 100%; border-radius: 4px; box-shadow: 0 5px 25px rgba(0,0,0,0.5);
             display: none; border: 1px solid #333;
         }
         .status-msg { color: #666; font-size: 0.8rem; margin-top: 20px; text-align: center; }
 
-        /* --- VORLAGE (A4 Weiß - Unsichtbar für User) --- */
+        /* --- VORLAGE (A4) --- */
         #invoiceTemplate {
             position: fixed; left: -9999px; top: 0;
-            width: 794px; height: 1123px; /* A4 Pixelmaße */
+            width: 794px; height: 1123px; 
             background: white; color: black;
             box-sizing: border-box; padding: 50px 60px;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             display: flex; flex-direction: column;
         }
 
-        /* Header Layout */
-        .tpl-header { 
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 40px; 
-        }
+        .tpl-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
         .tpl-shop { font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
         .tpl-slogan { font-size: 13px; color: #555; }
+        .tpl-meta { text-align: right; font-size: 13px; line-height: 1.6; color: #000; }
 
-        /* Meta Daten oben rechts */
-        .tpl-meta { 
-            text-align: right; font-size: 13px; line-height: 1.6; color: #000;
-        }
+        .tpl-address-block { margin-bottom: 40px; margin-top: 10px; }
+        .tpl-sender { font-size: 10px; text-decoration: underline; color: #666; margin-bottom: 10px; }
+        .tpl-addr { font-size: 14px; font-weight: normal; line-height: 1.5; white-space: pre-wrap; height: 100px; display: block; color: #000; }
 
-        /* Adressblock (Links, normal groß) */
-        .tpl-address-block {
-            margin-bottom: 40px; margin-top: 10px;
-        }
-        .tpl-sender { 
-            font-size: 10px; text-decoration: underline; color: #666; 
-            margin-bottom: 10px; 
-        }
-        .tpl-addr { 
-            font-size: 14px; /* Normale Schriftgröße */
-            font-weight: normal; 
-            line-height: 1.5; 
-            white-space: pre-wrap; 
-            height: 100px; 
-            display: block;
-            color: #000;
-        }
+        .tpl-title { font-size: 32px; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
 
-        /* Der Titel (Rechnung oder Rechnungskorrektur) */
-        .tpl-title { 
-            font-size: 32px; font-weight: 700; margin-bottom: 20px; 
-            border-bottom: 2px solid black; padding-bottom: 10px; 
-        }
-
-        /* Tabelle */
         .tpl-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-        .tpl-table th { 
-            text-align: left; border-bottom: 1px solid #000; padding: 8px 0; 
-            font-size: 11px; text-transform: uppercase; color: #444; 
-        }
-        /* Rechtsbündige Überschriften */
+        .tpl-table th { text-align: left; border-bottom: 1px solid #000; padding: 8px 0; font-size: 11px; text-transform: uppercase; color: #444; }
         .tpl-table th.r { text-align: right; }
-        
         .tpl-table td { padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 13px; }
         .r { text-align: right; }
-        
         .tpl-total td { border-top: 2px solid #000; font-size: 16px; font-weight: bold; padding-top: 12px; border-bottom: none; }
         
         .tpl-text { margin-top: 15px; font-size: 13px; line-height: 1.4; white-space: pre-wrap; }
         .tpl-note { margin-top: 15px; background: #f0f0f0; padding: 12px; font-size: 12px; color: #333; border-radius: 4px; }
         
-        .spacer { flex: 1; } /* Schiebt Footer nach unten */
+        .spacer { flex: 1; }
         .tpl-footer { text-align: center; font-size: 10px; color: #777; border-top: 1px solid #ccc; padding-top: 12px; margin-top: 10px; }
 
-        /* MODAL (Einstellungen) */
+        /* MODAL */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;}
         .modal-box { background:#222; padding:20px; border-radius:10px; width:85%; max-width:300px; border: 1px solid #444; color: #eee; }
         .m-inp { width:100%; padding:8px; margin-bottom:10px; border:1px solid #444; border-radius:6px; box-sizing:border-box; background:#333; color: white; font-size: 0.85rem;}
         .m-lbl { font-size:0.7rem; font-weight:bold; color:#888; margin-bottom:4px; display:block; text-transform:uppercase; }
-
     </style>
 </head>
 <body>
 
     <div class="cockpit">
         <div class="header-row">
-            <span class="app-lbl">RECHNUNG V39</span>
+            <span class="app-lbl">RECHNUNG V41</span>
             <button onclick="document.getElementById('settingsModal').style.display='flex'" class="btn-icon">⚙️</button>
         </div>
 
-        <span class="step-label">1. Daten importieren</span>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-inp" placeholder="Suche nach Name, Nr, Straße..." onkeyup="searchHistory(this.value)">
+            <div id="searchResultList"></div>
+        </div>
+
+        <span class="step-label">1. Daten</span>
         <button class="btn-action" onclick="importSalesData()">
-            📦 Einfügen (Auto-Storno)
+            📦 Lagerdaten Einfügen
         </button>
 
-        <span class="step-label">2. Kunde</span>
+        <span class="step-label">2. Kunde / Adresse</span>
         <div class="addr-box">
             <textarea id="addrInput" class="inp-addr" placeholder="Name&#10;Straße&#10;Ort" oninput="regeneratePreview()"></textarea>
         </div>
         <button class="btn-action btn-compact" onclick="pasteAddress()">
-            📋 Adresse einfügen
+            📋 Adresse aus Clipboard
         </button>
 
         <div class="meta-row">
@@ -193,7 +198,8 @@
 
     <div id="resultArea">
         <div id="statusMsg" class="status-msg">
-            Drücke oben auf "Einfügen"...
+            Bild erscheint hier...<br>
+            (Wird automatisch gespeichert)
         </div>
         <img id="finalImage" alt="Rechnung">
     </div>
@@ -204,21 +210,17 @@
                 <div class="tpl-shop" id="tShop">SHOP NAME</div>
                 <div class="tpl-slogan" id="tSlogan"></div>
             </div>
-            
             <div class="tpl-meta">
                 <span id="lblNr">Rechnungsnr.:</span> <span id="tNr">-</span><br>
                 Rechnungsdatum: <span id="tDate">-</span><br>
                 Lieferdatum: <span id="tDel">-</span>
             </div>
         </div>
-
         <div class="tpl-address-block">
             <div class="tpl-sender" id="tSender">Absenderzeile</div>
             <div class="tpl-addr" id="tAddr"></div>
         </div>
-
         <div class="tpl-title" id="tTitle">Rechnung</div>
-
         <table class="tpl-table">
             <thead>
                 <tr>
@@ -237,10 +239,8 @@
                 </tr>
             </tfoot>
         </table>
-
         <div class="tpl-text" id="tFree"></div>
         <div class="tpl-note" id="tNote" style="display:none"></div>
-        
         <div class="spacer"></div>
         <div class="tpl-footer" id="tFooter">Footer</div>
     </div>
@@ -253,17 +253,24 @@
             <span class="m-lbl">Absenderzeile</span><input class="m-inp" id="cfgSender" oninput="saveCfg()">
             <span class="m-lbl">Footer</span><textarea class="m-inp" id="cfgFooter" rows="3" oninput="saveCfg()"></textarea>
             <span class="m-lbl">Freitext</span><textarea class="m-inp" id="cfgFree" rows="2" oninput="saveCfg()"></textarea>
+            <div style="margin-top:15px; border-top:1px solid #444; padding-top:10px;">
+                <button class="btn-action" style="font-size:0.8rem; background:#400;" onclick="clearHistory()">⚠️ Such-Historie löschen</button>
+            </div>
             <button class="btn-action" onclick="document.getElementById('settingsModal').style.display='none'; regeneratePreview()">Fertig</button>
         </div>
     </div>
 
     <script>
         let currentData = { items: [] };
+        let invoiceHistory = [];
 
-        // Start-Datum setzen
         document.getElementById('inpDate').value = new Date().toLocaleDateString('de-DE');
+        
+        try {
+            const savedHist = localStorage.getItem('invoiceAppHistory');
+            if(savedHist) invoiceHistory = JSON.parse(savedHist);
+        } catch(e) { console.error(e); }
 
-        // Einstellungen laden
         const fields = ['cfgShop', 'cfgSlogan', 'cfgSender', 'cfgFooter', 'cfgFree'];
         fields.forEach(f => {
             const val = localStorage.getItem(f);
@@ -276,19 +283,57 @@
             fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
         }
 
-        // --- HAUPTFUNKTION: DATEN IMPORTIEREN ---
+        function searchHistory(term) {
+            const list = document.getElementById('searchResultList');
+            list.innerHTML = '';
+            if(!term || term.length < 2) { list.style.display = 'none'; return; }
+
+            const lower = term.toLowerCase();
+            const hits = invoiceHistory.filter(inv => {
+                const inNr = (inv.nr || '').toLowerCase();
+                const inAddr = (inv.addr || '').toLowerCase();
+                const inItems = (inv.items || []).map(i=>i.name.toLowerCase()).join(' ');
+                return inNr.includes(lower) || inAddr.includes(lower) || inItems.includes(lower);
+            });
+
+            if(hits.length === 0) { list.style.display = 'none'; return; }
+
+            hits.reverse().forEach(h => {
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.innerHTML = `<div><span class="si-main">${h.nr} (${h.date})</span><span class="si-sub">${h.addr.split('\n')[0].substring(0,25)}...</span></div><div style="text-align:right;"><span class="si-sub">${h.total}</span></div>`;
+                div.onclick = () => loadFromHistory(h);
+                list.appendChild(div);
+            });
+            list.style.display = 'block';
+        }
+
+        function loadFromHistory(entry) {
+            currentData = { invoiceNr: entry.nr, date: entry.date, items: entry.items, shipping: entry.shipping, platform: entry.platform, type: entry.type };
+            document.getElementById('addrInput').value = entry.addr;
+            document.getElementById('inpDate').value = entry.date;
+            document.getElementById('inpShip').value = entry.shipping;
+            document.getElementById('searchResultList').style.display = 'none';
+            document.querySelector('.search-inp').value = '';
+            regeneratePreview(false);
+            alert("Rechnung " + entry.nr + " geladen!");
+        }
+
+        function clearHistory() {
+            if(confirm("Historie löschen?")) {
+                localStorage.removeItem('invoiceAppHistory'); invoiceHistory = []; alert("Gelöscht.");
+            }
+        }
+
         async function importSalesData() {
             try {
                 const text = await navigator.clipboard.readText();
-                // Prüfen ob JSON
-                if(!text.trim().startsWith('{')) { alert('Keine Lager-Daten erkannt (Kein JSON).'); return; }
+                if(!text.trim().startsWith('{')) { alert('Keine Lager-Daten erkannt.'); return; }
                 const json = JSON.parse(text);
                 currentData = json;
 
-                // Rechnungsnummer
                 if(json.invoiceNr) document.getElementById('tNr').innerText = json.invoiceNr;
                 
-                // Datum formatieren
                 let d = json.date;
                 if(d && !d.includes('.')) d = new Date(d).toLocaleDateString('de-DE');
                 if(!d) d = new Date().toLocaleDateString('de-DE');
@@ -297,22 +342,21 @@
                 document.getElementById('tDel').innerText = d; 
                 document.getElementById('inpDate').value = d;
 
-                // --- INTELLIGENTE STORNO ERKENNUNG ---
+                // ADRESSE AUTOMATISCH FÜLLEN (NEU)
+                if(json.address) {
+                    document.getElementById('addrInput').value = json.address;
+                }
+
                 if(json.type === 'storno') {
-                    // Es ist eine Korrektur!
                     document.getElementById('tTitle').innerText = "Rechnungskorrektur";
                     document.getElementById('lblNr').innerText = "Korrektur zu Nr.:";
-                    
                     let noteText = "Stornierung / Rückerstattung";
                     if(json.platform) noteText += " (" + json.platform + ")";
                     document.getElementById('tNote').innerText = noteText;
                     document.getElementById('tNote').style.display = 'block';
-
                 } else {
-                    // Es ist eine normale Rechnung
                     document.getElementById('tTitle').innerText = "Rechnung";
                     document.getElementById('lblNr').innerText = "Rechnungsnr.:";
-                    
                     if(json.platform) {
                         document.getElementById('tNote').style.display = 'block';
                         document.getElementById('tNote').innerText = "Verkauf über " + json.platform;
@@ -322,10 +366,8 @@
                 }
 
                 if(json.shipping) document.getElementById('inpShip').value = json.shipping;
-                regeneratePreview();
-            } catch (err) { 
-                alert('Fehler beim Einfügen: ' + err); 
-            }
+                regeneratePreview(); 
+            } catch (err) { alert('Fehler: ' + err); }
         }
 
         async function pasteAddress() {
@@ -336,17 +378,37 @@
             } catch (err) { alert('Clipboard Fehler: ' + err); }
         }
 
-        // --- BILD RENDERN ---
-        function regeneratePreview() {
-            // Config einsetzen
+        function regeneratePreview(doSave = true) {
             document.getElementById('tShop').innerText = document.getElementById('cfgShop').value;
             document.getElementById('tSlogan').innerText = document.getElementById('cfgSlogan').value;
             document.getElementById('tSender').innerText = document.getElementById('cfgSender').value;
             document.getElementById('tFooter').innerHTML = document.getElementById('cfgFooter').value.replace(/\n/g, '<br>');
             document.getElementById('tFree').innerText = document.getElementById('cfgFree').value;
-            document.getElementById('tAddr').innerText = document.getElementById('addrInput').value;
+            
+            const addr = document.getElementById('addrInput').value;
+            document.getElementById('tAddr').innerText = addr;
 
-            // Tabelle aufbauen
+            const json = currentData;
+            if(json.invoiceNr) document.getElementById('tNr').innerText = json.invoiceNr;
+            
+            if(json.type === 'storno') {
+                document.getElementById('tTitle').innerText = "Rechnungskorrektur";
+                document.getElementById('lblNr').innerText = "Korrektur zu Nr.:";
+                let noteText = "Stornierung / Rückerstattung";
+                if(json.platform) noteText += " (" + json.platform + ")";
+                document.getElementById('tNote').innerText = noteText;
+                document.getElementById('tNote').style.display = 'block';
+            } else {
+                document.getElementById('tTitle').innerText = "Rechnung";
+                document.getElementById('lblNr').innerText = "Rechnungsnr.:";
+                if(json.platform) {
+                    document.getElementById('tNote').style.display = 'block';
+                    document.getElementById('tNote').innerText = "Verkauf über " + json.platform;
+                } else {
+                    document.getElementById('tNote').style.display = 'none';
+                }
+            }
+
             const tbody = document.getElementById('tBody');
             tbody.innerHTML = '';
             let total = 0;
@@ -362,26 +424,43 @@
                 tbody.appendChild(tr);
             });
 
-            // Versand
             const ship = parseFloat(document.getElementById('inpShip').value) || 0;
             if(ship > 0) {
                 total += ship;
                 tbody.innerHTML += `<tr><td>${pos}</td><td>Versand</td><td class="r">1</td><td class="r">${ship.toFixed(2).replace('.',',')} €</td><td class="r">${ship.toFixed(2).replace('.',',')} €</td></tr>`;
             }
 
-            document.getElementById('tTotal').innerText = total.toFixed(2).replace('.',',') + ' €';
+            const totalStr = total.toFixed(2).replace('.',',') + ' €';
+            document.getElementById('tTotal').innerText = totalStr;
+
+            if(doSave && json.invoiceNr) {
+                addToHistory({
+                    nr: json.invoiceNr,
+                    date: document.getElementById('inpDate').value,
+                    addr: addr,
+                    items: json.items || [],
+                    total: totalStr,
+                    shipping: ship,
+                    platform: json.platform,
+                    type: json.type
+                });
+            }
             generateImage();
+        }
+
+        function addToHistory(entry) {
+            const idx = invoiceHistory.findIndex(x => x.nr === entry.nr);
+            if(idx >= 0) invoiceHistory[idx] = entry; 
+            else invoiceHistory.push(entry);
+            localStorage.setItem('invoiceAppHistory', JSON.stringify(invoiceHistory));
         }
 
         function generateImage() {
             const el = document.getElementById('invoiceTemplate');
             const img = document.getElementById('finalImage');
             const msg = document.getElementById('statusMsg');
-
             msg.innerText = "⏳ Bild wird generiert...";
             img.style.opacity = '0.3';
-
-            // HTML2Canvas rendert den versteckten Bereich
             html2canvas(el, { scale: 2 }).then(canvas => {
                 img.src = canvas.toDataURL("image/jpeg", 0.9);
                 img.style.display = 'block';
